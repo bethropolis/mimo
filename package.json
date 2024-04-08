@@ -1,0 +1,17 @@
+{
+  "name": "mimo",
+  "module": "index.js",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A simple module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "bun original.js"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

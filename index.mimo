@@ -1,0 +1,25 @@
+set x 10
+set y 20
+if > x y
+	show "x is greater than y"
+else
+    show "x is not greater than y"
+endif
+
+set i 0
+while < i 5
+    show i
+    set i + i 1
+endwhile
+
+function add a b
+    return + a b
+endfunction
+
+set x 10
+set y 20
+call add x y -> sum
+show sum
+
+set fruits ["apple", "banana", "orange"]
+show fruits[1]

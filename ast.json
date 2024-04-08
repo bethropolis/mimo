@@ -1,0 +1,173 @@
+[
+  {
+    "type": "assignment",
+    "target": "x",
+    "value": {
+      "type": "literal",
+      "value": 10
+    }
+  },
+  {
+    "type": "assignment",
+    "target": "y",
+    "value": {
+      "type": "literal",
+      "value": 20
+    }
+  },
+  {
+    "type": "if",
+    "condition": {
+      "type": "binary",
+      "operator": ">",
+      "left": {
+        "type": "variable",
+        "name": "x"
+      },
+      "right": {
+        "type": "variable",
+        "name": "y"
+      }
+    },
+    "consequent": {
+      "type": "print",
+      "value": {
+        "type": "literal",
+        "value": "x is greater than y"
+      }
+    },
+    "alternate": {
+      "type": "print",
+      "value": {
+        "type": "literal",
+        "value": "x is not greater than y"
+      }
+    }
+  },
+  {
+    "type": "assignment",
+    "target": "i",
+    "value": {
+      "type": "literal",
+      "value": 0
+    }
+  },
+  {
+    "type": "while",
+    "condition": {
+      "type": "binary",
+      "operator": "<",
+      "left": {
+        "type": "variable",
+        "name": "i"
+      },
+      "right": {
+        "type": "literal",
+        "value": 5
+      }
+    },
+    "body": [
+      {
+        "type": "print",
+        "value": {
+          "type": "variable",
+          "name": "i"
+        }
+      },
+      {
+        "type": "assignment",
+        "target": "i",
+        "value": {
+          "type": "binary",
+          "operator": "+",
+          "left": {
+            "type": "variable",
+            "name": "i"
+          },
+          "right": {
+            "type": "literal",
+            "value": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "add",
+    "params": [
+      "a",
+      "b",
+      "return",
+      "+",
+      "a",
+      "b"
+    ],
+    "body": {
+      "type": "assignment",
+      "target": "x",
+      "value": {
+        "type": "literal",
+        "value": 10
+      }
+    }
+  },
+  {
+    "type": "assignment",
+    "target": "y",
+    "value": {
+      "type": "literal",
+      "value": 20
+    }
+  },
+  {
+    "type": "call",
+    "name": "add",
+    "args": [
+      {
+        "type": "variable",
+        "name": "x"
+      }
+    ],
+    "target": "sum"
+  },
+  {
+    "type": "print",
+    "value": {
+      "type": "variable",
+      "name": "sum"
+    }
+  },
+  {
+    "type": "assignment",
+    "target": "fruits",
+    "value": {
+      "type": "list",
+      "elements": [
+        {
+          "type": "literal",
+          "value": "apple"
+        },
+        {
+          "type": "literal",
+          "value": "banana"
+        },
+        {
+          "type": "literal",
+          "value": "orange"
+        }
+      ]
+    }
+  },
+  {
+    "type": "print",
+    "value": {
+      "type": "indexAccess",
+      "name": "fruits",
+      "index": {
+        "type": "literal",
+        "value": 1
+      }
+    }
+  }
+]
