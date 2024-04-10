@@ -1,173 +1,263 @@
 [
   {
-    "type": "assignment",
-    "target": "x",
-    "value": {
-      "type": "literal",
-      "value": 10
-    }
-  },
-  {
-    "type": "assignment",
-    "target": "y",
-    "value": {
-      "type": "literal",
-      "value": 20
-    }
-  },
-  {
-    "type": "if",
-    "condition": {
-      "type": "binary",
-      "operator": ">",
-      "left": {
-        "type": "variable",
-        "name": "x"
-      },
-      "right": {
-        "type": "variable",
-        "name": "y"
-      }
-    },
-    "consequent": {
-      "type": "print",
-      "value": {
-        "type": "literal",
-        "value": "x is greater than y"
-      }
-    },
-    "alternate": {
-      "type": "print",
-      "value": {
-        "type": "literal",
-        "value": "x is not greater than y"
-      }
-    }
-  },
-  {
-    "type": "assignment",
-    "target": "i",
-    "value": {
-      "type": "literal",
-      "value": 0
-    }
-  },
-  {
-    "type": "while",
-    "condition": {
-      "type": "binary",
-      "operator": "<",
-      "left": {
-        "type": "variable",
-        "name": "i"
-      },
-      "right": {
-        "type": "literal",
-        "value": 5
-      }
-    },
+    "type": "function",
+    "name": "grade",
+    "params": [
+      "subject"
+    ],
     "body": [
       {
-        "type": "print",
-        "value": {
-          "type": "variable",
-          "name": "i"
-        }
-      },
-      {
-        "type": "assignment",
-        "target": "i",
-        "value": {
+        "type": "if",
+        "condition": {
           "type": "binary",
-          "operator": "+",
+          "operator": ">",
           "left": {
             "type": "variable",
-            "name": "i"
+            "name": "subject"
           },
           "right": {
             "type": "literal",
-            "value": 1
+            "value": 90
           }
+        },
+        "consequent": {
+          "type": "return",
+          "value": {
+            "type": "literal",
+            "value": "A"
+          }
+        }
+      },
+      {
+        "type": "if",
+        "condition": {
+          "type": "binary",
+          "operator": ">",
+          "left": {
+            "type": "variable",
+            "name": "subject"
+          },
+          "right": {
+            "type": "literal",
+            "value": 80
+          }
+        },
+        "consequent": {
+          "type": "return",
+          "value": {
+            "type": "literal",
+            "value": "B"
+          }
+        }
+      },
+      {
+        "type": "if",
+        "condition": {
+          "type": "binary",
+          "operator": ">",
+          "left": {
+            "type": "variable",
+            "name": "subject"
+          },
+          "right": {
+            "type": "literal",
+            "value": 70
+          }
+        },
+        "consequent": {
+          "type": "return",
+          "value": {
+            "type": "literal",
+            "value": "C"
+          }
+        }
+      },
+      {
+        "type": "if",
+        "condition": {
+          "type": "binary",
+          "operator": ">",
+          "left": {
+            "type": "variable",
+            "name": "subject"
+          },
+          "right": {
+            "type": "literal",
+            "value": 60
+          }
+        },
+        "consequent": {
+          "type": "return",
+          "value": {
+            "type": "literal",
+            "value": "D"
+          }
+        }
+      },
+      {
+        "type": "if",
+        "condition": {
+          "type": "binary",
+          "operator": ">",
+          "left": {
+            "type": "variable",
+            "name": "subject"
+          },
+          "right": {
+            "type": "literal",
+            "value": 40
+          }
+        },
+        "consequent": {
+          "type": "return",
+          "value": {
+            "type": "literal",
+            "value": "E"
+          }
+        }
+      },
+      {
+        "type": "return",
+        "value": {
+          "type": "literal",
+          "value": "F"
         }
       }
     ]
   },
   {
     "type": "function",
-    "name": "add",
+    "name": "score",
     "params": [
-      "a",
-      "b",
-      "return",
-      "+",
-      "a",
-      "b"
+      "subject"
     ],
-    "body": {
-      "type": "assignment",
-      "target": "x",
-      "value": {
-        "type": "literal",
-        "value": 10
+    "body": [
+      {
+        "type": "call",
+        "name": "grade",
+        "args": [
+          {
+            "type": "variable",
+            "name": "subject"
+          }
+        ],
+        "target": "result"
+      },
+      {
+        "type": "return",
+        "value": {
+          "type": "variable",
+          "name": "result"
+        }
       }
-    }
-  },
-  {
-    "type": "assignment",
-    "target": "y",
-    "value": {
-      "type": "literal",
-      "value": 20
-    }
+    ]
   },
   {
     "type": "call",
-    "name": "add",
+    "name": "score",
     "args": [
       {
-        "type": "variable",
-        "name": "x"
+        "type": "literal",
+        "value": 77
       }
     ],
-    "target": "sum"
+    "target": "math"
+  },
+  {
+    "type": "call",
+    "name": "score",
+    "args": [
+      {
+        "type": "literal",
+        "value": 85
+      }
+    ],
+    "target": "english"
+  },
+  {
+    "type": "call",
+    "name": "score",
+    "args": [
+      {
+        "type": "literal",
+        "value": 92
+      }
+    ],
+    "target": "science"
+  },
+  {
+    "type": "call",
+    "name": "score",
+    "args": [
+      {
+        "type": "literal",
+        "value": 78
+      }
+    ],
+    "target": "history"
+  },
+  {
+    "type": "call",
+    "name": "score",
+    "args": [
+      {
+        "type": "literal",
+        "value": 88
+      }
+    ],
+    "target": "geography"
+  },
+  {
+    "type": "call",
+    "name": "score",
+    "args": [
+      {
+        "type": "literal",
+        "value": 95
+      }
+    ],
+    "target": "computerScience"
   },
   {
     "type": "print",
     "value": {
       "type": "variable",
-      "name": "sum"
-    }
-  },
-  {
-    "type": "assignment",
-    "target": "fruits",
-    "value": {
-      "type": "list",
-      "elements": [
-        {
-          "type": "literal",
-          "value": "apple"
-        },
-        {
-          "type": "literal",
-          "value": "banana"
-        },
-        {
-          "type": "literal",
-          "value": "orange"
-        }
-      ]
+      "name": "math"
     }
   },
   {
     "type": "print",
     "value": {
-      "type": "indexAccess",
-      "name": "fruits",
-      "index": {
-        "type": "literal",
-        "value": 1
-      }
+      "type": "variable",
+      "name": "english"
+    }
+  },
+  {
+    "type": "print",
+    "value": {
+      "type": "variable",
+      "name": "science"
+    }
+  },
+  {
+    "type": "print",
+    "value": {
+      "type": "variable",
+      "name": "history"
+    }
+  },
+  {
+    "type": "print",
+    "value": {
+      "type": "variable",
+      "name": "geography"
+    }
+  },
+  {
+    "type": "print",
+    "value": {
+      "type": "variable",
+      "name": "computerScience"
     }
   }
 ]

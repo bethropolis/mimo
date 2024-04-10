@@ -1,4 +1,5 @@
-import fs from "fs";
+import fs, { writeFileSync } from "fs";
+import { type } from "os";
 
 function tokenize(input) {
   const tokens = [];
@@ -196,24 +197,50 @@ function parse(tokens) {
       statement.type = "function";
       statement.name = tokens[index++].value;
       statement.params = [];
-      while (tokens[index].value !== "endfunction") {
-        statement.params.push(tokens[index++].value);
+      if (tokens[index].value === "(") {
+        index++; // Skip '('
+        while (tokens[index].value !== ")") {
+          if (tokens[index].type === "identifier") {
+            statement.params.push(tokens[index++].value);
+          }
+          if (tokens[index].value === ",") {
+            index++; // Skip ','
+          }
+        }
+        index++; // Skip ')'
       }
-      index++; // Skip 'endfunction'
-      statement.body = parseStatement(); // Parse the function body directly
+      const body = [];
+      while (tokens[index] && tokens[index].value !== "endfunction") {
+        body.push(parseStatement());
+      }
+      if (tokens[index].value === "endfunction") {
+        index++;
+      }
+      statement.body = body;
     } else if (tokens[index].value === "call") {
       index++;
       statement.type = "call";
       statement.name = tokens[index++].value;
       statement.args = [];
-      while (tokens[index].value !== "->") {
-        statement.args.push(parseExpression());
-        if (tokens[index].value !== "->") {
-          index++;
+      statement.target = null;
+      if (tokens[index].value === "(") {
+        index++; // Skip '('
+        while (tokens[index].value !== ")") {
+          if (tokens[index].value !== ",") {
+            statement.args.push(parseExpression());
+          }else{
+            index++; // Skip ','
+          }
         }
+        index++; // Skip ')'
       }
+      if ((tokens[index++].value = "->")) {
+        statement.target = tokens[index++].value;
+      }
+    } else if (tokens[index].value === "return") {
       index++;
-      statement.target = tokens[index++].value;
+      statement.type = "return";
+      statement.value = parseExpression();
     } else if (tokens[index].value === "show") {
       index++;
       statement.type = "print";
@@ -232,47 +259,75 @@ function parse(tokens) {
 }
 
 // Interpreter function
-function interpret(program, env = {}) {
+async function interpret(program, env = {}) {
   let index = 0; // Index to keep track of the current statement
 
-  const interpretStatement = (statement) => {
-    switch (statement.type) {
-      case "assignment":
-        env[statement.target] = evaluate(statement.value, env);
-        break;
-      case "if":
-        if (evaluate(statement.condition, env)) {
-          interpretStatement(statement.consequent); // Pass the consequent directly
-        } else if (statement.alternate) {
-          interpretStatement(statement.alternate); // Pass the alternate directly
-        }
-        break;
-      case "while":
-        while (evaluate(statement.condition, env)) {
-          interpretStatement(statement.body); // Pass the body directly
-        }
-        break;
-      case "function":
-        env[statement.name] = createFunction(
-          statement.params,
-          statement.body,
-          env
-        );
-        break;
-      case "call":
-        const func = env[statement.name];
-        env[statement.target] = func(
-          statement.args.map((arg) => evaluate(arg, env))
-        );
-        break;
-      case "print":
-        console.log(evaluate(statement.value, env));
-        break;
+  const interpretStatement = async (statement) => {
+    // if statement type of array
+    if (Array.isArray(statement)) {
+      for (let i = 0; i < statement.length; i++) {
+        if(await interpretStatement(statement[i])) return true;
+      }
+      return;
+    }
+
+    if (typeof statement === "object") {
+      switch (statement.type) {
+        case "assignment":
+          env[statement.target] = evaluate(statement.value, env);
+          break;
+
+        case "binary":
+          console.log("Binary", statement);
+          if (env[statement.target] === undefined) {
+            env[statement.target] = null;
+          }
+
+          env[statement.target] = await operate(
+            statement.operator,
+            await evaluate(statement.left, env),
+            await evaluate(statement.right, env)
+          );
+          break;
+        case "if":
+          if (evaluate(statement.condition, env)) {
+            if(await interpretStatement(statement.consequent)) return true; // Pass the consequent directly
+          } else if (statement.alternate) {
+            if(await interpretStatement(statement.alternate)) return true; // Pass the alternate directly
+          }
+          break;
+        case "while":
+          while (evaluate(statement.condition, env)) {
+            if(await interpretStatement(statement.body))return true; // Pass the body directly
+          }
+          break;
+        case "function":
+          env[statement.name] = createFunction(
+            statement.params,
+            statement.body,
+            env
+          );
+          break;
+        case "return":
+          env["return"] = evaluate(statement.value, env);
+          return true;
+        case "call":
+          const func = env[statement.name];
+          const args = statement.args.map((arg) => evaluate(arg, env));
+          env[statement.target] = await func(...args);
+          break;
+        case "print":
+          console.log(evaluate(statement.value, env));
+          break;
+        default:
+          console.log("Unknown statement type", statement.type);
+          break;
+      }
     }
   };
 
   while (index < program.length) {
-    interpretStatement(program[index++]); // Increment index after each statement
+    if(await interpretStatement(program[index++])) break;
   }
 
   return env;
@@ -282,13 +337,21 @@ const evaluate = (expression, env) =>
   expression.type === "literal"
     ? expression.value
     : expression.type === "variable"
-    ? env[expression.name]
+    ? env.hasOwnProperty(expression.name)
+      ? env[expression.name]
+      : null
     : expression.type === "list"
     ? expression.elements.map((element) => evaluate(element, env))
     : expression.type === "indexAccess"
     ? env[expression.name][evaluate(expression.index, env)]
-    : null
-    
+    : expression.type === "binary"
+    ? operate(
+        expression.operator,
+        evaluate(expression.left, env),
+        evaluate(expression.right, env)
+      )
+    : null;
+
 const operate = (operator, left, right) => {
   switch (operator) {
     case "+":
@@ -299,33 +362,46 @@ const operate = (operator, left, right) => {
       return left * right;
     case "/":
       return left / right;
+    case ">":
+      return left > right;
+    case "<":
+      return left < right;
   }
 };
 
 function createFunction(params, body, env) {
-  return function (...args) {
+  return async function (...args) {
     const newEnv = { ...env };
     params.forEach((param, index) => {
-      newEnv[param] = args[index];
+      newEnv[param] = args[index] ?? undefined;
     });
-    interpret(body, newEnv); // Interpret the body of the function
+    return (await interpret(body, newEnv))["return"]; 
   };
 }
 
 const readCode = (filename) => fs.readFileSync(filename, "utf8");
 
-let file = "index.mimo";
+async function main(file) {
+  const start = performance.now();
 
-const code = readCode(file);
+  const code = await readCode(file);
+
+  const tokens = await tokenize(code);
+  fs, writeFileSync("tokens.json", JSON.stringify(tokens, null, 2));
+
+  const ast = await parse(tokens);
+  fs.writeFileSync("ast.json", JSON.stringify(ast, null, 2));
+
+  const env = await interpret(ast);
+
+  const end = performance.now();
+  const timeTaken = end - start;
+  console.log("process took " + timeTaken + " milliseconds");
+}
+
+main("index.mimo");
+
 // console.log("Code:", code);
 
-const tokens = tokenize(code);
-// console.log("Tokens:", tokens);
-
-const ast = parse(tokens);
-
-fs.writeFileSync("ast.json", JSON.stringify(ast, null, 2));
-console.log("AST:", ast);
-
-const env = interpret(ast);
+// console.log("AST:", ast);
 // console.log("Environment:", env);

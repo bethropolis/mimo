@@ -1,25 +1,42 @@
-set x 10
-set y 20
-if > x y
-	show "x is greater than y"
-else
-    show "x is not greater than y"
-endif
-
-set i 0
-while < i 5
-    show i
-    set i + i 1
-endwhile
-
-function add a b
-    return + a b
+function grade(subject)
+    if > subject 90
+        return "A"
+    endif
+    
+    if > subject 80
+        return "B"
+    endif
+    
+    if > subject 70
+        return "C"
+    endif
+    
+    if > subject 60
+        return "D"
+    endif
+    
+    if > subject 40
+        return "E"
+    endif
+    
+    return "F"
 endfunction
 
-set x 10
-set y 20
-call add x y -> sum
-show sum
+function score(subject)
+    call grade(subject) -> result
+    return result
+endfunction
 
-set fruits ["apple", "banana", "orange"]
-show fruits[1]
+call score(77) -> math
+call score(85) -> english
+call score(92) -> science
+call score(78) -> history
+call score(88) -> geography
+call score(95) -> computerScience
+
+show math
+show english
+show science
+show history
+show geography
+show computerScience
