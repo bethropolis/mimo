@@ -1,5 +1,4 @@
 import fs, { writeFileSync } from "fs";
-import { type } from "os";
 
 function tokenize(input) {
   const tokens = [];
@@ -7,6 +6,7 @@ function tokenize(input) {
   let currentType = null;
   let inComment = false;
   let inString = false;
+
 
   const isOperator = (char) =>
     ["+", "-", "*", "/", ">", "<", "=", "!"].includes(char);
@@ -163,6 +163,7 @@ function parse(tokens) {
   const parseStatement = () => {
     const statement = { type: "statement" };
 
+    // console.log("parsing..", tokens[index].value);
     if (tokens[index].value === "set") {
       index++;
       statement.type = "assignment";
@@ -172,10 +173,21 @@ function parse(tokens) {
       index++;
       statement.type = "if";
       statement.condition = parseExpression();
-      statement.consequent = parseStatement();
+      statement.consequent = [];
+
+      while (
+        tokens[index] &&
+        tokens[index].value !== "endif" &&
+        tokens[index].value !== "else"
+      ) {
+        statement.consequent.push(parseStatement());
+      }
       if (tokens[index].value === "else") {
         index++;
-        statement.alternate = parseStatement();
+        statement.alternate = [];
+        while (tokens[index] && tokens[index].value !== "endif") {
+          statement.alternate.push(parseStatement());
+        }
       }
       if (tokens[index].value === "endif") {
         index++;
@@ -192,6 +204,23 @@ function parse(tokens) {
         index++;
       }
       statement.body = body;
+    } else if (tokens[index].value === "try") {
+      index++;
+      statement.type = "try-catch";
+      statement.tryBlock = [];
+      while (tokens[index] && tokens[index].value !== "catch") {
+        statement.tryBlock.push(parseStatement());
+      }
+      if (tokens[index].value === "catch") {
+        index++;
+        statement.catchBlock = [];
+        while (tokens[index] && tokens[index].value !== "endtry") {
+          statement.catchBlock.push(parseStatement());
+        }
+      }
+      if (tokens[index].value === "endtry") {
+        index++;
+      }
     } else if (tokens[index].value === "function") {
       index++;
       statement.type = "function";
@@ -228,7 +257,7 @@ function parse(tokens) {
         while (tokens[index].value !== ")") {
           if (tokens[index].value !== ",") {
             statement.args.push(parseExpression());
-          }else{
+          } else {
             index++; // Skip ','
           }
         }
@@ -245,6 +274,8 @@ function parse(tokens) {
       index++;
       statement.type = "print";
       statement.value = parseExpression();
+    } else {
+      index++;
     }
 
     return statement;
@@ -266,19 +297,29 @@ async function interpret(program, env = {}) {
     // if statement type of array
     if (Array.isArray(statement)) {
       for (let i = 0; i < statement.length; i++) {
-        if(await interpretStatement(statement[i])) return true;
+        if (await interpretStatement(statement[i])) return true;
       }
       return;
     }
 
     if (typeof statement === "object") {
+
+      if (statement.type === "try-catch") {
+        try {
+          await interpretStatement(statement.tryBlock);
+        } catch (error) {
+          console.error(error);
+          await interpretStatement(statement.catchBlock);
+        }
+      }
+      // console.log("interpretting..", statement.type);
       switch (statement.type) {
         case "assignment":
           env[statement.target] = evaluate(statement.value, env);
           break;
 
         case "binary":
-          console.log("Binary", statement);
+          // console.log("Binary", statement);
           if (env[statement.target] === undefined) {
             env[statement.target] = null;
           }
@@ -291,16 +332,17 @@ async function interpret(program, env = {}) {
           break;
         case "if":
           if (evaluate(statement.condition, env)) {
-            if(await interpretStatement(statement.consequent)) return true; // Pass the consequent directly
+            if (await interpretStatement(statement.consequent)) return true; // Pass the consequent directly
           } else if (statement.alternate) {
-            if(await interpretStatement(statement.alternate)) return true; // Pass the alternate directly
+            if (await interpretStatement(statement.alternate)) return true; // Pass the alternate directly
           }
           break;
         case "while":
           while (evaluate(statement.condition, env)) {
-            if(await interpretStatement(statement.body))return true; // Pass the body directly
+            if (await interpretStatement(statement.body)) return true; // Pass the body directly
           }
           break;
+
         case "function":
           env[statement.name] = createFunction(
             statement.params,
@@ -313,6 +355,10 @@ async function interpret(program, env = {}) {
           return true;
         case "call":
           const func = env[statement.name];
+          if (typeof func !== "function") {
+            throw new Error(`${statement.name} is not a function`);
+          }
+
           const args = statement.args.map((arg) => evaluate(arg, env));
           env[statement.target] = await func(...args);
           break;
@@ -327,7 +373,7 @@ async function interpret(program, env = {}) {
   };
 
   while (index < program.length) {
-    if(await interpretStatement(program[index++])) break;
+    if (await interpretStatement(program[index++])) break;
   }
 
   return env;
@@ -352,21 +398,28 @@ const evaluate = (expression, env) =>
       )
     : null;
 
+const operations = new Map([
+  ["+", (left, right) => left + right],
+  ["-", (left, right) => left - right],
+  ["*", (left, right) => left * right],
+  ["/", (left, right) => left / right],
+  ["%", (left, right) => left % right],
+  ["**", (left, right) => left ** right],
+  [">", (left, right) => left > right],
+  ["<", (left, right) => left < right],
+  [">=", (left, right) => left >= right],
+  ["<=", (left, right) => left <= right],
+  ["==", (left, right) => left == right],
+  ["!=", (left, right) => left != right],
+  ["!", (left) => !left],
+]);
+
 const operate = (operator, left, right) => {
-  switch (operator) {
-    case "+":
-      return left + right;
-    case "-":
-      return left - right;
-    case "*":
-      return left * right;
-    case "/":
-      return left / right;
-    case ">":
-      return left > right;
-    case "<":
-      return left < right;
+  const operation = operations.get(operator);
+  if (!operation) {
+    throw new Error(`Invalid operator: ${operator}`);
   }
+  return operation(left, right);
 };
 
 function createFunction(params, body, env) {
@@ -375,7 +428,7 @@ function createFunction(params, body, env) {
     params.forEach((param, index) => {
       newEnv[param] = args[index] ?? undefined;
     });
-    return (await interpret(body, newEnv))["return"]; 
+    return (await interpret(body, newEnv))["return"];
   };
 }
 

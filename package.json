@@ -6,6 +6,7 @@
   "description": "A simple module",
   "main": "index.js",
   "scripts": {
+    "index": "bun index.js",
     "dev": "bun original.js"
   },
   "devDependencies": {

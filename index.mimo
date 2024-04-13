@@ -1,42 +1,15 @@
-function grade(subject)
-    if > subject 90
-        return "A"
-    endif
-    
-    if > subject 80
-        return "B"
-    endif
-    
-    if > subject 70
-        return "C"
-    endif
-    
-    if > subject 60
-        return "D"
-    endif
-    
-    if > subject 40
-        return "E"
-    endif
-    
-    return "F"
+function findMax(arr)
+    set max arr[0]
+    set i 1
+    while < i 5
+        if > arr[i] max
+            set max arr[i]
+        endif
+        set i + i 1
+    endwhile
+    return max
 endfunction
 
-function score(subject)
-    call grade(subject) -> result
-    return result
-endfunction
-
-call score(77) -> math
-call score(85) -> english
-call score(92) -> science
-call score(78) -> history
-call score(88) -> geography
-call score(95) -> computerScience
-
-show math
-show english
-show science
-show history
-show geography
-show computerScience
+set numbers [5, 3, 9, 1, 7]
+call findMax(numbers) -> maxNumber
+show maxNumber

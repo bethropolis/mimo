@@ -174,3 +174,7 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 output.txt
+ast.json
+astIndex.json
+tokens.json
+tokensindex.json
