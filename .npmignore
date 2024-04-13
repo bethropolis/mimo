@@ -1,0 +1,14 @@
+# .npmignore
+
+# Ignore all test files/directories
+test/
+**/*.test.js
+
+# Ignore all documentation files
+docs/
+
+# Ignore CI/CD configuration
+.github/
+
+# Ignore development scripts
+scripts/

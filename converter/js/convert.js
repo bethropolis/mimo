@@ -35,7 +35,7 @@ export function generateCodeFromAst(node) {
   }
 }
 
-export function generateCodeFromAstArray(ast) {
+export function generateCodeJsFromAstArray(ast) {
   const generatedCode = ast.map(generateCodeFromAst).join("\n");
   return esformatter.format(generatedCode);
 }

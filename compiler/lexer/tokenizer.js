@@ -1,7 +1,7 @@
 import { processToken, processStringToken, processOperatorToken, isOperator } from './processToken.js';
 import { PUNCTUATION } from './tokenTypes.js';
 
-function tokenize(input) {
+function generateTokens(input) {
     const tokens = [];
     let currentToken = "";
     let currentType = null;

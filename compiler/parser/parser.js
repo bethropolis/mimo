@@ -1,6 +1,6 @@
 import { parseStatement } from "./parseStatement";
 
-export function parse(tokens) {
+export function parseTokens(tokens) {
     let index = 0;
 
     const program = [];

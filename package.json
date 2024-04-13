@@ -3,11 +3,10 @@
   "module": "index.js",
   "type": "module",
   "version": "1.0.0",
-  "description": "A simple module",
+  "description": "A simple programming language",
   "main": "index.js",
   "scripts": {
-    "index": "bun index.js",
-    "dev": "bun original.js"
+    "dev": "bun index.js"
   },
   "devDependencies": {
     "@types/bun": "latest"

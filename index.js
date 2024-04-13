@@ -1,28 +1,45 @@
-import { tokenize } from "./compiler/lexer/tokenizer";
-import fs from "fs";
-import { parse } from "./compiler/parser/parser";
-import { generateCodeFromAstArray } from "./converter/js/convert";
+import { generateTokens } from "./compiler/lexer/tokenizer";
+import { parseTokens } from "./compiler/parser/parser";
+import { interpret } from "./compiler/execute/interpreter";
+import { generateGoCodeFromAst } from "./converter/go/convert";
+import { generateCodeJsFromAstArray } from "./converter/js/convert";
 
-const readCode = (filename) => fs.readFileSync(filename, "utf8");
+// The main class for the Mimo language
+export default class Mimo {
+  constructor() {
+    // Initialize the environment for variables
+    this.env = {};
+  }
 
-async function main(file) {
-  const start = performance.now();
+  // Tokenize the given code into a list of tokens
+  async tokenize(code) {
+    return generateTokens(code);
+  }
 
-  const code = await readCode(file);
+  // Parse the list of tokens into an abstract syntax tree (AST)
+  async parse(tokens) {
+    return parseTokens(tokens);
+  }
 
-  const tokens = await tokenize(code);
-  fs.writeFileSync("test/output/tokensindex.json", JSON.stringify(tokens, null, 2));
+  // Interpret the AST and execute the code
+  async interpret(program) {
+    return interpret(program, this.env);
+  }
 
-  const ast = await parse(tokens);
-  fs.writeFileSync("test/output/astIndex.json", JSON.stringify(ast, null, 2));
+  // Run the given code by tokenizing, parsing, and interpreting it
+  async run(code) {
+    const tokens = await this.tokenize(code);
+    const program = await this.parse(tokens);
+    return await this.interpret(program);
+  }
 
-  const jsCode = generateCodeFromAstArray(ast);
-  fs.writeFileSync("test/output/jsCodeIndex.js", jsCode);
-  // const env = await interpret(ast);
+  // Convert the AST to JavaScript code
+  toJS(ast) {
+    return generateCodeJsFromAstArray(ast);
+  }
 
-  const end = performance.now();
-  const timeTaken = end - start;
-  console.log("process took " + timeTaken + " milliseconds");
+  // Convert the AST to Go code
+  toGO(ast) {
+    return generateGoCodeFromAst(ast);
+  }
 }
-
-main("index.mimo");
