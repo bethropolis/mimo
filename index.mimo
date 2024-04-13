@@ -1,15 +1,23 @@
-function findMax(arr)
-    set max arr[0]
-    set i 1
-    while < i 5
-        if > arr[i] max
-            set max arr[i]
-        endif
+function fibonacci(n)
+    if <= n 1
+        return n
+    endif
+    set a 0
+    set b 1
+    set i 2
+    while <= i n
+        call add(a, b) -> temp
+        set a b
+        set b temp
         set i + i 1
     endwhile
-    return max
+    return b
 endfunction
 
-set numbers [5, 3, 9, 1, 7]
-call findMax(numbers) -> maxNumber
-show maxNumber
+function add(x, y)
+    return + x y
+endfunction
+
+set number 10
+call fibonacci(number) -> fib
+show fib

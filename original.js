@@ -353,7 +353,7 @@ async function interpret(program, env = {}) {
         case "return":
           env["return"] = evaluate(statement.value, env);
           return true;
-        case "call":
+        case "call"<:
           const func = env[statement.name];
           if (typeof func !== "function") {
             throw new Error(`${statement.name} is not a function`);
@@ -440,10 +440,10 @@ async function main(file) {
   const code = await readCode(file);
 
   const tokens = await tokenize(code);
-  fs, writeFileSync("tokens.json", JSON.stringify(tokens, null, 2));
+  fs, writeFileSync("test/output/tokens.json", JSON.stringify(tokens, null, 2));
 
   const ast = await parse(tokens);
-  fs.writeFileSync("ast.json", JSON.stringify(ast, null, 2));
+  fs.writeFileSync("test/output/ast.json", JSON.stringify(ast, null, 2));
 
   const env = await interpret(ast);
 

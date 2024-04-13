@@ -3,6 +3,7 @@ import { parseStatement } from "../parseStatement";
 
 
 export const whileStatement = (tokens, index) => {
+  index++; // Skip 'while'
   let statement = { type: "while" };
   let result = parseExpression(tokens, index);
   statement.condition = result.expression;
