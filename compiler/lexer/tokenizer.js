@@ -60,4 +60,4 @@ function generateTokens(input) {
     return tokens;
 }
 
-export { tokenize };
+export { generateTokens };

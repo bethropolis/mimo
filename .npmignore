@@ -12,3 +12,5 @@ docs/
 
 # Ignore development scripts
 scripts/
+
+*.txt
