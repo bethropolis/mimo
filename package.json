@@ -20,7 +20,7 @@
     "@types/bun": "latest"
   },
   "dependencies": {
-    "esformatter": "^0.8.2"
+    "esformatter": "^0.11.3"
   },
   "repository": {
     "type": "git",
