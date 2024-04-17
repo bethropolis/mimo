@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import Mimo from "./index.js";
-import { version } from "./package.json";
+import { version } from "./package.json" assert { type: "json" };
 
 // Check if the user asked for the version
 if (process.argv.includes("-v") || process.argv.includes("--version")) {
