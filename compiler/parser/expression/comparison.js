@@ -1,4 +1,4 @@
-import { parseExpression } from "../parseExpression";
+import { parseExpression } from "../parseExpression.js";
 
 export function comparisonExpression(tokens, index) {
     const operator = tokens[index++].value;

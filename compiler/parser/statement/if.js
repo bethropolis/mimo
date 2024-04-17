@@ -1,5 +1,5 @@
-import { parseExpression } from "../parseExpression";
-import { parseStatement } from "../parseStatement";
+import { parseExpression } from "../parseExpression.js";
+import { parseStatement } from "../parseStatement.js";
 
 export function ifStatement(tokens, index) {
   let statement = { type: "if" };

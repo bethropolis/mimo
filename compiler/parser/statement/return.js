@@ -1,4 +1,4 @@
-import { parseExpression } from "../parseExpression";
+import { parseExpression } from "../parseExpression.js";
 
 // #file:statement/return.js
 export const returnStatement = (tokens, index) => {

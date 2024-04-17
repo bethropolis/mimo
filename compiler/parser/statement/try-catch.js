@@ -1,4 +1,4 @@
-import { parseStatement } from "../parseStatement";
+import { parseStatement } from "../parseStatement.js";
 
 export const tryCatchStatement = (tokens, index) => {
   let statement = { type: "try-catch" };

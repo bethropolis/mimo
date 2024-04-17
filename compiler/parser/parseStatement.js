@@ -1,7 +1,7 @@
 import { ifStatement } from "./statement/if.js";
 import { setStatement } from "./statement/set.js";
 import { tryCatchStatement } from "./statement/try-catch.js";
-import { whileStatement } from "./statement/while";
+import { whileStatement } from "./statement/while.js";
 import { functionStatement } from "./statement/function.js";
 import { callStatement } from "./statement/call.js";
 import { returnStatement } from "./statement/return.js";

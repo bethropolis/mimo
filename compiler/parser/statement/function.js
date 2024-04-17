@@ -1,4 +1,4 @@
-import { parseStatement } from "../parseStatement";
+import { parseStatement } from "../parseStatement.js";
 
 // #file:statement/function.js
 export const functionStatement = (tokens, index) => {

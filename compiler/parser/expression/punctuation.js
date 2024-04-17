@@ -1,4 +1,4 @@
-import { parseExpression } from "../parseExpression";
+import { parseExpression } from "../parseExpression.js";
 
 export function punctuationExpression(tokens, index) {
     if (tokens[index].value === "[") {

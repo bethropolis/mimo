@@ -1,4 +1,4 @@
-import { parseExpression } from "../parseExpression";
+import { parseExpression } from "../parseExpression.js";
 
 export const showStatement = (tokens, index) => {
     let statement = { type: "print" };
