@@ -1,7 +1,7 @@
-import { generateTokens } from "./compiler/lexer/tokenizer";
-import { parseTokens } from "./compiler/parser/parser";
-import { interpret } from "./compiler/execute/interpreter";
-import { generateCodeJsFromAstArray } from "./converter/js/convert";
+import { generateTokens } from "./compiler/lexer/tokenizer.js";
+import { parseTokens } from "./compiler/parser/parser.js";
+import { interpret } from "./compiler/execute/interpreter.js";
+import { generateCodeJsFromAstArray } from "./converter/js/convert.js";
 
 // The main class for the Mimo language
 export default class Mimo {
