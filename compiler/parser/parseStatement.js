@@ -1,12 +1,11 @@
-import { parseExpression } from "./parseExpression";
-import { ifStatement } from "./statement/if";
-import { setStatement } from "./statement/set";
-import { tryCatchStatement } from "./statement/try-catch";
+import { ifStatement } from "./statement/if.js";
+import { setStatement } from "./statement/set.js";
+import { tryCatchStatement } from "./statement/try-catch.js";
 import { whileStatement } from "./statement/while";
-import { functionStatement } from "./statement/function";
-import { callStatement } from "./statement/call";
-import { returnStatement } from "./statement/return";
-import { showStatement } from "./statement/show";
+import { functionStatement } from "./statement/function.js";
+import { callStatement } from "./statement/call.js";
+import { returnStatement } from "./statement/return.js";
+import { showStatement } from "./statement/show.js";
 
 export const parseStatement = (tokens, index) => {
   let statement = { type: "statement" };

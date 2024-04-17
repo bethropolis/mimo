@@ -1,5 +1,5 @@
-import { interpretStatement } from "../interpreter";
-import { evaluate } from "../utils/evaluate";
+import { interpretStatement } from "../interpreter.js";
+import { evaluate } from "../utils/evaluate.js";
 
 export async function interpretIf(statement, env) {
     if (evaluate(statement.condition, env)) {

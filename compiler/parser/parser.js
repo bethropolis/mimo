@@ -1,4 +1,4 @@
-import { parseStatement } from "./parseStatement";
+import { parseStatement } from "./parseStatement.js";
 
 export function parseTokens(tokens) {
     let index = 0;

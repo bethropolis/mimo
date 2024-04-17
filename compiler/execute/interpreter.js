@@ -1,10 +1,10 @@
-import { interpretBinary } from "./interpreters/binary";
-import { interpretCall } from "./interpreters/call";
-import { interpretIf } from "./interpreters/if";
-import { interpretTryCatch } from "./interpreters/try-catch";
-import { interpretWhile } from "./interpreters/while";
-import { createFunction } from "./utils/createfunction";
-import { evaluate } from "./utils/evaluate";
+import { interpretBinary } from "./interpreters/binary.js";
+import { interpretCall } from "./interpreters/call.js";
+import { interpretIf } from "./interpreters/if.js";
+import { interpretTryCatch } from "./interpreters/try-catch.js";
+import { interpretWhile } from "./interpreters/while.js";
+import { createFunction } from "./utils/createfunction.js";
+import { evaluate } from "./utils/evaluate.js";
 
 export async function interpretStatement(statement, env) {
   if (Array.isArray(statement)) {

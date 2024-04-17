@@ -1,4 +1,4 @@
-import { evaluate } from "../utils/evaluate";
+import { evaluate } from "../utils/evaluate.js";
 
 export async function interpretBinary(statement, env) {
     if (env[statement.target] === undefined) {

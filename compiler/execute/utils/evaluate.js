@@ -1,4 +1,4 @@
-import { operate } from "./operate";
+import { operate } from "./operate.js";
 
 export const evaluate = (expression, env) =>
   expression.type === "literal"

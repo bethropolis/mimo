@@ -1,3 +1,4 @@
+import { interpretStatement } from "../interpreter.js";
 
 export async function interpretTryCatch(statement, env) {
     try {

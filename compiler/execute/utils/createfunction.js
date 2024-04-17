@@ -1,4 +1,4 @@
-import { interpret } from "../interpreter";
+import { interpret } from "../interpreter.js";
 
 export function createFunction(params, body, env) {
   return async function (...args) {

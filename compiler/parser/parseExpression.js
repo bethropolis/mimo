@@ -1,9 +1,9 @@
-import { comparisonExpression } from "./expression/comparison";
-import { identifierExpression } from "./expression/identifier";
-import { numberExpression } from "./expression/number";
-import { operatorExpression } from "./expression/operator";
-import { punctuationExpression } from "./expression/punctuation";
-import { stringExpression } from "./expression/string";
+import { comparisonExpression } from "./expression/comparison.js";
+import { identifierExpression } from "./expression/identifier.js";
+import { numberExpression } from "./expression/number.js";
+import { operatorExpression } from "./expression/operator.js";
+import { punctuationExpression } from "./expression/punctuation.js";
+import { stringExpression } from "./expression/string.js";
 
 export const parseExpression = (tokens, index) => {
 //   console.log("expression..", tokens[index].type, tokens[index].value);

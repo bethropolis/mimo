@@ -1,6 +1,6 @@
 // processToken.js
 
-import { OPERATORS } from "./tokenTypes";
+import { OPERATORS } from "./tokenTypes.js";
 
 export const isOperator = (char) => OPERATORS.includes(char);
 
