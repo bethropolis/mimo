@@ -14,7 +14,9 @@
     "mimo": "./cli.js"
   },
   "scripts": {
-    "dev": "bun index.js"
+    "mimo": "bun cli.js",
+    "dev": "bun index.js",
+    "test": "bun test/index.js"
   },
   "devDependencies": {
     "@types/bun": "latest"

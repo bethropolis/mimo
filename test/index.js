@@ -26,4 +26,4 @@ let save = (filename, text) => {
   fs.writeFileSync(filename, text);
 };
 
-run("../test/mimo/fibonacci.mimo");
+run("./test/mimo/fibonacci.mimo");

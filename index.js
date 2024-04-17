@@ -29,7 +29,8 @@ export default class Mimo {
   async run(code) {
     const tokens = await this.tokenize(code);
     const program = await this.parse(tokens);
-    return await this.interpret(program);
+    const env = await this.interpret(program);
+    return { program, env };
   }
 
   // Convert the AST to JavaScript code
