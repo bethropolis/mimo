@@ -18,7 +18,7 @@ jobs:
           node-version: '20.x'
       - run: npm i
       - run: npm run build
-      - uses: peaceiris/actions-gh-pages@v4
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          folder: build 
