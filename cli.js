@@ -21,21 +21,21 @@ if (process.argv.includes("-v") || process.argv.includes("--version")) {
 
 // Check if the user asked for help
 if (process.argv.includes("-h") || process.argv.includes("--help")) {
-  console.log("Usage: mimo [FILENAME] [-o|--output] [-t|--time] [-h|--help] [-q|--quiet] [-v|--verbose] [-V|--version]");
+  console.log("Usage: mimo [FILENAME] [-o|--output] [-t|--time] [-h|--help] [-q|--quiet] [-d|--debug] [-v|--version]");
   console.log("FILENAME: The file to process.");
   console.log("-o, --output: Generate output file.");
   console.log("-t, --time: Measure execution time.");
   console.log("-h, --help: Show this help message.");
   console.log("-q, --quiet: Suppress all non-essential output.");
-  console.log("-v, --verbose: Display additional debug information.");
-  console.log("-V, --version: Display the version number.");
+  console.log("-d, --debug: Display additional debug information.");
+  console.log("-v, --version: Display the version number.");
   process.exit(0);
 }
 
 // Check if a filename was provided
 if (process.argv.length < 3) {
   console.error("Error: No file name provided.\n");
-  console.log("Usage: mimo [FILENAME] [-o|--output] [-t|--time] [-h|--help] [-q|--quiet] [-v|--verbose] [-V|--version]");
+  console.log("Usage: mimo [FILENAME] [-o|--output] [-t|--time] [-h|--help] [-q|--quiet] [-d|--debug] [-v|--version]");
   console.log("Use the --help flag for more information.\n\n");
   process.exit(1);
 }
@@ -44,7 +44,7 @@ const filename = process.argv[2];
 const shouldGenerateOutput = process.argv.includes("-o") || process.argv.includes("--output");
 const shouldMeasureTime = process.argv.includes("-t") || process.argv.includes("--time");
 const shouldSuppressOutput = process.argv.includes("-q") || process.argv.includes("--quiet");
-const shouldDisplayDebugInfo = process.argv.includes("-d") || process.argv.includes("--debbug");
+const shouldDisplayDebugInfo = process.argv.includes("-d") || process.argv.includes("--debug");
 
 // Check if the file exists
 if (!fs.existsSync(filename)) {
