@@ -1,30 +1,31 @@
 <script>
+	import { onMount } from 'svelte';
+	import Mimo from 'mimo-lang';
 	import AstCode from '$lib/components/astCode.svelte';
 	import Console from '$lib/components/console.svelte';
 	import JsCode from '$lib/components/jsCode.svelte';
 	import MimoCode from '$lib/components/mimoCode.svelte';
 	import Playground from '$lib/components/playground.svelte';
-	import Mimo from 'mimo-lang';
-	import { onMount } from 'svelte';
 
 	let source = `function add(a,b)
-  return a+b;
+  return + a b
 endfunction
 
-set x 5;
-set y 2;
+set x 5
+set y 2
 
-call add(x,y) -> result;
-show result;`;
+call add(x,y) -> result
+show result`;
 
 	let mimo = new Mimo();
 
 	let ast = []
 	let jscode = '';
 
-	function run() {
-		let { program } = mimo.run(source);
+	async function run() {
+		let { program } =await mimo.run(source);
 		ast = program;
+		console.log(program);
 		jscode = mimo.toJS(program);
 	}
 

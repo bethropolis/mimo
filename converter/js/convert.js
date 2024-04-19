@@ -1,4 +1,5 @@
-import esformatter from 'esformatter';
+import { js_beautify } from "js-beautify";
+
 
 
 let declaredVariables = new Set();
@@ -37,7 +38,7 @@ export function generateCodeFromAst(node) {
 
 export function generateCodeJsFromAstArray(ast) {
   const generatedCode = ast.map(generateCodeFromAst).join("\n");
-  return esformatter.format(generatedCode);
+  return js_beautify(generatedCode);
 }
 
 function generateFunction(node) {

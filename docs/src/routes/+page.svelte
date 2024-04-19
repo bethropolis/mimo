@@ -3,19 +3,17 @@
 	import 'prismjs/themes/prism-tomorrow.min.css';
 
 	// Add your programming language syntax here
-	const languageSyntax = `
-function add(a,b)
-  return a+b;
+	const languageSyntax = `function add(a,b)
+  return + a b
 endfunction
 
-set x 5;
-set y 2;
+set x 5
+set y 2
 
-call add(x,y) -> result;
-show result;
-	`;
+call add(x,y) -> result
+show result`;
 
-const highlightedCode = Prism.highlight(languageSyntax, Prism.languages.mimo, 'mimo');
+	const highlightedCode = Prism.highlight(languageSyntax, Prism.languages.mimo, 'mimo');
 </script>
 
 <main class="w-screen h-screen">
@@ -32,10 +30,11 @@ const highlightedCode = Prism.highlight(languageSyntax, Prism.languages.mimo, 'm
 
 		<div class="p-4">
 			<a href="./playground/">
-			<button
-				class="btn btn-xs sm:btn-sm bg-blue-400 uppercase text-black hover:bg-blue-500 md:btn-md lg:btn-lg"
-				>Try it!</button
-			></a>
+				<button
+					class="btn btn-xs sm:btn-sm bg-blue-400 uppercase text-black hover:bg-blue-500 md:btn-md lg:btn-lg"
+					>Try it!</button
+				></a
+			>
 		</div>
 	</div>
 

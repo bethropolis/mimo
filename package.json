@@ -1,6 +1,6 @@
 {
   "name": "mimo-lang",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A programming language made in javascript mostly for learning purposes.",
   "keywords": [
     "programing language"
@@ -22,7 +22,7 @@
     "@types/bun": "latest"
   },
   "dependencies": {
-    "esformatter": "^0.11.3"
+    "js-beautify": "^1.15.1"
   },
   "repository": {
     "type": "git",

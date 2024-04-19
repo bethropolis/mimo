@@ -19,7 +19,12 @@ let run = async (filename) => {
 
   let ast = await mimo.parse(tokens);
 
+  fs.writeFileSync("./test/output/astIndex.json", JSON.stringify(ast, null, 2));
   let env = await mimo.interpret(ast);
+
+  let js = mimo.toJS(ast);
+
+  // console.log(js);
 };
 
 let save = (filename, text) => {
@@ -27,3 +32,4 @@ let save = (filename, text) => {
 };
 
 run("./test/mimo/fibonacci.mimo");
+run("./test/mimo/add.mimo");
