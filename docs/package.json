@@ -37,6 +37,7 @@
     "@sveltejs/adapter-static": "^3.0.1",
     "@zerodevx/svelte-json-view": "^1.0.9",
     "dracula-prism": "^2.1.16",
+    "mimo-lang": "^1.0.1",
     "paneforge": "^0.0.4",
     "prismjs": "^1.29.0",
     "sveditor": "^0.0.31",

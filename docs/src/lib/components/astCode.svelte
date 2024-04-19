@@ -1,7 +1,7 @@
 <script>
     import { JsonView } from '@zerodevx/svelte-json-view'
   
-    const json = { foo: 'bar' }
+    export const json = [];
   </script>
   
   <div class="wrap">
