@@ -29,7 +29,7 @@
 				<Select bind:source/>
 			</li>
 			<li>
-				<label for="my-drawer"
+				<label for="my-drawer"  class="tooltip tooltip-bottom" data-tip="expand"
 					><Side
 						for="my-drawer"
 						class="h-5 w-5 hover:text-gray-600 active:scale-95 transition-all duration-300"

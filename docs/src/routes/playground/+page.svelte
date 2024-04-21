@@ -31,6 +31,10 @@ show result`;
 	onMount(run);
 </script>
 
+<svelte:head>
+	<title>Mimo code Playground</title>
+</svelte:head>
+
 <Playground>
 	<div slot="mimo">
 		<MimoCode bind:source on:run={run}/>

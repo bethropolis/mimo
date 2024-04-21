@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "postbuild": "npx svelte-sitemap --domain https://bethropolis.github.io/mimo",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
@@ -41,6 +42,7 @@
     "paneforge": "^0.0.4",
     "prismjs": "^1.29.0",
     "sveditor": "^0.0.31",
-    "svelte-codemirror-editor": "^1.3.0"
+    "svelte-codemirror-editor": "^1.3.0",
+    "svelte-sitemap": "^2.6.0"
   }
 }

@@ -1,4 +1,5 @@
 <script>
+	import GradientText from './../lib/components/gradientText.svelte';
 	import Side from '$lib/components/icons/side.svelte';
 	import Prism from '$lib/js/mimo-definition.js';
 	import 'prismjs/themes/prism-tomorrow.min.css';
@@ -23,7 +24,7 @@ show result`;
 		<img src="web/mimo.png" alt="" class="w-32 h-32" />
 	</div>
 	<div class="head">
-		<h1>Mimo programming language</h1>
+		<h1><GradientText>Mimo</GradientText> programming language</h1>
 	</div>
 	<div>
 		<div class="mockup-code">
@@ -33,7 +34,7 @@ show result`;
 		<div class="p-4">
 			<a href="./playground/">
 				<button
-					class="btn btn-xs sm:btn-sm bg-blue-400 uppercase text-black hover:bg-blue-500 md:btn-md lg:btn-lg"
+					class="btn btn-sm bg-blue-400 uppercase text-black hover:bg-blue-500 md:btn-md lg:btn-lg"
 					>Try it!</button
 				></a
 			>
@@ -42,9 +43,11 @@ show result`;
 
 	<label
 		for="my-drawer"
-		class="fixed bottom-8 left-8 bg-base-300 rounded-full p-3 shadow-md cursor-pointer transition-transform duration-300 hover:scale-105"
+		class="fixed z-30 bottom-2 left-2 md:bottom-8 md:left-8 flex items-center bg-base-300 rounded-full p-3 shadow-md cursor-pointer transition-transform duration-300 hover:scale-105"
 	>
-		<Side class="h-6 w-6 text-gray-200" />
+		<div class="lg:tooltip" data-tip="open drawer">
+			<Side class="h-6 w-6 text-gray-200 select-none" />
+		</div>
 	</label>
 	<footer class="absolute w-full bottom-0 py-4">
 		made with 💜 <a href="https://bethropolis.github.io/" class="text-blue-300" target="_blank"
@@ -65,4 +68,6 @@ show result`;
 	h1 {
 		@apply text-5xl font-bold p-8;
 	}
+
+
 </style>

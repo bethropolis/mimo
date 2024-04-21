@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { overrideGlobalConsole } from '$lib/js/overide-console.js';
-	import '../app.postcss';
+	import '../app.css';
 	import Sidebar from '$lib/components/sidebar.svelte';
 
 	onMount(overrideGlobalConsole);
@@ -38,6 +38,7 @@
 		content="Mimo is a programming language, with it's own built in lexer, parser and interpreter and can convert to multiple languages including javascript."
 	/>
 	<meta property="twitter:image" content="https://bethropolis.github.io/mimo/web/mimo-banner.png" />
+	<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 </svelte:head>
 
 <main>

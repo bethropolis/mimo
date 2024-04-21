@@ -55,8 +55,11 @@ call add(x,y) -> result
 show result
 ```
 
-more example id the [test directory]('./test/mimo/')
+more example in the [test directory]('./test/mimo/')
 
+
+## Docs
+check out the [documentation](./docs.md) file for more info.
 
 ## About
 this is just a simple language i created to learn more about how programing languages work.

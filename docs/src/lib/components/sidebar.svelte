@@ -2,6 +2,7 @@
 	import Terminal from './icons/terminal.svelte';
 	import Github from './icons/github.svelte';
 	import Home from './icons/home.svelte';
+	import Book from './icons/book.svelte';
 </script>
 
 <div class="drawer z-50">
@@ -11,9 +12,9 @@
 		<ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
 			<!-- Sidebar content here -->
 			<li><a href="./"><Home class="h-6 w-6"/>Home</a></li>
-			<li><a href="./"><Terminal class="h-6 w-6"/>Playground</a></li>
-
-			<li><a href="https://github.com/bethropolis/mimo"><Github  class="h-6 w-6"/>GitHub</a></li>
+			<li><a href="./playground"><Terminal class="h-6 w-6"/>Playground</a></li>
+			<li><a href="https://github.com/bethropolis/mimo/blob/main/docs.md" target="_blank"><Book  class="h-6 w-6"/>Docs</a></li>
+			<li><a href="https://github.com/bethropolis/mimo" target="_blank"><Github  class="h-6 w-6"/>GitHub</a></li>
 		</ul>
 
 		<div class="absolute text-center bottom-0 p-4">
