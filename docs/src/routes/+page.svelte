@@ -50,7 +50,7 @@ show result`;
 			<Side class="h-6 w-6 text-gray-200 select-none" />
 		</div>
 	</label>
-	<footer class="absolute w-full bottom-0 py-4">
+	<footer class="relative w-full  py-4">
 		made with 💜 <a href="https://bethropolis.github.io/" class="text-blue-300" target="_blank"
 			>bethropolis</a
 		>
