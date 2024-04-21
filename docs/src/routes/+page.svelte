@@ -1,4 +1,5 @@
 <script>
+		  import { base } from "$app/paths";
 	import GradientText from './../lib/components/gradientText.svelte';
 	import Side from '$lib/components/icons/side.svelte';
 	import Prism from '$lib/js/mimo-definition.js';
@@ -21,7 +22,7 @@ show result`;
 
 <main class="w-screen h-screen">
 	<div class="flex justify-center pt-4">
-		<img src="web/mimo.png" alt="" class="w-32 h-32" />
+		<img src="{base}/web/mimo.png" alt="" class="w-32 h-32" />
 	</div>
 	<div class="head">
 		<h1><GradientText>Mimo</GradientText> programming language</h1>

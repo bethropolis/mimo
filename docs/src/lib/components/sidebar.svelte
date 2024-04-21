@@ -1,4 +1,5 @@
 <script>
+	  import { base } from "$app/paths";
 	import Terminal from './icons/terminal.svelte';
 	import Github from './icons/github.svelte';
 	import Home from './icons/home.svelte';
@@ -11,8 +12,8 @@
 		<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 		<ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
 			<!-- Sidebar content here -->
-			<li><a href="./"><Home class="h-6 w-6"/>Home</a></li>
-			<li><a href="./playground"><Terminal class="h-6 w-6"/>Playground</a></li>
+			<li><a href="{base}/"><Home class="h-6 w-6"/>Home</a></li>
+			<li><a href="{base}/playground"><Terminal class="h-6 w-6"/>Playground</a></li>
 			<li><a href="https://github.com/bethropolis/mimo/blob/main/docs.md" target="_blank"><Book  class="h-6 w-6"/>Docs</a></li>
 			<li><a href="https://github.com/bethropolis/mimo" target="_blank"><Github  class="h-6 w-6"/>GitHub</a></li>
 		</ul>
