@@ -43,7 +43,9 @@ export default defineConfig({
 			}
 		})
 	],
-
+	optimizeDeps: {
+		exclude: ['js-big-decimal']
+	  },
 	build: {
 		target: 'esnext'
 	}
