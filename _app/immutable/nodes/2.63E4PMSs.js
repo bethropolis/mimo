@@ -1,5 +1,0 @@
-import{s as E,n as _}from"../chunks/scheduler.BvLojk_z.js";import{S as x,i as S,e as i,s as b,g as P,c,a as h,m as H,j as M,h as j,d,n as C,b as D,k as o}from"../chunks/index.ClzXCQWY.js";const L=!0,R=Object.freeze(Object.defineProperty({__proto__:null,prerender:L},Symbol.toStringTag,{value:"Module"}));function O(m){let e,t,g="<h1>Welcome to my Programming Language Playground</h1>",p,a,s,r,u;return{c(){e=i("main"),t=i("header"),t.innerHTML=g,p=b(),a=i("div"),s=i("pre"),r=i("code"),u=P(m[0]),this.h()},l(l){e=c(l,"MAIN",{});var n=h(e);t=c(n,"HEADER",{"data-svelte-h":!0}),H(t)!=="svelte-4muo9a"&&(t.innerHTML=g),p=M(n),a=c(n,"DIV",{class:!0});var f=h(a);s=c(f,"PRE",{});var v=h(s);r=c(v,"CODE",{});var y=h(r);u=j(y,m[0]),y.forEach(d),v.forEach(d),f.forEach(d),n.forEach(d),this.h()},h(){C(a,"class","code-box svelte-1tysi2p")},m(l,n){D(l,e,n),o(e,t),o(e,p),o(e,a),o(a,s),o(s,r),o(r,u)},p:_,i:_,o:_,d(l){l&&d(e)}}}function T(m){return[`
-	  function hello() {
-		console.log("Hello, world!");
-	  }
-	`]}class $ extends x{constructor(e){super(),S(this,e,T,O,E,{})}}export{$ as component,R as universal};
