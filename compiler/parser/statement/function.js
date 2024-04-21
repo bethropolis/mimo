@@ -7,7 +7,7 @@ export const functionStatement = (tokens, index) => {
   statement.name = tokens[index++]?.value;
   index++; // Skip 'function' and function name
   statement.params = [];
-  while (tokens[index]?.value !== ")") {
+  while (tokens[index] && tokens[index]?.value !== ")") {
     statement.params.push(tokens[index]?.value);
     index++; // Skip parameter
     if (tokens[index]?.value === ",") {
@@ -21,7 +21,7 @@ export const functionStatement = (tokens, index) => {
     body.push(result.statement);
     index = result.index; // Update the index
   }
-  if (tokens[index].value === "endfunction") {
+  if (tokens[index] && tokens[index].value === "endfunction") {
     index++;
   }
   statement.body = body;

@@ -11,8 +11,8 @@
 </script>
 
 <div class="jscode">
-	<div class="js-bar">
-		<div class="title">javascript code</div>
+	<div class="bar">
+		<div class="title uppercase">javascript code</div>
 	</div>
 	<Editor
 		bind:source
@@ -29,10 +29,10 @@
 
 <style>
     .jscode{
-        width: 100dvh;
+        height: 100dvh;
     }
 
-    .js-bar {
+    .bar {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -40,7 +40,4 @@
         background-color: #1e2228;
     }
 
-    .title{
-        
-    }
 </style>

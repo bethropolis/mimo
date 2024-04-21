@@ -25,7 +25,6 @@ show result`;
 	async function run() {
 		let { program } =await mimo.run(source);
 		ast = program;
-		console.log(program);
 		jscode = mimo.toJS(program);
 	}
 
@@ -34,10 +33,10 @@ show result`;
 
 <Playground>
 	<div slot="mimo">
-		<MimoCode bind:source />
+		<MimoCode bind:source on:run={run}/>
 	</div>
 	<div slot="ast">
-		<AstCode json={ast}/>
+		<AstCode bind:json={ast}/>
 	</div>
 	<div slot="js">
 		<JsCode bind:source={jscode}/>

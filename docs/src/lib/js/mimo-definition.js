@@ -21,7 +21,8 @@ Prism.languages.mimo = {
 		inside: {
 			'function-parameter': {
 				pattern: /\b[a-zA-Z_][a-zA-Z0-9_]*/,
-				alias: 'variable.parameter.function.mimo'  // Customize alias for parameters
+				alias: 'variable.parameter.function.mimo',  // Customize alias for parameters
+				lookbehind: true,
 			}
 		}
 	},
@@ -54,7 +55,7 @@ Prism.languages.mimo = {
 		}
 	],
 	// Highlights line comments
-	'line-comment': /\/\/.*/,
+	'comment': /\/\/.*/,
 	// Highlights block comments
 	'block-comment': {
 		pattern: /\/\*[\s\S]*?\*\//,

@@ -1,6 +1,17 @@
 import { processToken, processStringToken, processOperatorToken, isOperator } from './processToken.js';
 import { PUNCTUATION } from './tokenTypes.js';
 
+/**
+ * @typedef {Object} Token
+ * @property {string} type - The type of the token (e.g., 'number', 'identifier', 'operator', etc.).
+ * @property {string} value - The value of the token (e.g., '42', 'x', '+', etc.).
+ */
+
+/**
+ * Generate tokens from the given input.
+ * @param {string} input - The input to be tokenized.
+ * @returns {Token[]} An array of tokens.
+ */
 function generateTokens(input) {
     const tokens = [];
     let currentToken = "";

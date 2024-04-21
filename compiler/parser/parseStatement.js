@@ -10,7 +10,6 @@ import { showStatement } from "./statement/show.js";
 export const parseStatement = (tokens, index) => {
   let statement = { type: "statement" };
 
-  // console.log("parsing..", tokens[index].type, tokens[index].value);
   if (tokens[index].value === "set") {
     ({ statement, index } = setStatement(tokens, index));
   } else if (tokens[index].value === "if") {

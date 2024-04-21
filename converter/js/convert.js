@@ -1,6 +1,5 @@
-import { js_beautify } from "js-beautify";
-
-
+import pkg from "js-beautify";
+const { js_beautify } = pkg;
 
 let declaredVariables = new Set();
 
@@ -31,12 +30,13 @@ export function generateCodeFromAst(node) {
     case "list":
       return generateList(node);
     default:
-      console.log(node);
+      console.error(`Unknown node type: ${node.type} during conversion.`);
       throw new Error(`Unknown node type: ${node.type}`);
   }
 }
 
 export function generateCodeJsFromAstArray(ast) {
+  declaredVariables = new Set();
   const generatedCode = ast.map(generateCodeFromAst).join("\n");
   return js_beautify(generatedCode);
 }

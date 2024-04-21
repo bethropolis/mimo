@@ -1,4 +1,4 @@
-import Mimo from "..";
+import Mimo from "../index.js";
 import fs from "fs";
 
 let mimo = new Mimo();
@@ -16,6 +16,7 @@ let run = async (filename) => {
   let code = readfile(filename);
 
   let tokens = await mimo.tokenize(code);
+  fs.writeFileSync("./test/output/tokensindex.json", JSON.stringify(tokens, null, 2));
 
   let ast = await mimo.parse(tokens);
 
@@ -33,3 +34,4 @@ let save = (filename, text) => {
 
 run("./test/mimo/fibonacci.mimo");
 run("./test/mimo/add.mimo");
+run("./test/mimo/all.mimo");

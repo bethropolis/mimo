@@ -8,7 +8,7 @@
 		<PaneGroup direction="vertical">
 			<Pane defaultSize={50}><slot name="mimo"></slot></Pane>
 			<PaneResizer class="relative flex h-1 items-center justify-center bg-background">
-				<div class="z-10 flex h-2 w-4 items-center justify-center rounded-sm border bg-brand">
+				<div class="z-10 flex h-2 w-4 items-center justify-center rounded-sm bg-brand">
 					<Resize class="size-4 text-black  rotate-90" weight="bold" />
 				</div>
 			</PaneResizer>
@@ -16,7 +16,7 @@
 		</PaneGroup>
 	</Pane>
 	<PaneResizer class="relative flex w-1 items-center justify-center bg-background">
-		<div class="z-10 flex h-4 w-2 items-center justify-center rounded-sm border bg-brand">
+		<div class="z-10 flex h-4 w-2 items-center justify-center rounded-sm bg-brand">
 			<Resize class="size-4 text-black" weight="bold" />
 		</div>
 	</PaneResizer>
@@ -24,7 +24,7 @@
 		<PaneGroup direction="vertical">
 			<Pane defaultSize={50}><slot name="ast"></slot></Pane>
 			<PaneResizer class="relative flex h-1 items-center justify-center bg-background">
-				<div class="z-10 flex h-2 w-4 items-center justify-center rounded-sm border bg-brand">
+				<div class="z-10 flex h-2 w-4 items-center justify-center rounded-sm bg-brand">
 					<Resize class="size-4 text-black rotate-90" weight="bold" />
 				</div>
 			</PaneResizer>

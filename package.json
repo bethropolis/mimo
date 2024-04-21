@@ -1,6 +1,6 @@
 {
   "name": "mimo-lang",
-  "version": "1.0.9",
+  "version": "1.1.1",
   "description": "A programming language made in javascript mostly for learning purposes.",
   "keywords": [
     "programing language"
@@ -16,13 +16,15 @@
   "scripts": {
     "mimo": "bun cli.js",
     "dev": "bun index.js",
-    "test": "bun test/index.js"
+    "test": "node test/index.js",
+    "build": "vite build"
   },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "dependencies": {
-    "js-beautify": "^1.15.1"
+    "js-beautify": "^1.15.1",
+    "vite": "^5.2.10"
   },
   "repository": {
     "type": "git",

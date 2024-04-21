@@ -1,9 +1,11 @@
 <script>
+	import Side from '$lib/components/icons/side.svelte';
 	import Prism from '$lib/js/mimo-definition.js';
 	import 'prismjs/themes/prism-tomorrow.min.css';
 
 	// Add your programming language syntax here
-	const languageSyntax = `function add(a,b)
+	const languageSyntax = `
+function add(a,b)
   return + a b
 endfunction
 
@@ -38,6 +40,12 @@ show result`;
 		</div>
 	</div>
 
+	<label
+		for="my-drawer"
+		class="fixed bottom-8 left-8 bg-base-300 rounded-full p-3 shadow-md cursor-pointer transition-transform duration-300 hover:scale-105"
+	>
+		<Side class="h-6 w-6 text-gray-200" />
+	</label>
 	<footer class="absolute w-full bottom-0 py-4">
 		made with 💜 <a href="https://bethropolis.github.io/" class="text-blue-300" target="_blank"
 			>bethropolis</a
