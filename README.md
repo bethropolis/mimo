@@ -1,15 +1,68 @@
 # mimo
 
-To install dependencies:
+[![GitHub release](https://img.shields.io/github/release/bethropolis/mimo?include_prereleases=&sort=semver&color=blue)](https://github.com/bethropolis/mimo/releases/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+[![Deploy to GitHub Pages](https://github.com/bethropolis/mimo/actions/workflows/deploy.yml/badge.svg)](https://github.com/bethropolis/mimo/actions/workflows/deploy.yml)
 
-```bash
-bun install
+a simple programming language written in js.
+
+## Instalation
+
+```sh
+# install globally
+npm install -g mimo-lang
+
+# install project scope
+npm install mimo-lang
+
 ```
 
-To run:
+### Global cli commands
+
+the folowing are available commands and flags for the cli tool.
 
 ```bash
-bun run index.js
+$ mimo [FILENAME] [-o|--output] [-t|--time] [-h|--help] [-q|--quiet] [-d|--debug] [-v|--version]
 ```
 
-This project was created using `bun init` in bun v1.0.35. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+example `mimo exampleFile.mimo`
+
+### Library usage
+
+example:
+
+```js
+import Mimo from "../index.js";
+
+let mimo = new Mimo();
+
+let code = /* your code here*/
+
+mimo.run(code);
+```
+
+## Language syntax:
+
+```
+function add(a,b)
+  return + a b
+endfunction
+
+set x 5
+set y 2
+
+call add(x,y) -> result
+show result
+```
+
+more example id the [test directory]('./test/mimo/')
+
+
+## About
+this is just a simple language i created to learn more about how programing languages work.
+contributions are welcome.
+
+## License
+Released under [MIT](./LICENSE)
+
+happy coding 💜
