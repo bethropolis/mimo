@@ -20,7 +20,7 @@ show result`;
 	const highlightedCode = Prism.highlight(languageSyntax, Prism.languages.mimo, 'mimo');
 </script>
 
-<main class="w-screen h-screen">
+<main class="w-screen">
 	<div class="flex justify-center pt-4">
 		<img src="{base}/web/mimo.png" alt="" class="w-32 h-32" />
 	</div>
