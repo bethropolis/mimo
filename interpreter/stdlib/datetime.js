@@ -84,6 +84,79 @@ const dtFormat = new BuiltinFunction("format",
     2
 );
 
+const dtAdd = new BuiltinFunction("add",
+    (args, interpreter, callNode) => {
+        const [dateObj, amount, unit] = args;
+        expectDate(dateObj, "datetime.add", interpreter, callNode);
+        if (typeof amount !== 'number') {
+            throw interpreter.errorHandler.createRuntimeError(
+                `datetime.add() expects a numeric amount. Got '${typeof amount}'.`,
+                callNode, 'TYPE001', 'Provide a numeric amount to add.'
+            );
+        }
+        if (typeof unit !== 'string') {
+            throw interpreter.errorHandler.createRuntimeError(
+                `datetime.add() expects a string unit. Got '${typeof unit}'.`,
+                callNode, 'TYPE001', 'Provide a string unit (e.g., "days").'
+            );
+        }
+
+        const newDate = new Date(dateObj.getTime());
+        switch (unit.toLowerCase()) {
+            case 'years': newDate.setFullYear(newDate.getFullYear() + amount); break;
+            case 'months': newDate.setMonth(newDate.getMonth() + amount); break;
+            case 'days': newDate.setDate(newDate.getDate() + amount); break;
+            case 'hours': newDate.setHours(newDate.getHours() + amount); break;
+            case 'minutes': newDate.setMinutes(newDate.getMinutes() + amount); break;
+            case 'seconds': newDate.setSeconds(newDate.getSeconds() + amount); break;
+            default:
+                throw interpreter.errorHandler.createRuntimeError(
+                    `Unknown unit '${unit}' for datetime.add().`,
+                    callNode, 'ARG001', 'Supported units: years, months, days, hours, minutes, seconds.'
+                );
+        }
+        return newDate;
+    },
+    3
+);
+
+const dtSubtract = new BuiltinFunction("subtract",
+    (args, interpreter, callNode) => {
+        const [dateObj, amount, unit] = args;
+        expectDate(dateObj, "datetime.subtract", interpreter, callNode);
+        if (typeof amount !== 'number') {
+            throw interpreter.errorHandler.createRuntimeError(
+                `datetime.subtract() expects a numeric amount. Got '${typeof amount}'.`,
+                callNode, 'TYPE001', 'Provide a numeric amount to subtract.'
+            );
+        }
+        if (typeof unit !== 'string') {
+            throw interpreter.errorHandler.createRuntimeError(
+                `datetime.subtract() expects a string unit. Got '${typeof unit}'.`,
+                callNode, 'TYPE001', 'Provide a string unit (e.g., "days").'
+            );
+        }
+
+        const newDate = new Date(dateObj.getTime());
+        switch (unit.toLowerCase()) {
+            case 'years': newDate.setFullYear(newDate.getFullYear() - amount); break;
+            case 'months': newDate.setMonth(newDate.getMonth() - amount); break;
+            case 'days': newDate.setDate(newDate.getDate() - amount); break;
+            case 'hours': newDate.setHours(newDate.getHours() - amount); break;
+            case 'minutes': newDate.setMinutes(newDate.getMinutes() - amount); break;
+            case 'seconds': newDate.setSeconds(newDate.getSeconds() - amount); break;
+            default:
+                throw interpreter.errorHandler.createRuntimeError(
+                    `Unknown unit '${unit}' for datetime.subtract().`,
+                    callNode, 'ARG001', 'Supported units: years, months, days, hours, minutes, seconds.'
+                );
+        }
+        return newDate;
+    },
+    3
+);
+
+
 
 // --- Module Export ---
 export const datetimeModule = {
@@ -92,4 +165,6 @@ export const datetimeModule = {
     from_timestamp: dtFromTimestamp,
     to_iso_string: dtToISOString,
     format: dtFormat,
+    add: dtAdd,
+    subtract: dtSubtract,
 };

@@ -6,6 +6,8 @@
  */
 
 import { initializeBuiltins } from "./coreBuiltins.js";
+import { initializeArrayModule } from "./stdlib/array.js";
+
 import { ErrorHandler } from "./ErrorHandler.js";
 import { MimoError } from "./MimoError.js";
 import { ExpressionEvaluator } from "./ExpressionEvaluator.js";
@@ -35,6 +37,8 @@ export class Interpreter {
     this.callStack = [];
 
     initializeBuiltins(this.globalEnv);
+    initializeArrayModule(this.globalEnv);
+
   }
 
   /**

@@ -36,7 +36,22 @@ export const arrayReverse = new BuiltinFunction("reverse",
     1
 );
 
+export const arrayShuffle = new BuiltinFunction("shuffle",
+    (args, interpreter, callNode) => {
+        const [arr] = args;
+        expectArray(arr, "shuffle", interpreter, callNode, 1);
+        const newArray = [...arr];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    },
+    1
+);
+
 export const arrayConcat = new BuiltinFunction("concat",
+
     (args, interpreter, callNode) => {
         if (args.length === 0) {
             return [];

@@ -26,8 +26,16 @@ import {
 import {
     arraySort,
     arrayReverse,
+    arrayShuffle,
     arrayConcat
 } from './array/transformationFunctions.js';
+
+import {
+    arrayUnique,
+    arrayIntersection,
+    arrayUnion,
+    arrayDifference
+} from './array/setFunctions.js';
 
 // --- Module Definition ---
 export const arrayModule = {
@@ -46,8 +54,14 @@ export const arrayModule = {
     is_empty: arrayIsEmpty,
     sort: arraySort,
     reverse: arrayReverse,
+    shuffle: arrayShuffle,
     concat: arrayConcat,
+    unique: arrayUnique,
+    intersection: arrayIntersection,
+    union: arrayUnion,
+    difference: arrayDifference,
 };
+
 
 // --- Initialize Function ---
 export function initializeArrayModule(environment) {

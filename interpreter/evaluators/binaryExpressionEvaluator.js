@@ -3,9 +3,10 @@ import { isTruthy } from '../Utils.js';
 export function evaluateBinaryExpression(interpreter, node) {
     const left = interpreter.visitNode(node.left);
     const right = interpreter.visitNode(node.right);
-    
+
     // Type checking for arithmetic operations
     const isNumericOp = ['+', '-', '*', '/', '%', '<', '>', '<=', '>='].includes(node.operator);
+
     if (isNumericOp && (typeof left !== 'number' || typeof right !== 'number')) {
         // Special case: string concatenation with '+'
         if (node.operator === '+' && (typeof left === 'string' || typeof right === 'string')) {
@@ -18,7 +19,7 @@ export function evaluateBinaryExpression(interpreter, node) {
             `Ensure both operands for '${node.operator}' are numbers.`
         );
     }
-    
+
     switch (node.operator) {
         case '+':
             return left + right;
@@ -50,14 +51,27 @@ export function evaluateBinaryExpression(interpreter, node) {
             return left > right;
         case '<':
             return left < right;
+        case '>=':
+            return left >= right;
+        case '<=':
+            return left <= right;
         case '=':
+        case '==':
+            return left === right;
+        case '===':
             return left === right;
         case '!':
+        case '!=':
+            return left !== right;
+        case '!==':
             return left !== right;
         case 'and':
+        case '&&':
             return isTruthy(left) && isTruthy(right);
         case 'or':
+        case '||':
             return isTruthy(left) || isTruthy(right);
+
         default:
             throw interpreter.errorHandler.createRuntimeError(
                 `Unknown binary operator: '${node.operator}'.`,

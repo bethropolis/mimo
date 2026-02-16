@@ -56,6 +56,17 @@ const strToLower = new BuiltinFunction("to_lower", (args, interpreter, callNode)
     return args[0].toLowerCase();
 }, 1);
 
+const strToTitleCase = new BuiltinFunction("to_title_case", (args, interpreter, callNode) => {
+    expectString(args[0], "to_title_case", interpreter, callNode, 1);
+    return args[0].toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}, 1);
+
+const strCapitalize = new BuiltinFunction("capitalize", (args, interpreter, callNode) => {
+    expectString(args[0], "capitalize", interpreter, callNode, 1);
+    return args[0].charAt(0).toUpperCase() + args[0].slice(1);
+}, 1);
+
+
 // TODO: Consider 'to_title_case' or 'capitalize' later
 
 // Trimming
@@ -190,9 +201,9 @@ const strReplaceAll = new BuiltinFunction("replace_all", (args, interpreter, cal
         );
     }
     if (typeof String.prototype.replaceAll === 'function') { // Modern JS
-         return args[0].replaceAll(args[1], args[2]);
+        return args[0].replaceAll(args[1], args[2]);
     } else { // Fallback for older environments (simple string replacement)
-         return args[0].split(args[1]).join(args[2]);
+        return args[0].split(args[1]).join(args[2]);
     }
 }, 3);
 
@@ -204,9 +215,9 @@ const strRepeat = new BuiltinFunction("repeat", (args, interpreter, callNode) =>
 }, 2); // string, count
 
 const strCharAt = new BuiltinFunction("char_at", (args, interpreter, callNode) => {
-     expectString(args[0], "char_at", interpreter, callNode, 1);
-     expectNumber(args[1], "char_at", interpreter, callNode, 2);
-     return args[0].charAt(args[1]);
+    expectString(args[0], "char_at", interpreter, callNode, 1);
+    expectNumber(args[1], "char_at", interpreter, callNode, 2);
+    return args[0].charAt(args[1]);
 }, 2); // string, index
 
 // `len` is already a global built-in.
@@ -225,11 +236,14 @@ export const stringModuleExports = {
     ends_with: strEndsWith,
     index_of: strIndexOf,
     last_index_of: strLastIndexOf,
-    substring: strSubstring, 
+    substring: strSubstring,
     slice: strSlice,
-    split: strSplit,        
-    replace: strReplace,     
+    split: strSplit,
+    replace: strReplace,
     replace_all: strReplaceAll,
     repeat: strRepeat,
     char_at: strCharAt,
+    to_title_case: strToTitleCase,
+    capitalize: strCapitalize,
 };
+

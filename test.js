@@ -10,7 +10,7 @@ function findTestFile(fileName) {
 
     const withExt = directPath.endsWith('.mimo') ? '' : '.mimo';
     if (fs.existsSync(`${directPath}${withExt}`)) return `${directPath}${withExt}`;
-    
+
     const testSourcePath = path.resolve(process.cwd(), 'test/source', fileName);
     if (fs.existsSync(testSourcePath)) return testSourcePath;
     if (fs.existsSync(`${testSourcePath}.mimo`)) return `${testSourcePath}.mimo`;
@@ -21,14 +21,14 @@ function findTestFile(fileName) {
 async function runTest() {
     const testName = process.argv[2] || 'all';
     const filePath = findTestFile(testName);
-    
+
     if (!filePath) {
         console.error(`Error: Test file "${testName}" not found.`);
         return;
     }
 
     console.log(`\n=== Running Test: ${path.basename(filePath)} ===\n`);
-    
+
     const source = fs.readFileSync(filePath, 'utf-8');
     const mimo = new Mimo(adapter);
 
@@ -36,10 +36,11 @@ async function runTest() {
         mimo.run(source, filePath);
         console.log(`\n=== Test Passed: ${path.basename(filePath)} ===\n`);
     } catch (err) {
-        console.error(err.message); // High-level API throws pre-formatted string
+        console.error(err.message || err); // Show error even if it's a string
         console.error(`\n=== Test FAILED: ${path.basename(filePath)} ===\n`);
         process.exit(1);
     }
 }
+
 
 runTest();

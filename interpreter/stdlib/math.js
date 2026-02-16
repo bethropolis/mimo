@@ -5,9 +5,20 @@ import { ErrorHandler } from '../ErrorHandler.js';
 const MIMO_PI = Math.PI;
 const MIMO_E = Math.E;
 
+// --- Seeded Randomness ---
+let _currentSeed = null;
+
+function seededRandom() {
+    if (_currentSeed === null) return Math.random();
+    // Park-Miller LCG
+    _currentSeed = (_currentSeed * 16807) % 2147483647;
+    return (_currentSeed - 1) / 2147483646;
+}
+
+
 // --- Helper for type checking ---
 // Helper for type checking --- Updated
-function expectNumber(arg, funcName, interpreter, callNode, argPosition = 1) { 
+function expectNumber(arg, funcName, interpreter, callNode, argPosition = 1) {
     if (typeof arg !== 'number') {
         throw interpreter.errorHandler.createRuntimeError(
             `${funcName}() expects a number as argument ${argPosition}. Got '${typeof arg}'.`,
@@ -18,9 +29,9 @@ function expectNumber(arg, funcName, interpreter, callNode, argPosition = 1) {
     }
 }
 
-function expectNumbers(args, funcName, expectedCount, interpreter, callNode) { 
+function expectNumbers(args, funcName, expectedCount, interpreter, callNode) {
     if (args.length < expectedCount) {
-         throw interpreter.errorHandler.createRuntimeError(
+        throw interpreter.errorHandler.createRuntimeError(
             `${funcName}() expects at least ${expectedCount} arguments, got ${args.length}.`,
             callNode, // Pass callNode
             'BUILTIN001',
@@ -160,10 +171,25 @@ const mathMin = new BuiltinFunction("min", (args, interpreter, callNode) => {
     return Math.min(...args);
 }, [1, Infinity]); // Arity: 1 to many
 
- // random
- const mathRandom = new BuiltinFunction("random", (args, interpreter, callNode) => {
-    return Math.random();
- }, 0); // No arguments, returns a random number between 0 and 1
+// random
+const mathRandom = new BuiltinFunction("random", (args, interpreter, callNode) => {
+    return seededRandom();
+}, 0); // No arguments, returns a random number between 0 and 1
+
+const mathSeed = new BuiltinFunction("seed", (args, interpreter, callNode) => {
+    expectNumber(args[0], "seed", interpreter, callNode, 1);
+    _currentSeed = Math.abs(Math.floor(args[0])) % 2147483647;
+    if (_currentSeed === 0) _currentSeed = 1; // Seed cannot be 0 for this LCG
+    return null;
+}, 1);
+
+const mathRandInt = new BuiltinFunction("randint", (args, interpreter, callNode) => {
+    expectNumbers(args, "randint", 2, interpreter, callNode);
+    const min = Math.ceil(args[0]);
+    const max = Math.floor(args[1]);
+    return Math.floor(seededRandom() * (max - min + 1)) + min;
+}, 2);
+
 
 
 
@@ -192,4 +218,7 @@ export const mathModuleExports = {
     max: mathMax,
     min: mathMin,
     random: mathRandom,
+    seed: mathSeed,
+    randint: mathRandInt,
 };
+

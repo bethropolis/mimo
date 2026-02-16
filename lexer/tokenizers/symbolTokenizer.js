@@ -19,11 +19,20 @@ export const SYMBOLS = {
   ">": TokenType.Operator,
   "<": TokenType.Operator,
   "=": TokenType.Operator,
+  "==": TokenType.Operator,
+  "===": TokenType.Operator,
   "!": TokenType.Operator,
+  "!=": TokenType.Operator,
+  "!==": TokenType.Operator,
+  ">=": TokenType.Operator,
+  "<=": TokenType.Operator,
+  "&&": TokenType.Operator,
+  "||": TokenType.Operator,
   "->": TokenType.Operator, // Arrow operator
+
   "...": TokenType.Spread, // Spread operator
   "..": TokenType.Range, // Range operator
-  ":": TokenType.Colon, 
+  ":": TokenType.Colon,
 };
 
 
