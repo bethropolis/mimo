@@ -1,0 +1,84 @@
+// Test null coalescing operator (left ?? right) -> now using `coalesce` builtin
+
+// Basic null coalescing with null value
+set user_name null
+set display_name call coalesce(user_name, "Anonymous")
+show display_name  // Should show "Anonymous"
+
+// Null coalescing with non-null value
+set actual_name "Alice"
+set name call coalesce(actual_name, "Default")
+show name  // Should show "Alice"
+
+// Null coalescing with empty string (should NOT coalesce)
+set empty_string ""
+set result call coalesce(empty_string, "fallback")
+show result  // Should show "" (empty string is not null)
+
+// Null coalescing with zero (should NOT coalesce)
+set zero_value 0
+set number_result call coalesce(zero_value, 42)
+show number_result  // Should show 0 (zero is not null)
+
+// Null coalescing with false (should NOT coalesce)
+set false_value false
+set bool_result call coalesce(false_value, true)
+show bool_result  // Should show false (false is not null)
+
+// Chained null coalescing
+set first_option null
+set second_option null
+set third_option "final value"
+set chained_result call coalesce(first_option, call coalesce(second_option, third_option))
+show chained_result  // Should show "final value"
+
+// Null coalescing with object properties
+set config { timeout: null, retries: 5 }
+set timeout_value call coalesce(config.timeout, 30)
+set retries_value call coalesce(config.retries, 3)
+show timeout_value  // Should show 30
+show retries_value  // Should show 5
+
+// Null coalescing with array access
+set data [null, "valid", null]
+set first_item call coalesce(data[0], "default")
+set second_item call coalesce(data[1], "default")
+show first_item   // Should show "default"
+show second_item  // Should show "valid"
+
+// Null coalescing with function calls
+set numbers [1, 2, 3]
+call len(numbers) -> numbers_length
+set length_or_zero call coalesce(numbers_length, 0)
+show length_or_zero  // Should show 3
+
+// Complex expressions with null coalescing
+set x null
+set y 10
+// The original `(+ x y)` would error. Using safe_calc now.
+set safe_calc call coalesce(x, 5)
+set final_calc (+ safe_calc y)
+show final_calc  // Should show 15
+
+// Null coalescing in ternary expressions
+set user null
+set role "admin"
+set effective_role call if_else(= user null, call coalesce(role, "guest"), user)
+show effective_role  // Should show "admin"
+
+// Null coalescing with nested objects
+set settings { db: { host: null, port: 5432 } }
+set db_host call coalesce(settings.db.host, "localhost")
+set db_port call coalesce(settings.db.port, 3306)
+show db_host  // Should show "localhost"
+show db_port  // Should show 5432
+
+// Using null coalescing for default parameters simulation
+set username null
+set password null
+set login_user call coalesce(username, "guest")
+set login_pass call coalesce(password, "default")
+show login_user  // Should show "guest"
+show login_pass  // Should show "default"
+
+show "All null coalescing operator tests completed"

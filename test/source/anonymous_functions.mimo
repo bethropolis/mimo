@@ -1,0 +1,141 @@
+// Test anonymous functions functionality
+
+// Test 1: Basic anonymous function assignment
+show "=== Test 1: Basic anonymous function ==="
+set add function(a, b)
+    return + a b
+end
+
+call add(5, 3) -> result1
+show result1
+
+// Test 2: Anonymous function with default parameters
+show "=== Test 2: Anonymous function with defaults ==="
+set greet function(name: "World", greeting: "Hello")
+    return + greeting + ", " name
+end
+
+call greet() -> greeting1
+call greet("Alice") -> greeting2
+call greet("Bob", "Hi") -> greeting3
+
+show greeting1
+show greeting2
+show greeting3
+
+// Test 3: Anonymous function with variadic parameters
+show "=== Test 3: Anonymous function with variadic ==="
+set sum function(...numbers)
+    set total 0
+    for n in numbers
+        set total + total n
+    end
+    return total
+end
+
+call sum() -> sum1
+call sum(1, 2, 3) -> sum2
+call sum(5, 10, 15, 20) -> sum3
+
+show sum1
+show sum2
+show sum3
+
+// Test 4: Mixed parameters in anonymous function
+show "=== Test 4: Mixed parameters ==="
+set process function(required, optional: 10, ...extras)
+    call len(extras) -> extraCount
+    return + required + optional extraCount
+end
+
+call process(5) -> mixed1
+call process(3, 7) -> mixed2
+call process(1, 2, 10, 20) -> mixed3
+
+show mixed1
+show mixed2
+show mixed3
+
+// Test 5: Anonymous functions in variables and expressions
+show "=== Test 5: Anonymous functions in expressions ==="
+set multiply function(x, y: 2)
+    return * x y
+end
+
+set divide function(a, b)
+    return / a b
+end
+
+call multiply(6) -> mult1
+call divide(20, 4) -> div1
+
+show mult1
+show div1
+
+// Test 6: Anonymous functions with conditionals
+show "=== Test 6: Anonymous functions with conditionals ==="
+set compare function(a, b)
+    if > a b
+        return "greater"
+    end
+    if < a b
+        return "less" 
+    end
+    return "equal"
+end
+
+call compare(5, 3) -> comp1
+call compare(2, 8) -> comp2
+call compare(4, 4) -> comp3
+
+show comp1
+show comp2
+show comp3
+
+// Test 7: Anonymous functions with arrays
+show "=== Test 7: Anonymous functions with arrays ==="
+set getFirst function(arr: [])
+    call len(arr) -> length
+    if = length 0
+        return "empty"
+    end
+    return arr[0]
+end
+
+set joinStrings function(...strings)
+    set result ""
+    for str in strings
+        set result + result str
+    end
+    return result
+end
+
+call getFirst() -> first1
+call getFirst([10, 20, 30]) -> first2
+call joinStrings("Hello", " ", "World") -> joined
+
+show first1
+show first2
+show joined
+
+// Test 8: Nested anonymous functions
+show "=== Test 8: Nested anonymous functions ==="
+set createCounter function(start: 0)
+    set count start
+    set increment function(step: 1)
+        set count + count step
+        return count
+    end
+    return increment
+end
+
+call createCounter() -> counter1
+call counter1() -> count1
+call counter1(5) -> count2
+
+call createCounter(10) -> counter2
+call counter2(3) -> count3
+
+show count1
+show count2
+show count3

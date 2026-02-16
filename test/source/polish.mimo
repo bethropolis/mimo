@@ -1,0 +1,79 @@
+show "=== Polish Notation Comprehensive Test ==="
+
+show "1. Basic arithmetic operations:"
+set add_result + 5 3
+show add_result
+show "Expected: 8"
+
+set sub_result - 10 4
+show sub_result
+show "Expected: 6"
+
+set mul_result * 7 6
+show mul_result
+show "Expected: 42"
+
+set div_result / 15 3
+show div_result
+show "Expected: 5"
+
+show "2. Nested expressions without parentheses:"
+set nested1 + * 2 3 4
+show nested1
+show "Expected: 10 (2*3 + 4)"
+
+set nested2 * + 2 3 4
+show nested2
+show "Expected: 20 ((2+3) * 4)"
+
+set nested3 - * 5 4 / 8 2
+show nested3
+show "Expected: 16 (5*4 - 8/2)"
+
+show "3. Expressions with parentheses for grouping:"
+set paren1 * 2 (+ 3 4)
+show paren1
+show "Expected: 14 (2 * (3+4))"
+
+set paren2 + (* 3 4) (* 2 5)
+show paren2
+show "Expected: 22 ((3*4) + (2*5))"
+
+set paren3 / (+ 8 2) (- 7 2)
+show paren3
+show "Expected: 2 ((8+2) / (7-2))"
+
+show "4. Complex nested expressions:"
+set complex1 + * (+ 2 3) (- 8 3) / 20 4
+show complex1
+show "Expected: 30 ((2+3)*(8-3) + 20/4)"
+
+set complex2 * (+ 1 2) (+ (* 3 4) (/ 10 2))
+show complex2
+show "Expected: 51 ((1+2) * ((3*4) + (10/2)))"
+
+show "5. Comparison operators in polish notation:"
+set gt_result > 5 3
+show gt_result
+show "Expected: true"
+
+set eq_result = 4 4
+show eq_result
+show "Expected: true"
+
+set lt_result < 2 7
+show lt_result
+show "Expected: true"
+
+show "6. Mixed operations with variables:"
+set x 5
+set y 3
+set mixed1 + * x 2 y
+show mixed1
+show "Expected: 13 (5*2 + 3)"
+
+set mixed2 * (+ x y) (- x y)
+show mixed2
+show "Expected: 16 ((5+3) * (5-3))"
+
+show "=== Polish Notation Test Complete ==="

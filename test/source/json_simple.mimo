@@ -1,0 +1,14 @@
+show "=== Simple JSON Test ==="
+
+show "Testing json module import..."
+import "json" as json
+
+show "Module imported successfully"
+
+show "Testing json.parse..."
+set simple_json "[1, 2, 3]"
+call json.parse(simple_json) -> result
+show "Parse result:"
+show result
+
+show "=== Test Complete ==="

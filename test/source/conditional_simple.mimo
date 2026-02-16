@@ -1,0 +1,88 @@
+// Simple test for conditional expressions - precedence and edge cases
+// Now using `if_else`, `coalesce`, `get_property_safe` builtins
+
+// Basic ternary operator
+set x 5
+set result call if_else(> x 3, "big", "small")
+show result
+
+// Ternary with false condition
+set y 1
+set result2 call if_else(> y 3, "big", "small")
+show result2
+
+// Basic null coalescing
+set a null
+set b call coalesce(a, "default")
+show b
+
+// Null coalescing with non-null
+set c "value"
+set d call coalesce(c, "default")
+show d
+
+// Null coalescing edge cases - should NOT coalesce
+set empty ""
+set zero 0
+set false_val false
+show call coalesce(empty, "fallback")
+show call coalesce(zero, 42)
+show call coalesce(false_val, true)
+
+// Basic safe navigation
+set obj null
+set prop call get_property_safe(obj, "property")
+show prop
+
+// Safe navigation with valid object
+set valid { name: "test" }
+set name call get_property_safe(valid, "name")
+show name
+
+// Safe navigation with missing property
+set missing call get_property_safe(valid, "missing")
+show missing
+
+// Precedence test: ternary has lower precedence than null coalescing
+set val null
+set result3 call if_else(call coalesce(val, "default"), "has value", "no value")
+show result3
+
+// Chained null coalescing
+set first null
+set second null
+set third "found"
+set chained call coalesce(first, call coalesce(second, third))
+show chained
+
+// Chained safe navigation
+set deep { level1: { level2: { value: "deep" } } }
+set deep_val call get_property_safe(call get_property_safe(call get_property_safe(deep, "level1"), "level2"), "value")
+show deep_val
+
+// Chained safe navigation with null
+set broken { level1: null }
+set broken_val call get_property_safe(call get_property_safe(broken, "level1"), "level2") // will be null, and then get_property_safe(null, "value") will also be null
+show broken_val
+
+// Combining ternary and null coalescing
+set input null
+set processed call coalesce(input, "none")
+set message call if_else(= processed "none", "empty input", processed)
+show message
+
+// Combining safe navigation and null coalescing
+set config null
+set timeout call coalesce(call get_property_safe(config, "timeout"), 30)
+show timeout
+
+// Truthiness in ternary
+show call if_else(true, "yes", "no")
+show call if_else(false, "yes", "no")
+show call if_else(1, "yes", "no")
+show call if_else(0, "yes", "no")
+show call if_else("text", "yes", "no")
+show call if_else("", "yes", "no")
+show call if_else(null, "yes", "no")
+
+show "Conditional expressions test complete"

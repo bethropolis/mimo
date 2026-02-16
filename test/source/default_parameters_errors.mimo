@@ -1,0 +1,39 @@
+// Test error messages for default parameters
+
+// Test 1: Too many arguments
+function twoParams(x: 10, y: 20)
+    return + x y
+end
+
+show "=== Test 1: Too many arguments ==="
+try
+    call twoParams(1, 2, 3) -> result
+catch e
+    show "Error caught correctly"
+end
+
+// Test 2: Too few required arguments
+function requiredAndOptional(required, optional: 42)
+    return + required optional
+end
+
+show "=== Test 2: Too few required arguments ==="
+try
+    call requiredAndOptional() -> result
+catch e
+    show "Error caught correctly"
+end
+
+// Test 3: Valid calls should work
+show "=== Test 3: Valid calls ==="
+call twoParams() -> result1
+call twoParams(5) -> result2
+call twoParams(1, 3) -> result3
+show result1
+show result2
+show result3
+
+call requiredAndOptional(10) -> result4
+call requiredAndOptional(5, 15) -> result5
+show result4
+show result5

@@ -1,0 +1,45 @@
+// Math utility module for testing
+export const PI 3.14159
+export const E 2.71828
+
+const v 105
+
+export function add(a, b)
+    return + a b 
+end
+
+export function subtract(a, b)
+    return - a b
+end
+
+export function multiply(a, b)
+    return * a b
+end
+
+export function divide(a, b)
+    if (= b 0)
+        throw "Division by zero"
+    end
+    return / a b
+end
+
+export function circle_area(radius)
+    return * PI (* radius radius)
+end
+
+export function square(x)
+    return * x x
+end
+
+export function power(base, exponent)
+    set result 1
+    set i 0
+    while (< i exponent)
+        set result * result base
+        set i + i 1
+    end
+    return result
+end
+
+global math_loaded true
+show "Math utils module loaded"

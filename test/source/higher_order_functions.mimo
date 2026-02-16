@@ -1,0 +1,245 @@
+// Test higher-order functions functionality
+
+// Test 1: Functions that take other functions as arguments
+show "=== Test 1: Functions taking functions as arguments ==="
+
+function apply(func, value)
+    call func(value) -> temp
+    return temp
+end
+
+set double function(x)
+    return * x 2
+end
+
+set square function(x)
+    return * x x
+end
+
+call apply(double, 5) -> result1
+call apply(square, 4) -> result2
+
+show result1
+show result2
+
+// Test 2: Functions that return functions
+show "=== Test 2: Functions returning functions ==="
+
+function makeAdder(n)
+    return function(x)
+        return + x n
+    end
+end
+
+function makeMultiplier(factor: 1)
+    return function(value: 1)
+        return * value factor
+    end
+end
+
+call makeAdder(10) -> add10
+call add10(5) -> added
+call makeMultiplier(3) -> times3
+call times3(7) -> multiplied
+
+show added
+show multiplied
+
+// Test 3: Map-like function
+show "=== Test 3: Map-like higher-order function ==="
+
+function mapArray(func, arr)
+    set result []
+    set i 0
+    call len(arr) -> length
+    while < i length
+        call func(arr[i]) -> transformed
+        call push(result, transformed)
+        set i + i 1
+    end
+    return result
+end
+
+set increment function(x)
+    return + x 1
+end
+
+call mapArray(increment, [1, 2, 3, 4]) -> mapped
+
+show mapped
+
+// Test 4: Filter-like function
+show "=== Test 4: Filter-like higher-order function ==="
+
+function filterArray(predicate, arr)
+    set result []
+    for item in arr
+        call predicate(item) -> keep
+        if keep
+            call push(result, item)
+        end
+    end
+    return result
+end
+
+set isEven function(x)
+    return = 0 % x 2
+end
+
+set isPositive function(x)
+    return > x 0
+end
+
+call filterArray(isEven, [1, 2, 3, 4, 5, 6]) -> evens
+call filterArray(isPositive, [2, 1, 0, 1, 2]) -> positives
+
+show evens
+show positives
+
+// Test 5: Reduce-like function
+show "=== Test 5: Reduce-like higher-order function ==="
+
+function reduceArray(func, arr, initial)
+    set accumulator initial
+    for item in arr
+        call func(accumulator, item) -> accumulator
+    end
+    return accumulator
+end
+
+set add function(a, b)
+    return + a b
+end
+
+set multiply function(a, b)
+    return * a b
+end
+
+call reduceArray(add, [1, 2, 3, 4], 0) -> sum
+call reduceArray(multiply, [2, 3, 4], 1) -> product
+
+show sum
+show product
+
+// Test 6: Function composition
+show "=== Test 6: Function composition ==="
+
+function compose(f, g)
+    return function(x)
+        call g(x) -> gResult
+        call f(gResult) -> temp
+        return temp
+    end
+end
+
+set addOne function(x)
+    return + x 1
+end
+
+set timesTwo function(x)
+    return * x 2
+end
+
+call compose(timesTwo, addOne) -> composedFunc
+call composedFunc(5) -> composed
+
+show composed
+
+// Test 7: Curry-like function
+show "=== Test 7: Curry-like function ==="
+
+function curry(func, firstArg)
+    return function(secondArg)
+        call func(firstArg, secondArg) -> temp
+        return temp
+    end
+end
+
+set subtract function(a, b)
+    return - a b
+end
+
+call curry(subtract, 10) -> subtractFrom10
+call subtractFrom10(3) -> curried
+
+show curried
+
+// Test 8: Higher-order with variadic functions
+show "=== Test 8: Higher-order with variadic functions ==="
+
+function applyToAll(func, ...values)
+    set results []
+    for value in values
+        call func(value) -> result
+        call push(results, result)
+    end
+    return results
+end
+
+set triple function(x)
+    return * x 3
+end
+
+call applyToAll(triple, 1, 2, 3, 4) -> tripled
+
+show tripled
+
+// Test 9: Complex nested higher-order functions
+show "=== Test 9: Complex nested functions ==="
+
+function createProcessor(operation)
+    return function(data, ...processors)
+        set result data
+        for processor in processors
+            call processor(result) -> result
+        end
+        call operation(result) -> result
+        return result
+    end
+end
+
+set finalize function(x)
+    return + x 100
+end
+
+set step1 function(x)
+    return * x 2
+end
+
+set step2 function(x)
+    return + x 5
+end
+
+call createProcessor(finalize) -> processor
+call processor(10, step1, step2) -> processed
+
+show processed
+
+// Test 10: Higher-order with default and variadic parameters
+show "=== Test 10: Mixed parameter types ==="
+
+function executeChain(value, defaultOp: null, ...operations)
+    set result value
+
+    if defaultOp
+        call defaultOp(result) -> result
+    end
+
+    for op in operations
+        call op(result) -> result
+    end
+
+    return result
+end
+
+set defaultDouble function(x)
+    return * x 2
+end
+
+call executeChain(5) -> chain1
+call executeChain(3, defaultDouble) -> chain2
+call executeChain(2, defaultDouble, addOne, timesTwo) -> chain3
+
+show chain1
+show chain2
+show chain3

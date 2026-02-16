@@ -1,0 +1,60 @@
+show "=== Error Improvements Test ==="
+
+show "1. Testing division by zero with enhanced error:"
+try
+    set result / 10 0
+catch err
+    show + "Caught: " err
+end
+
+show "2. Testing undefined variable with suggestion:"
+try
+    show undefined_variable
+catch err
+    show + "Caught: " err
+end
+
+show "3. Testing function argument mismatch:"
+function test_args(a, b, c)
+    return + + a b c
+end
+
+try
+    call test_args(1, 2)
+catch err
+    show + "Caught: " err
+end
+
+show "4. Testing array index out of bounds:"
+try
+    set arr [1, 2, 3]
+    show arr[10]
+catch err
+    show + "Caught: " err
+end
+
+show "5. Testing const assignment:"
+try
+    const READONLY 42
+    set READONLY 100
+catch err
+    show + "Caught: " err
+end
+
+show "6. Testing type errors:"
+try
+    call len(42)
+catch err
+    show + "Caught: " err
+end
+
+show "7. Testing for loop type error:"
+try
+    for item in 42
+        show item
+    end
+catch err
+    show + "Caught: " err
+end
+
+show "=== Error improvements test complete ==="

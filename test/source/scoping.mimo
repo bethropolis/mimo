@@ -1,0 +1,96 @@
+show "=== Variable Scoping Demo ==="
+
+show "1. Basic declarations:"
+set x 10
+let y 20
+const PI 3.14159
+global counter 0
+
+show x
+show y
+show PI
+show counter
+
+show "2. Block scoping with let:"
+if > x 5
+    let blockVar 42
+    show blockVar
+    set x 15
+    show x
+end
+
+show "3. Const immutability test:"
+try
+    set PI 3.14
+catch error
+    show + "Cannot modify const: " error
+end
+
+show "4. Global variable access:"
+function increment_counter()
+    set counter + counter 1
+    show counter
+end
+
+call increment_counter()
+call increment_counter()
+show counter
+
+show "5. Variable shadowing:"
+let name "global"
+show name
+
+if = 1 1
+    let name "local"
+    show name
+end
+
+show name
+
+show "6. Let vs Set scoping:"
+let scopeTest 100
+show scopeTest
+
+if > scopeTest 50
+    let scopeTest 200
+    show scopeTest
+    set anotherVar 300
+end
+
+show scopeTest
+// show anotherVar (causes an error)
+
+show "7. Function parameter scoping:"
+function test_params(param)
+    let local 999
+    show param
+    show local
+    set param + param 10
+    show param
+end
+
+call test_params(42)
+
+show "8. Nested scope access:"
+let outer 1000
+function nested_test()
+    show outer
+    let inner 2000
+    
+    if > inner 1500
+        show inner
+        show outer
+        let deepest 3000
+        show deepest
+    end
+end
+
+call nested_test()
+
+show "9. For loop scoping:"
+for i in [1, 2, 3]
+    let loopVar + i 100
+    show loopVar
+end
+
+show "=== Scoping Demo Complete ==="

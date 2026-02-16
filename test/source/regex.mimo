@@ -1,0 +1,51 @@
+import "regex" as r
+import "assert" as assert
+
+show "=== Testing Regex Module ==="
+
+// Get assert functions as variables to avoid reserved keyword issues
+set assert_true assert["true"]
+set assert_false assert["false"]
+
+// 1. Test Validation (r.is_match)
+show "1. Testing Email Validation..."
+set email_pattern "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
+call assert_true(call r.is_match(email_pattern, "user@example.com"))
+call assert_false(call r.is_match(email_pattern, "invalid-email"))
+
+// 2. Test Extraction (r.find_matches)
+show "2. Testing Match (Global)..."
+set text "The year is 2023 and the time is 10:00"
+set digit_pattern "\\d+"
+
+call r.find_matches(digit_pattern, text) -> matches
+call assert.eq(matches[0], "2023")
+call assert.eq(matches[1], "10")
+call assert.eq(matches[2], "00")
+
+// 3. Test Replacement (r.replace_all)
+show "3. Testing Replace..."
+set sensitive "My password is password123"
+set redact_pattern "password\\d+"
+call r.replace_all(sensitive, redact_pattern, "******") -> clean
+call assert.eq(clean, "My password is ******")
+
+// 4. Test Capturing Groups (r.extract)
+show "4. Testing Capturing Groups..."
+set date_str "2024-05-20"
+set date_pattern "(\\d{4})-(\\d{2})-(\\d{2})"
+
+call r.extract(date_pattern, date_str) -> groups
+// Group 0 is full match
+call assert.eq(groups[0], "2024-05-20")
+// Group 1 is Year
+call assert.eq(groups[1], "2024")
+// Group 2 is Month
+call assert.eq(groups[2], "05")
+
+// 5. Test Flags (Case Insensitive)
+show "5. Testing Flags..."
+call assert_true(call r.is_match("hello", "HELLO", "i"), "Should match case-insensitive")
+call assert_false(call r.is_match("hello", "HELLO"), "Should fail case-sensitive")
+
+show "=== Regex Tests Passed ==="

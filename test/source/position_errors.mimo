@@ -1,0 +1,80 @@
+show "=== Position-Aware Error Testing with Try/Catch ==="
+
+show "Testing errors at different positions..."
+
+show "Line 5 - Variable redeclaration error:"
+try
+    let x 10
+    let x 20
+catch e
+    show + "Caught: " e
+end
+
+show "Line 12 - Array access error:"
+try
+    set arr [1, 2, 3]
+    show arr[999]
+catch e
+    show + "Caught: " e
+end
+
+show "Line 19 - Const assignment error:"
+try
+    const FIXED 42
+    set FIXED 100
+catch e
+    show + "Caught: " e
+end
+
+show "Line 26 - Undefined variable:"
+try
+    show undefined_variable_here
+catch e
+    show + "Caught: " e
+end
+
+show "Line 33 - Function argument mismatch:"
+function add_two (a,b)
+    return + a b
+end
+try
+    call add_two(5)
+catch e
+    show + "Caught: " e
+end
+
+show "Line 43 - Built-in function error:"
+try
+    call push("not an array",42)
+catch e
+    show + "Caught: " e
+end
+
+show "Line 50 - Division by zero in expression:"
+try
+    set complex_expr (+ (* 5 3) (/ 10 0))
+catch e
+    show + "Caught: " e
+end
+
+show "Line 57 - For loop type error:"
+try
+    for item in "strings are not iterable yet"
+        show item
+    end
+catch e
+    show + "Caught: " e
+end
+
+show "Line 65 - Nested error in function:"
+function nested_error ()
+    set local_var + undefined_in_function 5
+    return local_var
+end
+try
+    call nested_error()
+catch e
+    show + "Caught: " e
+end
+
+show "All errors caught. Test finished."

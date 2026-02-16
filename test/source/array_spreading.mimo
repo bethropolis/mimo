@@ -1,0 +1,125 @@
+show "=== Array Spreading Test ==="
+
+show "1. Basic array spreading:"
+set arr1 [1, 2, 3]
+set arr2 [4, 5, 6]
+set combined [...arr1, ...arr2]
+show combined
+show "Expected: [1, 2, 3, 4, 5, 6]"
+
+show "2. Spreading with additional elements:"
+set result [0, ...arr1, 10, ...arr2, 20]
+show result
+show "Expected: [0, 1, 2, 3, 10, 4, 5, 6, 20]"
+
+show "3. Single array spread:"
+set copy [...arr1]
+show copy
+show "Expected: [1, 2, 3]"
+
+show "4. Empty array spreading:"
+set empty []
+set with_empty [...empty, 1, 2, 3, ...empty]
+show with_empty
+show "Expected: [1, 2, 3]"
+
+show "5. Multiple array spreading:"
+set a [1, 2]
+set b [3, 4]
+set c [5, 6]
+set multi [...a, ...b, ...c]
+show multi
+show "Expected: [1, 2, 3, 4, 5, 6]"
+
+show "6. Nested arrays spreading:"
+set nested [[1, 2], [3, 4]]
+set flat [...nested]
+show flat
+show "Expected: [[1, 2], [3, 4]]"
+
+show "7. String arrays spreading:"
+set words1 ["hello", "world"]
+set words2 ["foo", "bar"]
+set all_words [...words1, ...words2]
+show all_words
+show "Expected: [hello, world, foo, bar]"
+
+show "8. Mixed data types:"
+set numbers [1, 2, 3]
+set strings ["a", "b"]
+set booleans [true, false]
+set mixed [...numbers, ...strings, ...booleans, null]
+show mixed
+show "Expected: [1, 2, 3, a, b, true, false, null]"
+
+show "9. Spreading in variables:"
+set first [10, 20]
+set second [30, 40]
+set spread_result [...first, 25, ...second]
+show spread_result
+show first
+show second
+
+show "10. Complex spreading:"
+set base [1, 2]
+set middle [3, 4, 5]
+set final [6, 7]
+set complex [0, ...base, ...middle, ...final, 8, 9]
+show complex
+show "Expected: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"
+
+show "11. Spreading with slicing:"
+set original [1, 2, 3, 4, 5, 6, 7, 8, 9]
+call slice(original, 0, 3) -> first_part
+call slice(original, 6, 9) -> last_part
+set reconstructed [...first_part, ...last_part]
+show reconstructed
+show "Expected: [1, 2, 3, 7, 8, 9]"
+
+show "12. Function parameter spreading simulation:"
+function process_array(arr)
+    set processed [0, ...arr, 100]
+    return processed
+end
+
+call process_array([5, 10, 15]) -> result
+show result
+show "Expected: [0, 5, 10, 15, 100]"
+
+//show "13. Creating array copies:"
+//set original_data [1, "test", true, [1, 2]]
+//set copy_data [...original_data]
+//show original_data
+//show copy_data
+//set copy_data[0] 999
+//show original_data
+//show copy_data
+//show "Original should be unchanged"
+
+show "14. Error handling:"
+try
+    set invalid [...42]
+catch err
+    show + "Caught: " err
+end
+
+try
+    set also_invalid [..."string"]
+catch err
+    show + "Caught: " err
+end
+
+show "15. Spreading with object arrays:"
+set objects [
+    { name: "Alice", age: 30 },
+    { name: "Bob", age: 25 }
+]
+set more_objects [
+    { name: "Charlie", age: 35 }
+]
+set all_people [...objects, ...more_objects]
+show all_people
+show all_people[0].name
+show all_people[2].name
+
+show "=== Array spreading test complete ==="

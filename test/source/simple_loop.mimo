@@ -1,0 +1,13 @@
+// Simple infinite loop test for debugging
+show "Testing basic infinite loop functionality"
+
+set counter 0
+loop
+    show counter
+    set counter + counter 1
+    if = counter 3
+        show "Breaking at counter = 3"
+        break
+    end
+end
+show "Infinite loop ended"

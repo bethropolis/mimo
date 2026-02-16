@@ -1,0 +1,59 @@
+show "=== Additional Match Tests ==="
+
+show "--- Testing empty array ---"
+set empty_array []
+match empty_array
+    case []:
+        show "  -> Matched empty array!"
+    default:
+        show "  -> Failed to match empty array."
+end
+
+show "--- Testing single element array ---"
+set single [42]
+match single
+    case [x]:
+        show "  -> Matched single element array!"
+        show + "    x = " x
+    default:
+        show "  -> Failed to match single element."
+end
+
+show "--- Testing boolean patterns ---"
+function test_bool(val)
+    match val
+        case true:
+            show "  -> Matched true"
+        case false:
+            show "  -> Matched false"
+        default:
+            show "  -> Not a boolean"
+    end
+end
+
+call test_bool(true)
+call test_bool(false)
+call test_bool("not a bool")
+
+show "--- Testing mixed patterns ---"
+function test_mixed(val)
+    match val
+        case [1, 2, 3]:
+            show "  -> Matched [1, 2, 3]"
+        case [a, b]:
+            show "  -> Matched two-element array"
+            show + "    a = " a
+            show + "    b = " b
+        case "test":
+            show "  -> Matched 'test' string"
+        default:
+            show "  -> No match found"
+    end
+end
+
+call test_mixed([1, 2, 3])
+call test_mixed([99, 88])
+call test_mixed("test")
+call test_mixed(123)
+
+show "=== Additional Match Tests Complete ==="

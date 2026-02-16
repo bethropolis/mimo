@@ -1,0 +1,125 @@
+// Test safe navigation operator (object?.property) -> now using `get_property_safe` builtin
+
+// Basic safe navigation with null object
+set user null
+set user_name call get_property_safe(user, "name")
+show user_name  // Should show null
+
+// Safe navigation with valid object
+set person { name: "Alice", age: 30 }
+set person_name call get_property_safe(person, "name")
+set person_age call get_property_safe(person, "age")
+show person_name  // Should show "Alice"
+show person_age   // Should show 30
+
+// Safe navigation with missing property
+set data { id: 123 }
+set missing_prop call get_property_safe(data, "missing")
+show missing_prop  // Should show null (property doesn't exist)
+
+// Nested safe navigation
+set company { 
+    employee: { 
+        name: "Bob", 
+        address: { 
+            street: "Main St", 
+            city: "NYC" 
+        } 
+    } 
+}
+set street call get_property_safe(call get_property_safe(call get_property_safe(company, "employee"), "address"), "street")
+set zip call get_property_safe(call get_property_safe(call get_property_safe(company, "employee"), "address"), "zip")
+show street  // Should show "Main St"
+show zip     // Should show null (property doesn't exist)
+
+// Safe navigation with null in chain
+set incomplete { employee: null }
+set emp_name call get_property_safe(call get_property_safe(incomplete, "employee"), "name")
+show emp_name  // Should show null
+
+// Safe navigation vs regular navigation comparison
+set valid_obj { prop: "value" }
+set null_obj null
+
+// This should work (safe navigation)
+set safe_result call get_property_safe(null_obj, "prop")
+show safe_result  // Should show null
+
+// Safe navigation with arrays (accessing the array itself, not elements)
+set collection { items: [1, 2, 3] }
+set items_array call get_property_safe(collection, "items")
+show items_array  // Should show [1, 2, 3]
+
+// Safe navigation in conditional expressions
+set config null
+set timeout call coalesce(call get_property_safe(config, "timeout"), 30)
+show timeout  // Should show 30
+
+// Safe navigation with ternary operator
+set settings { theme: "dark" }
+set theme call if_else(call get_property_safe(settings, "theme"), settings.theme, "light")
+show theme  // Should show "dark"
+
+// Safe navigation with null settings
+set null_settings null
+set null_theme call if_else(call get_property_safe(null_settings, "theme"), call get_property_safe(null_settings, "theme"), "light")
+show null_theme  // Should show "light"
+
+// Chained safe navigation with mixed null/valid objects
+set app {
+    user: {
+        profile: null
+    }
+}
+set avatar call get_property_safe(call get_property_safe(call get_property_safe(app, "user"), "profile"), "avatar")
+show avatar  // Should show null
+
+// Safe navigation with function-like property access
+set api { client: { version: "1.0" } }
+set version call get_property_safe(call get_property_safe(api, "client"), "version")
+show version  // Should show "1.0"
+
+// Safe navigation with nested objects and arrays
+set store {
+    products: [
+        { name: "laptop", price: 999 },
+        { name: "mouse", price: 25 }
+    ]
+}
+set products call get_property_safe(store, "products")
+show products  // Should show the array
+
+// Safe navigation with deeply nested null
+set deep { level1: { level2: { level3: null } } }
+set deep_value call get_property_safe(call get_property_safe(call get_property_safe(call get_property_safe(deep, "level1"), "level2"), "level3"), "value")
+show deep_value  // Should show null
+
+// Safe navigation preserving null through chain
+set chain { a: { b: { c: null } } }
+set result call get_property_safe(call get_property_safe(call get_property_safe(call get_property_safe(call get_property_safe(call get_property_safe(chain, "a"), "b"), "c"), "d"), "e"), "f")
+show result  // Should show null
+
+// Safe navigation with boolean properties
+set flags { enabled: true, disabled: false }
+set enabled_flag call get_property_safe(flags, "enabled")
+set disabled_flag call get_property_safe(flags, "disabled")
+set missing_flag call get_property_safe(flags, "missing")
+show enabled_flag   // Should show true
+show disabled_flag  // Should show false
+show missing_flag   // Should show null
+
+// Safe navigation with numeric properties
+set coords { x: 10, y: 20 }
+set x_coord call get_property_safe(coords, "x")
+set y_coord call get_property_safe(coords, "y")
+set z_coord call get_property_safe(coords, "z")
+show x_coord  // Should show 10
+show y_coord  // Should show 20
+show z_coord  // Should show null
+
+// Safe navigation in assignments
+set target null
+set safe_assignment call coalesce(call get_property_safe(target, "property"), "default")
+show safe_assignment  // Should show "default"
+
+show "All safe navigation operator tests completed"

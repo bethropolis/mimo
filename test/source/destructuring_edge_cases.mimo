@@ -1,0 +1,37 @@
+show "=== Edge Cases for Object Destructuring ==="
+
+show "--- Empty object destructuring ---"
+set empty_obj {}
+destructure {missing} from empty_obj
+show missing  // Expected: null
+
+show "--- Object with null values ---"
+set obj_with_null { value: null, other: 42 }
+destructure {value, other} from obj_with_null
+show value  // Expected: null
+show other  // Expected: 42
+
+show "--- Destructuring from object with nested structure ---"
+set complex { 
+    user: { name: "Alice", age: 25 },
+    settings: { theme: "dark" }
+}
+destructure {user, settings} from complex
+show user      // Expected: {name: Alice, age: 25}
+show settings  // Expected: {theme: dark}
+
+show "--- Error case: destructuring array pattern from object ---"
+try
+    destructure [a, b] from { x: 1, y: 2 }
+catch err
+    show "Caught array-from-object error as expected."
+end
+
+show "--- Error case: destructuring object pattern from array ---"
+try
+    destructure {x, y} from [1, 2, 3]
+catch err
+    show "Caught object-from-array error as expected."
+end
+
+show "=== Edge Cases Complete ==="

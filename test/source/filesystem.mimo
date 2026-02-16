@@ -1,0 +1,105 @@
+import "fs" as fs
+
+show "=== File System Operations Demo ==="
+
+// --- Test file paths ---
+// NOTE: These paths are relative to where the Mimo CLI is run,
+// or relative to the CWD of the virtual file system in the browser.
+set test_dir "test_data_mimo" // Changed to avoid conflict with `test` directory
+set test_file_path + test_dir "/sample.txt"
+set test_write_path + test_dir "/output.txt"
+set non_existent_file + test_dir "/nope.txt"
+set non_existent_dir + test_dir "/non_existent_subdir" // Added for listing test
+
+// --- Setup: Ensure test directory exists and is empty ---
+show "--- Setup: Creating test directory ---"
+try
+    call fs.remove_dir(test_dir, true) // Attempt to remove existing dir recursively
+    show + + "Cleaned up existing '" test_dir "'"
+catch err
+    // Ignore error if directory didn't exist to begin with
+end
+call fs.make_dir(test_dir, true) // Create it recursively
+show + + "Created '" test_dir "'"
+
+
+show "1. Checking file existence (non-existent):"
+call fs.exists(non_existent_file) -> exists1
+show exists1 // Expected: false
+
+show "2. Writing a new file:"
+set content_to_write "Hello from Mimo!\nThis is a test file."
+call fs.write_file(test_file_path, content_to_write) -> write_result1
+show + "Write operation result: " write_result1 // Expected: null (if write_file returns null)
+
+show "3. Checking file existence (should exist now):"
+call fs.exists(test_file_path) -> exists2
+show exists2 // Expected: true
+
+show "4. Reading the file back:"
+call fs.read_file(test_file_path) -> read_content1
+show "Content read:"
+show read_content1
+// Expected: "Hello from Mimo!\nThis is a test file."
+
+show "5. Appending to a file (by reading, appending, writing):"
+call fs.read_file(test_file_path) -> current_content
+set new_line "\nAnother line appended."
+set appended_content + current_content new_line
+call fs.write_file(test_file_path, appended_content) -> write_result2
+show + "Append (write) operation result: " write_result2
+
+call fs.read_file(test_file_path) -> read_content2
+show "Content after append:"
+show read_content2
+// Expected: "Hello from Mimo!\nThis is a test file.\nAnother line appended."
+
+show "6. Listing directory contents:"
+call fs.list_dir(test_dir) -> dir_contents
+show "Directory contents:"
+show dir_contents // Expected: an array containing file names (e.g., ["sample.txt"])
+
+show "7. Attempting to read a non-existent file (should error):"
+try
+    call fs.read_file(non_existent_file) -> no_content
+    show no_content
+catch err
+    show + "Error reading non-existent file: " err
+end
+
+show "8. Writing to a different file path:"
+call fs.write_file(test_write_path, "This is output.txt") -> write_result3
+call fs.exists(test_write_path) -> exists3
+show + "output.txt exists: " exists3 // Expected: true
+call fs.read_file(test_write_path) -> output_content
+show output_content // Expected: "This is output.txt"
+
+show "9. Testing error handling for invalid arguments:"
+try
+    call fs.read_file(123) -> invalid_read
+catch err
+    show + "Error with invalid path type: " err
+end
+
+try
+    call fs.write_file("valid_path", 123) -> invalid_write
+catch err
+    show + "Error with invalid content type: " err
+end
+
+show "10. Testing directory listing with non-existent directory:"
+try
+    call fs.list_dir(non_existent_dir) -> invalid_list // Use the defined non_existent_dir
+catch err
+    show + "Error listing non-existent directory: " err
+end
+
+// --- Teardown: Clean up test directory ---
+show "--- Teardown: Removing test directory ---"
+
+call fs.remove_dir(test_dir, true) // Remove directory and its contents recursively
+call fs.exists(test_dir) -> exists_after_cleanup
+
+show + + +  "Test directory '" test_dir "' exists after cleanup: " exists_after_cleanup // Expected: false
+
+show "=== File System Demo Complete ==="

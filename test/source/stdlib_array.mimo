@@ -1,0 +1,241 @@
+show "=== Standard Library: Array Module Demo (Initial) ==="
+
+import "array" as arr
+
+set numbers [1, 2, 3, 4, 5]
+set mixed_types [1, "two", true, null, {val: 5}]
+
+show "--- 1. arr.map ---"
+// Double each number
+call arr.map(numbers, function (item) return * item 2 end) -> doubled_numbers
+show doubled_numbers // Expected: [2, 4, 6, 8, 10]
+
+// Get types of items
+call arr.map(mixed_types, function (item, index)
+    call type(item) -> item_type
+    return + (+ "Index " (+ index ": ")) item_type
+end) -> types_description
+show types_description // Expected: ["Index 0: number", "Index 1: string", "Index 2: boolean", "Index 3: null", "Index 4: object"]
+
+show "--- 2. arr.filter ---"
+// Get even numbers
+call arr.filter(numbers, function (item) return = (% item 2) 0 end) -> even_numbers
+show even_numbers // Expected: [2, 4]
+
+// Filter out null and non-true booleans
+set complex_filter_arr [1, null, 0, "hello", true, false, "mimo"]
+call arr.filter(complex_filter_arr, function (item)
+    // Mimo's 'isTruthy' will be used by the filter's JS implementation
+    return item // Test with Mimo's truthiness
+end) -> truthy_items
+show truthy_items // Expected: [1, "hello", true, "mimo"] (0 is falsy, null is falsy, false is falsy)
+
+
+show "--- 3. arr.reduce ---"
+// Sum of numbers
+call arr.reduce(numbers, function (accumulator, current_val)
+    return + accumulator current_val
+end, 0) -> sum_of_numbers
+show sum_of_numbers // Expected: 15
+
+// Concatenate strings with initial value
+set words ["mimo", " ", "is", " ", "cool"]
+call arr.reduce(words, function (acc, word)
+    return + acc word
+end, "Sentence: ") -> sentence
+show sentence // Expected: "Sentence: mimo is cool"
+
+// Reduce without initial value (uses first element as initial)
+set values_for_product [2, 3, 4]
+call arr.reduce(values_for_product, function (acc, val)
+    return * acc val
+end) -> product_val // No initial value given
+show product_val // Expected: 24 (2*3*4)
+
+try
+    call arr.reduce([], function(a,b) return a end) -> reduce_empty_err
+    show reduce_empty_err
+catch err
+    show + "Reduce empty error: " err
+end
+
+
+show "--- 4. arr.includes ---"
+call arr.includes(numbers, 3) -> has_three
+show + "numbers includes 3: " has_three // Expected: true
+
+call arr.includes(numbers, 6) -> has_six
+show + "numbers includes 6: " has_six // Expected: false
+
+set names ["alice", "bob", "charlie"]
+call arr.includes(names, "bob") -> has_bob
+show + "names includes 'bob': " has_bob // Expected: true
+call arr.includes(names, "david") -> has_david
+show + "names includes 'david': " has_david // Expected: false
+
+// Test fromIndex
+set more_numbers [10, 20, 30, 20, 40]
+call arr.includes(more_numbers, 20, 2) -> has_twenty_from_idx_2
+show + "more_numbers includes 20 from index 2: " has_twenty_from_idx_2 // Expected: true
+
+
+show "--- 5. arr.for_each ---"
+set items_processed []  // Collect side effects for testing
+call arr.for_each(numbers, function (item, index)
+    set message + "Processing " (+ item (+ " at index " index))
+    call push(items_processed, message)
+end)
+show "For_each processed messages:"
+for msg_item in items_processed
+    show msg_item
+end
+
+show "--- 6. arr.find ---"
+set users [
+    {name: "Alice", age: 30},
+    {name: "Bob", age: 25},
+    {name: "Charlie", age: 35}
+]
+call arr.find(users, function (user) return = user.age 25 end) -> bob_user
+show "Found user with age 25:"
+show bob_user
+call arr.find(numbers, function (n) return = n 100 end) -> not_found_user
+show "Find non-existent:"
+show not_found_user
+
+show "--- 7. arr.find_index ---"
+call arr.find_index(users, function (user) return = user.name "Charlie" end) -> charlie_index
+show + "Index of Charlie: " charlie_index
+call arr.find_index(numbers, function (n) return = n 100 end) -> not_found_idx
+show + "Index of 100 (non-existent): " not_found_idx
+
+show "--- 8. arr.slice ---"
+set letters ["a", "b", "c", "d", "e"]
+call arr.slice(letters, 1, 3) -> sliced1
+show + "slice(1,3): " sliced1
+call arr.slice(letters, 2) -> sliced2
+show + "slice(2): " sliced2
+call arr.slice(letters) -> copy_letters
+show + "slice() (copy): " copy_letters
+call push(copy_letters, "f")
+show + "Original letters after modifying copy: " letters
+show + "Modified copy: " copy_letters
+call arr.slice(letters, -3, -1) -> sliced_negative
+show + "slice(-3, -1): " sliced_negative
+
+show "--- 9. arr.index_of & arr.last_index_of ---"
+set search_array [10, 20, 30, 20, 40, 20, 50]
+call arr.index_of(search_array, 20) -> first_20_idx
+show + "Index of first 20: " first_20_idx
+
+call arr.index_of(search_array, 20, 2) -> first_20_from_idx_2
+show + "Index of first 20 from index 2: " first_20_from_idx_2
+
+call arr.index_of(search_array, 99) -> idx_99
+show + "Index of 99: " idx_99
+
+call arr.last_index_of(search_array, 20) -> last_20_idx
+show + "Index of last 20: " last_20_idx
+
+call arr.last_index_of(search_array, 20, 4) -> last_20_from_idx_4
+show + "Index of last 20 from index 4 (searching backwards): " last_20_from_idx_4
+
+call arr.last_index_of(search_array, 99) -> last_idx_99
+show + "Last index of 99: " last_idx_99
+
+show "--- 10. arr.is_empty ---"
+set empty_arr []
+call arr.is_empty(empty_arr) -> is_e1
+show + "Is [] empty? " is_e1
+
+call arr.is_empty(numbers) -> is_e2
+show + "Is numbers array empty? " is_e2
+
+show "--- 11. arr.first & arr.last ---"
+call arr.first(numbers) -> first_num
+show + "First of numbers: " first_num
+
+call arr.last(numbers) -> last_num
+show + "Last of numbers: " last_num
+
+call arr.first(empty_arr) -> first_empty
+show + "First of empty_arr: " first_empty
+
+call arr.last(empty_arr) -> last_empty
+show + "Last of empty_arr: " last_empty
+
+show "--- 12. arr.sort ---"
+set unsorted_numbers [3, 1, 10, 2, 5]
+call arr.sort(unsorted_numbers) -> sorted_numbers
+show + "Sorted numbers: " sorted_numbers
+show + "Original unsorted_numbers after sort: " unsorted_numbers
+
+set unsorted_strings ["banana", "apple", "cherry", "date"]
+call arr.sort(unsorted_strings) -> sorted_strings
+show + "Sorted strings: " sorted_strings
+
+set mixed_sort_test [3, "apple", 1, "banana"]
+call arr.sort(mixed_sort_test) -> sorted_mixed
+show + "Sorted mixed (JS default): " sorted_mixed
+
+show "--- 13. arr.reverse ---"
+set to_reverse [1, "mimo", true, 42]
+call arr.reverse(to_reverse) -> reversed_arr
+show + "Reversed array: " reversed_arr
+show + "Original to_reverse after reverse: " to_reverse
+
+call arr.reverse([]) -> reversed_empty
+show + "Reversed empty: " reversed_empty
+
+show "--- 14. arr.concat ---"
+set arr1 [1, 2]
+set arr2 [3, 4]
+set arr3 ["a", "b"]
+call arr.concat(arr1, arr2) -> concat1
+show + "Concat arr1, arr2: " concat1
+
+call arr.concat(arr1, arr2, arr3) -> concat2
+show + "Concat arr1, arr2, arr3: " concat2
+
+call arr.concat(arr1) -> concat_copy
+show + "Concat arr1 (copy): " concat_copy
+
+call arr.concat([]) -> concat_empty
+show + "Concat empty: " concat_empty
+
+// Error handling tests
+try
+    call arr.for_each(numbers, "not a function") -> foreach_err
+catch err
+    show + "For_each error (non-function callback): " err
+end
+try
+    call arr.slice("not an array", 0) -> slice_err
+catch err
+    show + "Slice error (non-array): " err
+end
+try
+    call arr.index_of("not an array", 1) -> idx_err
+catch err
+    show + "Index_of error (non-array): " err
+end
+
+try
+    call arr.is_empty(null) -> isempty_err
+catch err
+    show + "Is_empty error (null): " err
+end
+
+try
+    call arr.sort("not an array") -> sort_err
+catch err
+    show + "Sort error (non-array): " err
+end
+
+try
+    call arr.concat([1,2], "not an array") -> concat_err
+catch err
+    show + "Concat error (non-array argument): " err
+end
+
+show "=== Array Module Demo (Batch 2 Complete) ==="

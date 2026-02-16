@@ -1,0 +1,40 @@
+show "=== Comprehensive Destructuring Test ==="
+
+show "--- Testing variable re-assignment through destructuring ---"
+set x 0
+set y 0
+show + + + "Initial values: x=" x ", y=" y
+
+set point { x: 100, y: 200 }
+destructure {x, y} from point
+show + + + "After object destructuring: x=" x ", y=" y
+
+set coords [300, 400]
+destructure [x, y] from coords
+show + + +  "After array destructuring: x=" x ", y=" y
+
+show "--- Testing with function parameters simulation ---"
+function process_data(data)
+    destructure {name, value} from data
+    show + + + "Processing: " name " with value " value
+    return + name "_processed"
+end
+
+set input_data { name: "test", value: 123 }
+set result call process_data(input_data)
+show + "Result: " result
+
+show "--- Testing nested destructuring workflow ---"
+set api_response {
+    data: { users: [{ id: 1, name: "John" }, { id: 2, name: "Jane" }] },
+    meta: { count: 2, page: 1 }
+}
+
+destructure {data, meta} from api_response
+destructure {users} from data
+destructure {count} from meta
+
+show + + "Found " count " users"
+show users
+
+show "=== Comprehensive Test Complete ==="

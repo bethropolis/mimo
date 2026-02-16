@@ -1,0 +1,39 @@
+show "=== Object Destructuring Tests ==="
+
+set person { name: "Mimo", version: 2.0, status: "stable" }
+show person
+
+show "\n1. Basic object destructuring:"
+destructure {name, version} from person
+show name      // Expected: Mimo
+show version   // Expected: 2.0
+
+show "\n2. Destructuring with missing properties:"
+destructure {status, author} from person
+show status    // Expected: stable
+show author    // Expected: null
+
+show "\n3. Re-destructuring (should re-assign):"
+set new_data { name: "Mimo-Next", version: 2.1 }
+destructure {name, version} from new_data
+show name      // Expected: Mimo-Next
+show version   // Expected: 2.1
+
+show "\n4. Destructuring from a function return:"
+function get_config()
+    return { enabled: true, mode: "production" }
+end
+
+destructure {enabled, mode} from call get_config()
+show enabled   // Expected: true
+show mode      // Expected: production
+
+show "\n5. Error handling - destructuring from non-object:"
+try
+    destructure {a, b} from 123
+catch err
+    show "Caught error as expected."
+    // show err.message // Uncomment for detailed error
+end
+
+show "=== Object Destructuring Tests Complete ==="

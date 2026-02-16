@@ -1,0 +1,190 @@
+// Loop Enhancements Test for mimo
+// Testing break, continue, infinite loops, and loop control
+
+show "=== Loop Enhancements Demo ==="
+
+show "1. Basic break statement in while loop:"
+set i 0
+while < i 10
+    if = i 5
+        show "Breaking at i = 5"
+        break
+    end
+    show i
+    set i + i 1
+end
+show "After while loop"
+
+show "2. Basic continue statement in while loop:"
+set j 0
+while < j 5
+    set j + j 1
+    if = j 3
+        show "Skipping j = 3"
+        continue
+    end
+    show j
+end
+show "After continue while loop"
+
+show "3. Break statement in for loop:"
+set numbers [1, 2, 3, 4, 5, 6, 7, 8]
+for num in numbers
+    if = num 5
+        show "Breaking at num = 5"
+        break
+    end
+    show num
+end
+show "After for loop with break"
+
+show "4. Continue statement in for loop:"
+set values [1, 2, 3, 4, 5]
+for val in values
+    if = val 3
+        show "Skipping val = 3"
+        continue
+    end
+    show val
+end
+show "After for loop with continue"
+
+show "5. Infinite loop with break:"
+set counter 0
+loop
+    show counter
+    set counter + counter 1
+    if = counter 3
+        show "Breaking infinite loop at counter = 3"
+        break
+    end
+end
+show "After infinite loop"
+
+show "6. Infinite loop with continue:"
+set x 0
+loop
+    set x + x 1
+    if < x 3
+        continue
+    end
+    show x
+    if = x 5
+        break
+    end
+end
+show "After infinite loop with continue"
+
+show "7. Nested loops with break (outer loop break):"
+set outer_i 0
+while < outer_i 3
+    show "Outer loop iteration"
+    set inner_j 0
+    while < inner_j 5
+        if = inner_j 2
+            show "Breaking inner loop at j = 2"
+            break
+        end
+        show "  Inner loop iteration"
+        set inner_j + inner_j 1
+    end
+    set outer_i + outer_i 1
+end
+show "After nested loops"
+
+show "8. Nested loops with continue:"
+for a in [1, 2, 3]
+    show "Processing array element"
+    for b in [10, 20, 30]
+        if = b 20
+            show "  Skipping b = 20"
+            continue
+        end
+        show "  Processing b"
+    end
+end
+show "After nested for loops with continue"
+
+show "9. Loop control in function:"
+function find_first_even(arr)
+    for item in arr
+        if = % item 2 0
+            show "Found even number"
+            return item
+        end
+        show "Checking item"
+    end
+    return null
+end
+
+set test_array [1, 3, 7, 8, 9, 12]
+call find_first_even(test_array) -> result
+show "First even number found"
+
+show "10. Complex loop control scenario:"
+set matrix [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+set found false
+set target 5
+
+for row in matrix
+    for element in row
+        if = element target
+            show "Found target"
+            set found true
+            break
+        end
+        show "Checking element"
+    end
+    if found
+        show "Breaking outer loop"
+        break
+    end
+    show "Moving to next row"
+end
+
+if found
+    show "Search completed successfully"
+else
+    show "Target not found"
+end
+
+show "11. Loop with early exit conditions:"
+set data [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+set sum 0
+set max_sum 15
+
+for num in data
+    set sum + sum num
+    show "Current sum calculated"
+    if > sum max_sum
+        show "Sum exceeded maximum, breaking"
+        break
+    end
+end
+show "Final sum calculated"
+
+show "12. Continue with condition checking:"
+set items [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+set processed 0
+
+for item in items
+    // Skip even numbers
+    if = % item 2 0
+        show "Skipping even number"
+        continue
+    end
+    
+    // Process odd numbers
+    show "Processing odd number"
+    set processed + processed 1
+    
+    // Stop after processing 3 odd numbers
+    if = processed 3
+        show "Processed 3 odd numbers, breaking"
+        break
+    end
+end
+
+show "Total odd numbers processed"
+
+show "=== End of Loop Enhancements Demo ==="

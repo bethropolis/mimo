@@ -1,0 +1,52 @@
+// Test file to verify both unary and binary minus operations work correctly
+
+// Test binary minus operations (prefix notation)
+set a 10
+set b 3
+set binary_result - a b
+show "Binary minus: 10 - 3 ="
+show binary_result
+
+// Test unary minus operations
+set positive 5
+set negative (- positive)
+show "Unary minus: -5 ="
+show negative
+
+// Test nested operations with minus
+set complex_result - (* 2 3) (+ 1 2)
+show "Complex binary: (2*3) - (1+2) ="
+show complex_result
+
+// Test unary minus with variables
+set x 7
+set neg_x (- x)
+show "Unary minus with variable: -7 ="
+show neg_x
+
+// Test function with binary minus
+function subtract_func(first, second)
+    return - first second
+end
+
+call subtract_func(15, 8) -> func_result
+show "Function binary minus: 15 - 8 ="
+show func_result
+
+// Test unary minus in function
+function negate_func(value)
+    return (- value)
+end
+
+call negate_func(12) -> negate_result
+show "Function unary minus: -12 ="
+show negate_result
+
+// Test that both work in conditional expressions
+if (> (- 10 5) (- 3))
+    show "Binary minus (10-5) > unary minus (-3): true"
+else
+    show "Binary minus (10-5) > unary minus (-3): false"
+end
+
+show "All minus operations test completed"

@@ -1,0 +1,140 @@
+// Default Parameters Summary Test - Complete Feature Demonstration
+// This test showcases all implemented default parameter functionality
+
+show "=== MIMO DEFAULT PARAMETERS FEATURE SUMMARY ==="
+
+// Basic default parameters
+function greet(name: "World")
+    show + "Hello, " name
+end
+
+show "1. Basic default parameter:"
+call greet()
+call greet("Alice")
+
+// Multiple default parameters
+function introduce(first: "John", last: "Doe", title: "Mr.")
+    show + title + " " + first + " " last
+end
+
+show "2. Multiple default parameters:"
+call introduce()
+call introduce("Jane")
+call introduce("Bob", "Smith")
+call introduce("Alice", "Johnson", "Dr.")
+
+// Mixed required and default parameters
+function calculate(required, optional: 10)
+    return + required optional
+end
+
+show "3. Mixed required and default:"
+call calculate(5) -> result1
+call calculate(3, 7) -> result2
+show result1
+show result2
+
+// Complex default expressions
+function power(base: + 1 1, exponent: * 1 2)
+    set result 1
+    set i 0
+    while < i exponent
+        set result * result base
+        set i + i 1
+    end
+    return result
+end
+
+show "4. Complex default expressions:"
+call power() -> pow1
+call power(3) -> pow2
+call power(2, 4) -> pow3
+show pow1
+show pow2
+show pow3
+
+// Default parameters with conditionals
+function format(text: "default", uppercase: false)
+    if uppercase
+        return + "UPPER: " text
+    else
+        return + "lower: " text
+    end
+end
+
+show "5. Defaults with conditionals:"
+call format() -> fmt1
+call format("hello") -> fmt2
+call format("world", true) -> fmt3
+show fmt1
+show fmt2
+show fmt3
+
+// Error handling - too many arguments
+function twoParams(x: 1, y: 2)
+    return + x y
+end
+
+show "6. Error handling (too many args):"
+try
+    call twoParams(1, 2, 3) -> error
+catch e
+    show "Correctly caught error"
+end
+
+// Error handling - too few required arguments
+function reqAndOpt(required, optional: 99)
+    return + required optional
+end
+
+show "7. Error handling (too few args):"
+try
+    call reqAndOpt() -> error
+catch e
+    show "Correctly caught error"
+end
+
+// All default parameters
+function allDefaults(a: 1, b: 2, c: 3)
+    return + a + b c
+end
+
+show "8. All parameters have defaults:"
+call allDefaults() -> all1
+call allDefaults(10) -> all2
+call allDefaults(5, 10) -> all3
+call allDefaults(1, 2, 3) -> all4
+show all1
+show all2
+show all3
+show all4
+
+// Default parameters with arrays
+function arrayProcessor(arr: [1, 2, 3], index: 0)
+    return arr[index]
+end
+
+show "9. Defaults with arrays:"
+call arrayProcessor() -> arr1
+call arrayProcessor([10, 20, 30]) -> arr2
+call arrayProcessor([5, 15, 25], 2) -> arr3
+show arr1
+show arr2
+show arr3
+
+// Nested functions with defaults
+function outer(x: 5)
+    function inner(y: + x 2)
+        return * x y
+    end
+    call inner() -> result
+    return result
+end
+
+show "10. Nested functions with defaults:"
+call outer() -> nest1
+call outer(3) -> nest2
+show nest1
+show nest2
+
+show "=== ALL DEFAULT PARAMETER FEATURES WORKING CORRECTLY ==="

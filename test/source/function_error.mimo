@@ -1,0 +1,19 @@
+show "Testing function call errors"
+
+function add_numbers(first, second)
+    return + first second
+end
+
+show "Correct function call:"
+call add_numbers(5, 3) -> result
+show result
+
+show "Function call with wrong number of arguments:"
+try
+    call add_numbers(5) -> bad_result
+    show bad_result
+catch error
+    show + "Caught error: " error
+end
+
+show "This should not be reached"

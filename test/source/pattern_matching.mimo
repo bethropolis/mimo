@@ -1,0 +1,141 @@
+// Pattern matching test for mimo
+
+show "=== Pattern Matching Demo ==="
+
+show "1. Basic literal matching:"
+set value 5
+match value
+case 1:
+    show "It's one"
+case 5:
+    show "It's five"
+case 10:
+    show "It's ten"
+default:
+    show "It's something else"
+end
+
+show "2. String matching:"
+set greeting "hello"
+match greeting
+case "hi":
+    show "Informal greeting"
+case "hello":
+    show "Formal greeting"
+case "goodbye":
+    show "Farewell"
+default:
+    show "Unknown greeting"
+end
+
+show "3. Boolean and null matching:"
+set flag true
+match flag
+case true:
+    show "Flag is true"
+case false:
+    show "Flag is false"
+case null:
+    show "Flag is null"
+end
+
+set empty null
+match empty
+case 0:
+    show "It's zero"
+case null:
+    show "It's null"
+default:
+    show "It's something else"
+end
+
+show "4. Variable binding in patterns:"
+set number 42
+match number
+case x:
+    show "Matched with variable x"
+    show x
+end
+
+show "5. Array pattern matching:"
+set arr [1, 2, 3]
+match arr
+case [1, 2, 3]:
+    show "Exact array match: [1, 2, 3]"
+case [1, 2]:
+    show "Array with two elements"
+default:
+    show "Different array"
+end
+
+set pair [10, 20]
+match pair
+case [a, b]:
+    show "Array with two elements:"
+    show a
+    show b
+end
+
+show "6. Mixed pattern matching:"
+set data [5, 10]
+match data
+case [5, x]:
+    show "Array starting with 5, second element is:"
+    show x
+case [1, 2, 3]:
+    show "Exact match [1, 2, 3]"
+default:
+    show "No match"
+end
+
+show "7. Pattern matching with expressions:"
+set result + 2 3
+match result
+case 5:
+    show "Result is 5"
+case 10:
+    show "Result is 10"
+default:
+    show "Result is something else"
+end
+
+show "8. Nested array patterns:"
+set nested [[1, 2], [3, 4]]
+match nested
+case [[1, 2], [3, 4]]:
+    show "Matched nested array pattern"
+default:
+    show "No match for nested array"
+end
+
+show "9. Pattern matching in function:"
+function classify_value(val)
+    match val
+    case 0:
+        return "zero"
+    case 1:
+        return "one"
+    case []:
+        return "empty array"
+    case [x]:
+        return "single element array"
+    case [a, b]:
+        return "two element array"
+    default:
+        return "other"
+    end
+end
+
+call classify_value(0) -> result1
+show result1
+
+call classify_value([42]) -> result2
+show result2
+
+call classify_value([1, 2]) -> result3
+show result3
+
+call classify_value("hello") -> result4
+show result4
+
+show "=== End of Pattern Matching Demo ==="

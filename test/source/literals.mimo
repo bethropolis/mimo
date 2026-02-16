@@ -1,0 +1,96 @@
+show "=== Boolean and Null Literals Test ==="
+
+show "1. Boolean literals:"
+set bool_true true
+set bool_false false
+show bool_true
+show bool_false
+
+show "2. Null literal:"
+set null_value null
+show null_value
+
+show "3. Boolean operations:"
+set and_result = bool_true bool_true
+show and_result
+show "Expected: true"
+
+set and_false = bool_true bool_false
+show and_false
+show "Expected: false"
+
+set or_result = bool_false bool_true
+show or_result
+show "Expected: true"
+
+show "4. Comparisons with booleans:"
+set bool_eq = true true
+show bool_eq
+show "Expected: true"
+
+set bool_neq ! false true
+show bool_neq
+show "Expected: true"
+
+show "5. Null comparisons:"
+set null_eq = null null
+show null_eq
+show "Expected: true"
+
+set null_neq ! null true
+show null_neq
+show "Expected: true"
+
+show "6. Type checking with built-in type function:"
+call type(true) -> true_type
+show true_type
+
+call type(false) -> false_type
+show false_type
+
+call type(null) -> null_type
+show null_type
+
+show "7. Booleans in control flow:"
+if true
+    show "True condition works"
+end
+
+if false
+    show "This should not print"
+else
+    show "False condition works"
+end
+
+show "8. Booleans in arrays:"
+set bool_array [true, false, null, true]
+show bool_array
+
+show "9. Function parameters with booleans:"
+function test_bool(flag)
+    if flag
+        return "Flag is truthy"
+    else
+        return "Flag is falsy"
+    end
+end
+
+call test_bool(true) -> result1
+show result1
+
+call test_bool(false) -> result2
+show result2
+
+call test_bool(null) -> result3
+show result3
+
+show "10. Mixed type operations:"
+set mixed_array [1, "hello", true, null, false]
+show mixed_array
+
+for item in mixed_array
+    call type(item) -> item_type
+    show item_type
+end
+
+show "=== Boolean and Null test complete ==="

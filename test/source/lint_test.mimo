@@ -1,0 +1,16 @@
+set used_variable 10
+show used_variable
+
+set unused_variable 20 // This should trigger a warning
+
+let mutable_but_not_reassigned 30 // This should trigger a warning
+show mutable_but_not_reassigned
+
+// This function now has an unused parameter
+function my_func(used_param, unused_param)
+    const PI 3.14
+    show + "hello " used_param
+end
+
+
+call my_func("world", 123)

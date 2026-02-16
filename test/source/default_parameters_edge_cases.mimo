@@ -1,0 +1,76 @@
+// Test edge cases for default parameters
+
+// Test 1: Function with only default parameters
+function allDefaults(a: 1, b: 2, c: 3)
+    return + a + b c
+end
+
+show "=== Test 1: All defaults ==="
+call allDefaults() -> result
+show result
+
+// Test 2: Error case - too many arguments
+function twoParams(x: 10, y: 20)
+    return + x y
+end
+
+show "=== Test 2: Too many arguments (should error) ==="
+try
+    call twoParams(1, 2, 3) -> result
+    show "This should not print"
+catch e
+    show "Caught error as expected"
+end
+
+// Test 3: Error case - too few required arguments  
+function mixedParams(required, optional: 42)
+    return + required optional
+end
+
+show "=== Test 3: Too few arguments (should error) ==="
+try
+    call mixedParams() -> result
+    show "This should not print"
+catch e
+    show "Caught error as expected"
+end
+
+// Test 4: Complex default expressions
+function complexDefaults(name: "User", count: + 5 3, flag: true)
+    if flag
+        show + name + " has " count
+    else
+        show + name " is disabled"
+    end
+end
+
+show "=== Test 4: Complex default expressions ==="
+call complexDefaults()
+call complexDefaults("Alice")
+call complexDefaults("Bob", 10)
+call complexDefaults("Charlie", 15, false)
+
+// Test 5: Nested function calls with defaults
+function outer(x: 5)
+    function inner(y: + x 1)
+        return * x y
+    end
+    call inner() -> result
+    return result
+end
+
+show "=== Test 5: Nested functions with defaults ==="
+call outer() -> result1
+call outer(3) -> result2
+show result1
+show result2
+
+// Test 6: Default parameter referencing variables
+set globalDefault 100
+function useGlobal(value: globalDefault)
+    return value
+end
+
+show "=== Test 6: Global variable as default ==="
+call useGlobal() -> result
+show result

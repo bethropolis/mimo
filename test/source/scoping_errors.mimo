@@ -1,0 +1,86 @@
+show "=== Scoping Error Cases Demo ==="
+
+show "1. Redeclaring let variable in same scope:"
+try
+    let x 10
+    let x 20
+catch error
+    show + "Error: " error
+end
+
+show "2. Redeclaring const variable:"
+try
+    const MAX 100
+    //const MAX 200
+catch error
+    show + "Error: " error
+end
+
+show "3. Modifying const variable:"
+try
+    const READONLY 42
+    show READONLY
+    set READONLY 43
+catch error
+    show + "Error: " error
+end
+
+show "4. Accessing undefined variable:"
+try
+    show undefinedVar
+catch error
+    show + "Error: " error
+end
+
+show "5. Block scope violation:"
+let blockTest 100
+if > blockTest 50
+    let innerVar 200
+end
+
+try
+    show innerVar
+catch error
+    show + "Error: " error
+end
+
+show "6. Function scope isolation:"
+function scope_test()
+    let functionLocal 999
+end
+
+call scope_test()
+
+try
+    show functionLocal
+catch error
+    show + "Error: " error
+end
+
+show "7. Const in different scopes (should work):"
+const GLOBAL_CONST 1
+if = 1 1
+    const GLOBAL_CONST 2
+    show GLOBAL_CONST
+end
+show GLOBAL_CONST
+
+show "8. Let redeclaration across scopes (should work):"
+let scopeVar 1
+show scopeVar
+
+if = 1 1
+    let scopeVar 2
+    show scopeVar
+end
+
+show scopeVar
+
+show "9. Assignment to non-existent variable:"
+try
+    set nonExistent 42
+catch error
+    show + "Error: " error
+end
+
+show "=== Error Cases Demo Complete ==="

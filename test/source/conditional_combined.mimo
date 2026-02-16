@@ -1,0 +1,70 @@
+// Comprehensive test for all conditional expressions: ternary (?:), null coalescing (??), and safe navigation (?.)
+// All replaced by `if_else`, `coalesce`, `get_property_safe` builtins
+
+// Simple ternary operator
+set age 25
+set status call if_else(> age 18, "adult", "minor")
+show status  // Should show "adult"
+
+// Simple null coalescing
+set name null
+set display_name call coalesce(name, "Anonymous")
+show display_name  // Should show "Anonymous"
+
+// Simple safe navigation
+set user null
+set user_name call get_property_safe(user, "name")
+show user_name  // Should show null
+
+// Combined ternary and null coalescing
+set input null
+set value call coalesce(input, "default")
+set result call if_else(= value "default", "using default", "using input")
+show result  // Should show "using default"
+
+// Combined safe navigation and null coalescing
+set config { server: null }
+set host call coalesce(call get_property_safe(call get_property_safe(config, "server"), "host"), "localhost")
+show host  // Should show "localhost"
+
+// Triple combination
+set data null
+set backup_data { value: "backup" }
+set final_value call coalesce(call get_property_safe(data, "value"), call coalesce(call get_property_safe(backup_data, "value"), "fallback"))
+show final_value  // Should show "backup"
+
+// Working with objects
+set person { name: "Alice", address: null }
+set street call coalesce(call get_property_safe(call get_property_safe(person, "address"), "street"), "Unknown")
+set greeting call if_else((= (call get_property_safe(person, "name")) null), "Hello stranger", "Hello Alice")
+show street    // Should show "Unknown"
+show greeting  // Should show "Hello Alice"
+
+// Nested ternary with safe navigation
+set settings { theme: "dark" }
+set color call if_else(call get_property_safe(settings, "theme"), "white", "black")
+show color  // Should show "white"
+
+// Null coalescing chains
+set first null
+set second null
+set third "found"
+set chained call coalesce(first, call coalesce(second, third))
+show chained  // Should show "found"
+
+// Safe navigation with boolean properties
+set flags { enabled: true }
+set is_enabled call coalesce(call get_property_safe(flags, "enabled"), false)
+set status_msg call if_else(is_enabled, "ON", "OFF")
+show status_msg  // Should show "ON"
+
+// Complex combination scenario
+set api_response null
+set fallback { status: "offline", code: 500 }
+set status_code call coalesce(call get_property_safe(api_response, "status"), call coalesce(call get_property_safe(fallback, "status"), "unknown"))
+set is_ok call if_else(= status_code "online", true, false)
+set message call if_else(is_ok, "Service running", "Service down")
+show status_code  // Should show "offline"
+show message     // Should show "Service down"
+
+show "All combined conditional expression tests completed"

@@ -1,0 +1,88 @@
+import "regex" as r
+import "assert" as assert
+
+show "=== Testing Regex Module Edge Cases ==="
+
+// Get assert functions as variables to avoid reserved keyword issues
+set assert_true assert["true"]
+set assert_false assert["false"]
+
+// 1. Test invalid regex patterns
+show "1. Testing Invalid Regex Patterns..."
+try
+    call r.is_match("[invalid", "test")
+catch err
+    show "Caught invalid regex error as expected"
+end
+
+try
+    call r.find_matches("*invalid", "test")
+catch err
+    show "Caught invalid regex error in find_matches"
+end
+
+// 2. Test null/empty inputs
+show "2. Testing Null and Empty Inputs..."
+call assert.eq(call r.find_matches("\\d+", ""), null)
+call assert_false(call r.is_match("test", ""))
+call assert.eq(call r.replace_all("", "test", "replacement"), "")
+
+// 3. Test pattern with no matches
+show "3. Testing Pattern with No Matches..."
+call assert.eq(call r.find_matches("\\d+", "no digits here"), null)
+call assert.eq(call r.extract("\\d+", "no digits here"), null)
+call assert_false(call r.is_match("\\d+", "no digits here"))
+
+// 4. Test complex patterns
+show "4. Testing Complex Patterns..."
+set complex_text "Email: user@example.com, Phone: (555) 123-4567, Date: 2024-05-20"
+set email_regex "[\\w-\\.]+@[\\w-]+\\.[a-zA-Z]{2,}"
+set phone_regex "\\(\\d{3}\\)\\s\\d{3}-\\d{4}"
+set date_regex "\\d{4}-\\d{2}-\\d{2}"
+
+call r.find_matches(email_regex, complex_text) -> email_match
+call r.find_matches(phone_regex, complex_text) -> phone_match
+call r.find_matches(date_regex, complex_text) -> date_match
+
+call assert.eq(email_match[0], "user@example.com")
+call assert.eq(phone_match[0], "(555) 123-4567")
+call assert.eq(date_match[0], "2024-05-20")
+
+// 5. Test flags edge cases
+show "5. Testing Flags Edge Cases..."
+call assert_true(call r.is_match("test", "TEST", "i"), "Case insensitive should work")
+call assert_false(call r.is_match("test", "TEST", ""), "Case sensitive should fail")
+
+// Test multiline flag
+set multiline_text "line1\nline2\nline3"
+call r.find_matches("^line", multiline_text, "gm") -> multiline_matches
+call assert.eq(call len(multiline_matches), 3)
+
+// 6. Test replacement edge cases
+show "6. Testing Replacement Edge Cases..."
+call assert.eq(call r.replace_all("test", "notfound", "replacement"), "test")
+call assert.eq(call r.replace_all("aaa", "a", "b"), "bbb")
+call assert.eq(call r.replace_all("test123test456", "\\d+", "X"), "testXtestX")
+
+// 7. Test extract with capturing groups
+show "7. Testing Extract with Capturing Groups..."
+set url_text "Visit https://example.com:8080/path"
+set url_pattern "(https?)://([^:]+):(\\d+)(/.*)"
+
+call r.extract(url_pattern, url_text) -> url_parts
+call assert.eq(url_parts[0], "https://example.com:8080/path")  // Full match
+call assert.eq(url_parts[1], "https")                         // Protocol
+call assert.eq(url_parts[2], "example.com")                   // Domain
+call assert.eq(url_parts[3], "8080")                          // Port
+call assert.eq(url_parts[4], "/path")                         // Path
+
+// 8. Test special regex characters
+show "8. Testing Special Regex Characters..."
+set special_text "Price: $19.99, Discount: 20%"
+call r.find_matches("\\$\\d+\\.\\d{2}", special_text) -> price_match
+call r.find_matches("\\d+%", special_text) -> percent_match
+
+call assert.eq(price_match[0], "$19.99")
+call assert.eq(percent_match[0], "20%")
+
+show "=== All Regex Edge Case Tests Passed ==="

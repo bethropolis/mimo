@@ -1,0 +1,77 @@
+show "=== Error Handling Demo ==="
+
+show "1. Division by zero error:"
+try
+    set result / 10 0
+    show result
+catch err
+    show + "Caught: " err
+end
+
+show "2. Array index out of bounds:"
+try
+    set arr [1, 2, 3]
+    show arr[10]
+catch err
+    show + "Caught: " err
+end
+
+show "3. Type error - indexing non-array:"
+try
+    set num 42
+    show num[0]
+catch err
+    show + "Caught: " err
+end
+
+show "4. Undefined variable access:"
+try
+    show some_undefined_var
+catch err
+    show + "Caught: " err
+end
+
+show "5. Function call with wrong arguments:"
+function test_func(a, b)
+    return + a b
+end
+
+try
+    call test_func(1) -> result
+catch err
+    show + "Caught: " err
+end
+
+show "6. Built-in function error:"
+try
+    call len(42)
+catch err
+    show + "Caught: " err
+end
+
+show "7. Assignment to const:"
+try
+    const READONLY 100
+    set READONLY 200
+catch err
+    show + "Caught: " err
+end
+
+show "8. Pop from empty array:"
+try
+    set empty []
+    call pop(empty)
+catch err
+    show + "Caught: " err
+end
+
+show "9. For loop with non-array:"
+try
+    for item in 42
+        show item
+    end
+catch err
+    show + "Caught: " err
+end
+
+show "=== Error Demo Complete ==="

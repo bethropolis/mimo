@@ -1,0 +1,85 @@
+show "=== Standard Library: Math Module Demo ==="
+
+import "math" as m
+
+show "--- Constants ---"
+show + "PI: " m.PI
+show + "E: " m.E
+
+show "--- Trigonometry (using PI/4 = 0.785398...) ---"
+set angle_rad (/ m.PI 4)
+call m.sin(angle_rad) -> sin_val
+call m.cos(angle_rad) -> cos_val
+call m.tan(angle_rad) -> tan_val
+show + "sin(PI/4): " sin_val
+show + "cos(PI/4): " cos_val
+show + "tan(PI/4): " tan_val
+
+call m.asin(0.5) -> asin_val
+call m.acos(0.5) -> acos_val
+call m.atan(1) -> atan_val
+call m.atan2(1, 1) -> atan2_val // atan2(y,x)
+show + "asin(0.5): " asin_val
+show + "acos(0.5): " acos_val
+show + "atan(1): " atan_val
+show + "atan2(1,1): " atan2_val
+
+show "--- Logarithms & Exponential ---"
+call m.log(m.E) -> ln_e
+call m.log10(100) -> log10_100
+call m.log2(8) -> log2_8
+call m.exp(1) -> exp_1
+show + "ln(E): " ln_e
+show + "log10(100): " log10_100
+show + "log2(8): " log2_8
+show + "exp(1): " exp_1
+
+show "--- Power & Roots ---"
+call m.pow(2, 3) -> pow_2_3
+call m.sqrt(16) -> sqrt_16
+call m.cbrt(27) -> cbrt_27
+show + "pow(2,3): " pow_2_3
+show + "sqrt(16): " sqrt_16
+show + "cbrt(27): " cbrt_27
+
+show "--- Rounding & Absolute ---"
+call m.floor(3.7) -> floor_val
+call m.ceil(3.2) -> ceil_val
+call m.round(3.5) -> round_val1
+call m.round(3.49) -> round_val2
+call m.abs(-5) -> abs_val
+show + "floor(3.7): " floor_val
+show + "ceil(3.2): " ceil_val
+show + "round(3.5): " round_val1
+show + "round(3.49): " round_val2
+show + "abs(-5): " abs_val
+
+show "--- Min/Max (Optional) ---"
+call m.max(1, 5, 2, 8, 3) -> max_val
+call m.min(-1, 0, 5, -10, 2) -> min_val
+show + "max(1,5,2,8,3): " max_val
+show + "min(-1,0,5,-10,2): " min_val
+
+show "--- Error Handling ---"
+try
+    call m.sin("not a number") -> sin_err_res
+    show sin_err_res // Should not reach here
+catch err
+    show + "Error for sin with string: " err
+end
+
+try
+    call m.pow(2) -> pow_err_res // Not enough args
+    show pow_err_res // Should not reach here
+catch err
+    show + "Error for pow with 1 arg: " err
+end
+
+try
+    call m.max() -> max_err_res // Not enough args for variadic
+    show max_err_res // Should not reach here
+catch err
+    show + "Error for max with 0 args: " err
+end
+
+show "=== Math Module Demo Complete ==="

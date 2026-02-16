@@ -1,0 +1,41 @@
+import "string" as string
+
+// String utility module for testing
+export const DEFAULT_SEPARATOR " "
+const NEWLINE "\n"
+
+export function join_strings(arr, separator)
+    call join(arr, separator) -> result
+    return result
+end
+
+export function make_upper(str)
+    return call string.to_upper(str)
+end
+
+export function make_lower(str)
+    return call string.to_lower(str)
+end
+
+export function get_length(str)
+    call len(str) -> result
+    return result
+end
+
+export function format_greeting(name)
+    return + + "Hello, " name "!"
+end
+
+export function repeat_char(char, count)
+    set result ""
+    set i 0
+    while (< i count)
+        set result + result char
+        set i + i 1
+    end
+    return result
+end
+
+export const VERSION "1.0.0"
+global string_utils_loaded true
+show "String utils module loaded"

@@ -1,0 +1,44 @@
+show "=== Match Statement Tests ==="
+
+function test_match(value)
+    show + "Matching on: " value
+    match value
+        case 10:
+            show "  -> Matched the number 10."
+        case "hello":
+            show "  -> Matched the string 'hello'."
+        case true:
+            show "  -> Matched boolean true."
+        case null:
+            show "  -> Matched null."
+        default:
+            show "  -> No literal match."
+    end
+end
+
+call test_match(10)
+call test_match("world")
+call test_match(null)
+
+show "\n--- Pattern Binding ---"
+set data ["capture", 100]
+match data
+    case [a, b]:
+        show "  -> Captured elements:"
+        show + "    a = " a
+        show + "    b = " b
+    default:
+        show "  -> Failed to match array pattern."
+end
+
+show "\n--- Nested Patterns ---"
+set nested_data [10, ["x", 20]]
+match nested_data
+    case [10, [v, 20]]:
+        show "  -> Matched nested pattern successfully!"
+        show + "    v = " v
+    default:
+        show "  -> Failed to match nested pattern."
+end
+
+show "=== Match Statement Tests Complete ==="

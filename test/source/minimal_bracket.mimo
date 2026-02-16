@@ -1,0 +1,21 @@
+show "=== Minimal Bracket Test ==="
+
+set obj { name: "test" }
+show obj
+show obj.name
+show obj["name"]
+
+show "Testing bracket assignment:"
+set obj["age"] 25
+show obj["age"]
+show obj
+
+set arr [1, 2, 3]
+show arr
+
+show "Testing array assignment:"
+set arr[1] 99
+show arr[1]
+show arr
+
+show "=== End test ==="

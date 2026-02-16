@@ -1,0 +1,113 @@
+show "=== String Manipulation Functions Test ==="
+
+
+import "string" as string
+
+
+
+
+show "1. Basic string functions:"
+set name "  Alice  "
+call string.to_upper(name) -> upper_name
+show upper_name
+show "Expected: '  ALICE  '"
+
+call string.to_lower(upper_name) -> lower_name  
+show lower_name
+show "Expected: '  alice  '"
+
+call string.trim(name) -> trimmed_name
+show trimmed_name
+show "Expected: 'Alice'"
+
+show "2. String call string.substring operations:"
+set text "Hello World"
+call string.substring(text, 0, 5) -> hello
+show hello
+show "Expected: 'Hello'"
+
+call string.substring(text, 6) -> world
+show world
+show "Expected: 'World'"
+
+call string.substring(text, 2, 8) -> middle
+show middle
+show "Expected: 'llo Wo'"
+
+show "3. String searching:"
+call string.contains(text, "World") -> has_world
+show has_world
+show "Expected: true"
+
+call string.contains(text, "xyz") -> has_xyz
+show has_xyz
+show "Expected: false"
+
+show "4. String replacement:"
+call string.replace(text, "World", "Universe") -> replaced
+show replaced
+show "Expected: 'Hello Universe'"
+
+call string.replace("banana", "a", "o") -> replaced2
+show replaced2
+show "Expected: 'bonana' (only first occurrence)"
+
+show "5. String splitting:"
+set csv "apple,banana,cherry"
+call string.split(csv, ",") -> fruits
+show fruits
+show "Expected: ['apple', 'banana', 'cherry']"
+
+set sentence "The quick brown fox"
+call string.split(sentence, " ") -> words
+show words
+show "Expected: ['The', 'quick', 'brown', 'fox']"
+
+show "6. Combining string functions:"
+set messy_text "  HELLO world  "
+call string.trim(messy_text) -> step1
+call string.to_lower(step1) -> step2
+call string.replace(step2, "hello", "hi") -> final
+show final
+show "Expected: 'hi world'"
+
+show "7. String functions with variables:"
+set greeting "Hello"
+set target "World"
+set space " "
+set combined + + greeting space target
+show combined
+
+call string.to_upper(combined) -> loud_greeting
+show loud_greeting
+
+show "8. String arrays and manipulation:"
+set names ["alice", "bob", "charlie"]
+for name in names
+    call string.to_upper(name) -> upper_name
+    show upper_name
+end
+
+show "9. String length with existing len function:"
+call len("Hello") -> hello_len
+show hello_len
+show "Expected: 5"
+
+call len("") -> empty_len
+show empty_len
+show "Expected: 0"
+
+show "10. Error handling:"
+try
+    call string.to_upper(123)
+catch err
+    show + "Caught error: " err
+end
+
+try
+    call string.substring("test", "not_a_number")
+catch err
+    show + "Caught error: " err
+end
+
+show "=== String functions test complete ==="

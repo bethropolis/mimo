@@ -1,0 +1,138 @@
+// Comprehensive module system test - tests all implemented features
+
+show "=== Comprehensive Module System Test ==="
+
+// Import modules
+import "math_utils" as math
+import "string_utils" as str
+
+show "\n1. Testing module constants access:"
+show math.PI
+show math.E
+show str.DEFAULT_SEPARATOR
+show str.VERSION
+
+show "\n2. Testing basic math functions:"
+call math.add(10, 5) -> sum
+call math.subtract(20, 8) -> diff
+call math.multiply(6, 7) -> product
+call math.divide(24, 6) -> quotient
+show sum
+show diff
+show product
+show quotient
+
+show "\n3. Testing advanced math functions:"
+call math.circle_area(3) -> area
+call math.square(9) -> squared
+call math.power(2, 8) -> power_result
+show area
+show squared
+show power_result
+
+show "\n4. Testing string functions:"
+call str.format_greeting("Alice") -> greeting
+call str.make_upper("hello world") -> upper_text
+call str.make_lower("MIMO ROCKS") -> lower_text
+call str.get_length("testing") -> length
+show greeting
+show upper_text
+show lower_text
+show length
+
+show "\n5. Testing string utilities:"
+call str.join_strings(["a", "b", "c"], "-") -> joined
+call str.repeat_char("*", 5) -> stars
+show joined
+show stars
+
+show "\n6. Testing global variables from modules:"
+show math_loaded
+show string_utils_loaded
+
+show "\n7. Testing module properties in expressions:"
+set pi_doubled  * math.PI 2
+set e_plus_pi  + math.E math.PI
+set version_info  + "Version: " str.VERSION
+show pi_doubled
+show e_plus_pi
+show version_info
+
+show "\n8. Testing conditional expressions with modules:"
+set is_valid_pi call if_else((> math.PI 3.0), "valid", "invalid")
+set version_status call if_else((= str.VERSION "1.0.0"), "current", "outdated")
+set math_comparison call if_else((> math.PI math.E), "PI wins", "E wins")
+show is_valid_pi
+show version_status
+show math_comparison
+
+show "\n9. Testing nested function calls with modules:"
+call math.add(math.PI, math.E) -> math_sum
+call str.format_greeting("Module User") -> module_greeting
+call math.square(5) -> five_squared
+call str.make_upper("mimo") -> mimo_upper
+show math_sum
+show module_greeting
+show five_squared
+show mimo_upper
+
+show "\n10. Testing complex expressions with multiple modules:"
+call math.multiply(math.PI, 2) -> diameter_factor
+call str.repeat_char("=", 10) -> separator
+show diameter_factor
+show separator
+
+show "\n11. Testing module properties in control flow:"
+if (> math.PI 3)
+    show "PI is greater than 3"
+else
+    show "PI is not greater than 3"
+end
+
+set count  0
+while (< count 3)
+    call math.add(count, 1) -> next_count
+    set count  next_count
+    call str.repeat_char(".", count) -> dots
+    show dots
+end
+
+show "\n12. Testing module functions with arrays:"
+set numbers  [1, 2, 3, 4, 5]
+for num in numbers
+    call math.square(num) -> squared_num
+    show squared_num
+end
+
+show "\n13. Testing error handling with modules:"
+try
+    call math.divide(10, 0) -> error_result
+catch err
+    show + "Caught math error: " err.message
+end
+
+show "\n14. Testing module property chaining in complex scenarios:"
+call math.circle_area(5) -> circle_area_result
+call str.format_greeting("Mathematician") -> math_greeting
+set area_description  + + "Circle area: " circle_area_result  " units"
+show area_description
+show math_greeting
+
+show "\n15. Testing module constants in calculations:"
+set circumference  * 2 * math.PI 5
+set natural_log_approx  * math.E 1
+show circumference
+show natural_log_approx
+
+show "\n16. Testing module interoperability:"
+call math.add(10, 20) -> sum_result
+call str.repeat_char("*", sum_result) -> star_pattern
+show star_pattern
+
+show "\n17. Testing all conditional operators with modules:"
+set pi_or_default  call coalesce(math.PI, 3.14)
+set pi_status  call if_else((> math.PI 3), "big", "small")
+show pi_or_default
+show pi_status
+
+show "=== Comprehensive Module System Test Complete ==="

@@ -1,0 +1,36 @@
+import "json" as json
+
+show "=== JSON Module Demo ==="
+
+show "1. Parsing a valid JSON string:"
+set simple_json_str "[1, 2, 3, true, false, null]"
+call json.parse(simple_json_str) -> simple_arr
+show simple_arr // Expected: [1, 2, 3, true, false, null]
+
+show "\n2. Parsing JSON object:"
+set obj_json_str "{\"name\": \"Alice\", \"age\": 30}"
+call json.parse(obj_json_str) -> obj_data
+show obj_data // Expected: {name: "Alice", age: 30}
+
+show "\n3. Stringifying a Mimo object to compact JSON:"
+set book_obj { title: "Mimo Adventures", year: 2024 }
+call json.stringify(book_obj) -> book_json_compact
+show book_json_compact // Expected: {"title":"Mimo Adventures","year":2024}
+
+show "\n4. Stringifying with pretty printing (2 spaces):"
+call json.stringify(book_obj, 2) -> book_json_pretty
+show book_json_pretty
+// Expected:
+// {
+//   "title": "Mimo Adventures",
+//   "year": 2024
+// }
+
+show "\n5. Round-trip test (parse then stringify):"
+set test_json "{\"test\": \"roundtrip\"}"
+call json.parse(test_json) -> parsed_data
+call json.stringify(parsed_data) -> roundtrip_json
+set roundtrip_message  + "Roundtrip: "  roundtrip_json
+show roundtrip_message
+
+show "=== JSON Module Demo Complete ==="
