@@ -1,0 +1,34 @@
+{
+  "name": "mimo-lang",
+  "version": "1.1.1",
+  "description": "A programming language made in javascript mostly for learning purposes.",
+  "keywords": [
+    "programing language"
+  ],
+  "author": "bethropolis",
+  "license": "MIT",
+  "main": "index.js",
+  "module": "index.js",
+  "type": "module",
+  "bin": {
+    "mimo": "./bin/cli.js"
+  },
+  "scripts": {
+    "mimo": "bun bin/cli.js",
+    "dev": "bun test.js",
+    "build": "bun build.js",
+    "convert": "bun tools/convert.js"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "esbuild": "^0.25.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bethropolis/mimo.git"
+  },
+  "homepage": "https://bethropolis.github.io/mimo",
+  "bugs": {
+    "url": "https://github.com/bethropolis/mimo/issues"
+  }
+}
