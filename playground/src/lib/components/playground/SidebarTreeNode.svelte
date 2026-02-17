@@ -44,7 +44,7 @@
 			<button
 				type="button"
 				onclick={() => onToggleFolder(node.id)}
-				class="mr-0.5 rounded p-0.5 text-zinc-500 hover:bg-zinc-200/70 dark:text-zinc-400 dark:hover:bg-zinc-800"
+				class="mr-0.5 rounded p-0.5 text-text-soft hover:bg-surface-elevated"
 			>
 				{#if collapsed[node.id]}
 					<ChevronRight size={12} />
@@ -56,7 +56,7 @@
 			<div class="mr-0.5 h-4 w-4"></div>
 		{/if}
 		{#if editNodeId === node.id}
-			<div class="flex min-w-0 flex-1 items-center gap-1 rounded border border-zinc-300 bg-white px-1 py-0.5 dark:border-zinc-700 dark:bg-zinc-900">
+			<div class="flex min-w-0 flex-1 items-center gap-1 rounded border border-border bg-surface px-1 py-0.5">
 				{#if node.type === 'folder'}
 					<FolderOpen size={13} />
 				{:else if node.kind === 'module'}
@@ -72,7 +72,7 @@
 						if (event.key === 'Enter') onSubmitEdit();
 						if (event.key === 'Escape') onCancelEdit();
 					}}
-					class="w-full bg-transparent text-xs text-zinc-800 outline-none dark:text-zinc-100"
+					class="w-full bg-transparent text-xs text-app-fg outline-none"
 				/>
 				<button
 					type="button"
@@ -85,7 +85,7 @@
 				<button
 					type="button"
 					onclick={onCancelEdit}
-					class="inline-flex items-center rounded p-0.5 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+					class="inline-flex items-center rounded p-0.5 text-text-muted hover:bg-surface-elevated"
 					aria-label="Cancel"
 				>
 					<X size={11} />
@@ -101,10 +101,10 @@
 				}}
 				class={`flex min-w-0 flex-1 items-center gap-1.5 rounded px-1.5 py-1 text-left text-xs transition ${
 					activeFileId === node.id
-						? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200'
+						? 'bg-accent-muted text-accent'
 						: selectedNodeId === node.id
-							? 'bg-zinc-200/80 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-100'
-							: 'text-zinc-700 hover:bg-zinc-200/70 dark:text-zinc-300 dark:hover:bg-zinc-800'
+							? 'bg-surface-elevated text-app-fg'
+							: 'text-app-fg hover:bg-surface-elevated'
 				}`}
 			>
 				{#if node.type === 'folder'}
@@ -120,7 +120,7 @@
 				{/if}
 				<span class="truncate">{node.name}</span>
 				{#if deleteArmedId === node.id}
-					<span class="ml-auto text-[9px] uppercase tracking-[0.08em] text-rose-600 dark:text-rose-300">delete?</span>
+					<span class="ml-auto text-[9px] uppercase tracking-[0.08em] text-rose-600 dark:text-rose-400">delete?</span>
 				{/if}
 			</button>
 		{/if}

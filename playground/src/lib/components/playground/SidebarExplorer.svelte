@@ -190,17 +190,17 @@
 	});
 </script>
 
-<aside class="flex h-full flex-col border-r border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
-	<div class="border-b border-zinc-200 px-2.5 py-2 dark:border-zinc-800">
+<aside class="flex h-full flex-col border-r border-border bg-panel">
+	<div class="border-b border-border px-2.5 py-2">
 		<div class="mb-1.5 flex items-center justify-between gap-2">
-			<h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">
+			<h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-text-soft">
 				Explorer
 			</h2>
 			<div class="flex items-center gap-1">
 				<button
 					type="button"
 					onclick={beginCreateFile}
-					class="inline-flex items-center rounded border border-zinc-300 bg-white p-1 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+					class="inline-flex items-center rounded border border-border bg-surface p-1 text-app-fg hover:bg-surface-elevated"
 					aria-label="New file"
 					title="New file"
 				>
@@ -209,7 +209,7 @@
 				<button
 					type="button"
 					onclick={beginCreateFolder}
-					class="inline-flex items-center rounded border border-zinc-300 bg-white p-1 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+					class="inline-flex items-center rounded border border-border bg-surface p-1 text-app-fg hover:bg-surface-elevated"
 					aria-label="New folder"
 					title="New folder"
 				>
@@ -218,7 +218,7 @@
 				<button
 					type="button"
 					onclick={beginRename}
-					class="inline-flex items-center rounded border border-zinc-300 bg-white p-1 text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+					class="inline-flex items-center rounded border border-border bg-surface p-1 text-app-fg hover:bg-surface-elevated disabled:opacity-40"
 					aria-label="Rename selected"
 					title="Rename"
 					disabled={!selectedNodeId}
@@ -228,10 +228,10 @@
 				<button
 					type="button"
 					onclick={triggerDelete}
-					class={`inline-flex items-center rounded border bg-white p-1 text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 ${
+					class={`inline-flex items-center rounded border bg-surface p-1 text-app-fg hover:bg-surface-elevated disabled:opacity-40 ${
 						deleteArmedId === selectedNodeId
 							? 'border-rose-400 text-rose-700 dark:border-rose-500 dark:text-rose-300'
-							: 'border-zinc-300 dark:border-zinc-700'
+							: 'border-border'
 					}`}
 					aria-label="Delete selected"
 					title={deleteArmedId === selectedNodeId ? 'Click again to delete' : 'Delete'}

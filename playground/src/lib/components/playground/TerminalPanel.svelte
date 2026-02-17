@@ -11,10 +11,10 @@
 
 	/** @type {Record<string, string>} */
 	const levelClass = {
-		info: 'text-sky-300',
-		success: 'text-emerald-300',
-		error: 'text-rose-300',
-		warning: 'text-amber-300'
+		info: 'text-sky-700 dark:text-sky-300',
+		success: 'text-emerald-700 dark:text-emerald-300',
+		error: 'text-rose-700 dark:text-rose-300',
+		warning: 'text-amber-700 dark:text-amber-300'
 	};
 
 	/** @type {Record<string, string>} */
@@ -59,8 +59,8 @@
 	});
 </script>
 
-<section class="flex h-full flex-col rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-	<div class="flex items-center justify-between border-b border-zinc-200 px-3 py-2 dark:border-zinc-800">
+<section class="flex h-full flex-col border border-border/40 bg-surface">
+	<div class="flex items-center justify-between border-b border-border px-3 py-2">
 		<div class="flex items-center gap-2">
 			<Terminal size={14} />
 			<h2 class="text-sm font-semibold">Terminal</h2>
@@ -69,7 +69,7 @@
 			<button
 				type="button"
 				onclick={copyLogs}
-				class="inline-flex items-center rounded-md border border-zinc-300 bg-zinc-100 p-1.5 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+				class="inline-flex items-center rounded-md border border-border bg-surface-elevated p-1.5 text-text-muted hover:bg-panel-alt"
 				aria-label="Copy logs"
 			>
 				<Copy size={12} />
@@ -77,7 +77,7 @@
 			<button
 				type="button"
 				onclick={onClearLogs}
-				class="inline-flex items-center rounded-md border border-zinc-300 bg-zinc-100 p-1.5 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+				class="inline-flex items-center rounded-md border border-border bg-surface-elevated p-1.5 text-text-muted hover:bg-panel-alt"
 				aria-label="Clear logs"
 			>
 				<Trash2 size={12} />
@@ -85,9 +85,9 @@
 		</div>
 	</div>
 
-	<div bind:this={viewportEl} class="min-h-0 flex-1 overflow-auto bg-zinc-950 p-3 font-mono text-xs text-zinc-200">
+	<div bind:this={viewportEl} class="min-h-0 flex-1 overflow-auto bg-panel-alt p-3 font-mono text-xs text-app-fg">
 		{#if logs.length === 0}
-			<p class="text-zinc-500">No terminal logs yet.</p>
+			<p class="text-text-soft">No terminal logs yet.</p>
 		{:else}
 			{#each logs as log}
 				<div class="mb-1.5 grid grid-cols-[4.5rem_5rem_1fr] items-start gap-2">
@@ -101,7 +101,7 @@
 		{/if}
 	</div>
 
-	<div class="grid grid-cols-[1fr_auto] gap-2 border-t border-zinc-200 p-2 dark:border-zinc-800">
+	<div class="grid grid-cols-[1fr_auto] gap-2 border-t border-border p-2">
 		<input
 			bind:value={command}
 			onkeydown={(event) => {
@@ -121,12 +121,12 @@
 				}
 			}}
 			placeholder="Type command..."
-			class="flex-1 rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 dark:border-zinc-700 dark:bg-zinc-800"
+			class="flex-1 rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent"
 		/>
 		<button
 			type="button"
 			onclick={submit}
-			class="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-black dark:bg-zinc-100 dark:text-zinc-900"
+			class="rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-contrast hover:brightness-110"
 		>
 			Run
 		</button>

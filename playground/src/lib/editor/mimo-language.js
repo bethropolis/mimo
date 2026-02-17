@@ -1,4 +1,5 @@
 import { LanguageSupport, StreamLanguage } from '@codemirror/language';
+import { autocompletion, snippetCompletion } from '@codemirror/autocomplete';
 
 const numberPattern = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b/;
 const booleanPattern = /^(?:true|false|null)\b/;
@@ -61,3 +62,101 @@ const mimoStreamParser = {
 };
 
 export const mimoLanguage = new LanguageSupport(StreamLanguage.define(mimoStreamParser));
+
+const completionKeywords = [
+	'if',
+	'else',
+	'while',
+	'for',
+	'in',
+	'match',
+	'case',
+	'default',
+	'break',
+	'continue',
+	'try',
+	'catch',
+	'throw',
+	'return',
+	'function',
+	'fn',
+	'end',
+	'import',
+	'export',
+	'from',
+	'as',
+	'set',
+	'let',
+	'const',
+	'global',
+	'call',
+	'show'
+];
+
+const completionOperators = ['+', '-', '*', '/', '%', '=', '>', '<', '>=', '<=', '!=', '==', 'and', 'or', 'not'];
+const completionBuiltins = ['array.length', 'array.sum', 'array.map', 'get', 'set'];
+
+const mimoCompletionEntries = [
+	...completionKeywords.map((label) => ({ label, type: 'keyword' })),
+	...completionOperators.map((label) => ({ label, type: 'operator' })),
+	...completionBuiltins.map((label) => ({ label, type: 'function' })),
+	snippetCompletion('function ${1:name}(${2:arg})\n\t${3:show "todo"}\nend', {
+		label: 'function … end',
+		type: 'keyword',
+		detail: 'snippet'
+	}),
+	snippetCompletion('if ${1:condition}\n\t${2:show "true"}\nend', {
+		label: 'if … end',
+		type: 'keyword',
+		detail: 'snippet'
+	}),
+	snippetCompletion('if ${1:condition}\n\t${2:show "true"}\nelse\n\t${3:show "false"}\nend', {
+		label: 'if … else … end',
+		type: 'keyword',
+		detail: 'snippet'
+	}),
+	snippetCompletion('while ${1:condition}\n\t${2:show "loop"}\nend', {
+		label: 'while … end',
+		type: 'keyword',
+		detail: 'snippet'
+	}),
+	snippetCompletion('for ${1:item} in ${2:items}\n\t${3:show item}\nend', {
+		label: 'for … in … end',
+		type: 'keyword',
+		detail: 'snippet'
+	}),
+	snippetCompletion('match ${1:value}\n\tcase ${2:pattern}\n\t\t${3:show "matched"}\n\tdefault\n\t\t${4:show "default"}\nend', {
+		label: 'match … case … end',
+		type: 'keyword',
+		detail: 'snippet'
+	}),
+	snippetCompletion('try\n\t${1:call risky()}\ncatch ${2:error}\n\t${3:show error}\nend', {
+		label: 'try … catch … end',
+		type: 'keyword',
+		detail: 'snippet'
+	}),
+	snippetCompletion('import "${1:modules/math.mimo}" as ${2:math}', {
+		label: 'import module as',
+		type: 'keyword',
+		detail: 'snippet'
+	}),
+	snippetCompletion('export function ${1:name}(${2:arg})\n\t${3:return arg}\nend', {
+		label: 'export function',
+		type: 'keyword',
+		detail: 'snippet'
+	})
+];
+
+/** @param {import('@codemirror/autocomplete').CompletionContext} context */
+function mimoCompletionSource(context) {
+	const before = context.matchBefore(/[A-Za-z_+\-*/%<>=!][A-Za-z0-9_.+\-*/%<>=!]*/);
+	if (!before && !context.explicit) return null;
+	const from = before ? before.from : context.pos;
+	return {
+		from,
+		options: mimoCompletionEntries,
+		validFor: /^[A-Za-z0-9_.+\-*/%<>=!]*$/
+	};
+}
+
+export const mimoEditorExtensions = [autocompletion({ override: [mimoCompletionSource], activateOnTyping: true })];

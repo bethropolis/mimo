@@ -55,20 +55,20 @@
 	let nodeCount = $derived(countNodes(astData));
 </script>
 
-<section class="flex h-full flex-col rounded-2xl border border-zinc-200 bg-zinc-900 text-zinc-100 dark:border-zinc-700">
-	<div class="flex items-center justify-between border-b border-zinc-700/70 px-3 py-2">
+<section class="flex h-full flex-col border border-border/40 bg-surface text-app-fg">
+	<div class="flex items-center justify-between border-b border-border px-3 py-2">
 		<div>
 			<div class="flex items-center gap-2">
-				<GitBranch size={14} class="text-zinc-300" />
-				<h2 class="text-sm font-semibold text-zinc-100">AST Viewer</h2>
+				<GitBranch size={14} class="text-text-soft" />
+				<h2 class="text-sm font-semibold text-app-fg">AST Viewer</h2>
 			</div>
-			<p class="text-[11px] text-zinc-400">{nodeCount ? `${nodeCount} nodes` : 'No AST yet'}</p>
+			<p class="text-[11px] text-text-soft">{nodeCount ? `${nodeCount} nodes` : 'No AST yet'}</p>
 		</div>
 		<div class="flex items-center gap-1">
 			<button
 				type="button"
 				onclick={expandAll}
-				class="rounded-lg border border-zinc-600 px-2 py-1 text-xs hover:bg-zinc-800"
+				class="rounded-lg border border-border px-2 py-1 text-xs hover:bg-surface-elevated"
 				disabled={!astData}
 			>
 				Expand
@@ -76,7 +76,7 @@
 			<button
 				type="button"
 				onclick={collapseAll}
-				class="rounded-lg border border-zinc-600 px-2 py-1 text-xs hover:bg-zinc-800"
+				class="rounded-lg border border-border px-2 py-1 text-xs hover:bg-surface-elevated"
 				disabled={!astData}
 			>
 				Collapse
@@ -85,7 +85,7 @@
 	</div>
 
 	{#if astLoading}
-		<div class="flex min-h-0 flex-1 items-center justify-center gap-2 text-sm text-zinc-300">
+		<div class="flex min-h-0 flex-1 items-center justify-center gap-2 text-sm text-text-muted">
 			<LoaderCircle size={16} class="animate-spin" />
 			<span>Parsing AST...</span>
 		</div>
@@ -104,7 +104,7 @@
 			<AstTreeNode node={astData} depth={0} {expandedIds} onToggle={toggleNode} />
 		</div>
 	{:else}
-		<div class="flex min-h-0 flex-1 items-center justify-center text-sm text-zinc-400">
+		<div class="flex min-h-0 flex-1 items-center justify-center text-sm text-text-soft">
 			Run or edit code to generate AST.
 		</div>
 	{/if}

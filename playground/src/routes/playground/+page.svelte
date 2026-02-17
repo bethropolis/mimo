@@ -1,5 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import HeaderBar from '$lib/components/playground/HeaderBar.svelte';
 	import SidebarExplorer from '$lib/components/playground/SidebarExplorer.svelte';
 	import EditorPanel from '$lib/components/playground/EditorPanel.svelte';
@@ -7,6 +7,7 @@
 	import AstViewerPanel from '$lib/components/playground/AstViewerPanel.svelte';
 	import OutputPanel from '$lib/components/playground/OutputPanel.svelte';
 	import SettingsModal from '$lib/components/playground/SettingsModal.svelte';
+	import ShareModal from '$lib/components/playground/ShareModal.svelte';
 	import SplitPane from '$lib/components/playground/SplitPane.svelte';
 	import {
 		initZenFS,
@@ -22,6 +23,8 @@
 		deleteWorkspacePath,
 		createZenFSBrowserAdapter
 	} from '$lib/runtime/zenfs.js';
+	import MimoRunnerWorker from '$lib/runtime/mimo-runner.worker.js?worker';
+	import { createZipBlob } from '$lib/runtime/zip.js';
 
 	/** @type {Record<string, string>} */
 	const fileContents = {
@@ -87,7 +90,10 @@
 
 	let sidebarOpen = $state(true);
 	let settingsOpen = $state(false);
+	let shareOpen = $state(false);
 	let fsStatus = $state('initializing');
+	let shareLink = $state('');
+	let shareLinkError = $state('');
 
 	let sidebarRatio = $state(23);
 	let workspaceRatio = $state(64);
@@ -134,6 +140,10 @@
 	/** @type {any | null} */
 	let astMimo = null;
 	let astParseSeq = 0;
+	let runWorker = $state(/** @type {Worker | null} */ (null));
+	let runRequestId = 0;
+	/** @type {Map<number, { resolve: (value: any) => void; reject: (error: unknown) => void }>} */
+	const runPending = new Map();
 
 	function timestamp() {
 		return new Date().toLocaleTimeString('en-US', { hour12: false });
@@ -216,6 +226,73 @@
 
 	function refreshExplorerFromFs() {
 		tree = buildTreeFromFs();
+	}
+
+	/** @param {string} text */
+	function encodeShareBase64(text) {
+		const bytes = new TextEncoder().encode(text);
+		let binary = '';
+		for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]);
+		return btoa(binary);
+	}
+
+	/** @param {string} base64 */
+	function decodeShareBase64(base64) {
+		const binary = atob(base64);
+		const bytes = new Uint8Array(binary.length);
+		for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+		return new TextDecoder().decode(bytes);
+	}
+
+	/** @param {string} path */
+	function sanitizeSharedPath(path) {
+		const normalized = String(path || '')
+			.replace(/\\/g, '/')
+			.replace(/^\/+/, '')
+			.replace(/\/+/g, '/')
+			.trim();
+		if (!normalized || normalized.includes('..')) return 'shared/shared.mimo';
+		return normalized;
+	}
+
+	/** @param {string} [dirId] */
+	function snapshotWorkspaceFiles(dirId = '') {
+		/** @type {Record<string, string>} */
+		const files = {};
+		const entries = listWorkspaceEntries(dirId);
+		for (const entry of entries) {
+			if (entry.isDirectory) {
+				Object.assign(files, snapshotWorkspaceFiles(entry.path));
+				continue;
+			}
+			files[entry.path] = readWorkspaceFile(entry.path) ?? '';
+		}
+		return files;
+	}
+
+	function ensureRunWorker() {
+		if (runWorker) return runWorker;
+		runWorker = new MimoRunnerWorker();
+		runWorker.addEventListener('message', (event) => {
+			const payload = event.data;
+			if (!payload || typeof payload.id !== 'number') return;
+			const pending = runPending.get(payload.id);
+			if (!pending) return;
+			runPending.delete(payload.id);
+			if (payload.type === 'run:ok') pending.resolve(payload);
+			else pending.reject(payload.error ?? 'Unknown worker error');
+		});
+		return runWorker;
+	}
+
+	/** @param {{ source: string; filePath: string; files: Record<string, string> }} payload */
+	function runInWorker(payload) {
+		const worker = ensureRunWorker();
+		const id = ++runRequestId;
+		return new Promise((resolve, reject) => {
+			runPending.set(id, { resolve, reject });
+			worker.postMessage({ type: 'run', id, ...payload });
+		});
 	}
 
 	/** @param {any} value */
@@ -476,6 +553,26 @@
 	onMount(async () => {
 		await initZenFS();
 		seedWorkspaceFiles(fileContents);
+
+		const params = new URLSearchParams(location.search);
+		const codeParam = params.get('code');
+		if (codeParam) {
+			try {
+				const decoded = decodeShareBase64(codeParam);
+				const targetPath = sanitizeSharedPath(params.get('file') ?? 'shared/shared.mimo');
+				writeWorkspaceFile(targetPath, decoded);
+				if (!tabs.some((tab) => tab.id === targetPath)) {
+					tabs = [...tabs, { id: targetPath, name: targetPath.split('/').pop() ?? targetPath, content: decoded }];
+				}
+				activeTabId = targetPath;
+				selectedNodeId = targetPath;
+				appendLog('success', `Loaded shared file from URL: ${targetPath}`);
+			} catch (error) {
+				appendLog('error', `Failed to decode shared file: ${String(error)}`);
+				alert(`Failed to decode shared link: ${String(error)}`);
+			}
+		}
+
 		refreshExplorerFromFs();
 
 		tabs = tabs.map((tab) => ({
@@ -497,6 +594,15 @@
 		await refreshAst(activeCode, `/${activeTabId}`);
 	});
 
+	onDestroy(() => {
+		for (const pending of runPending.values()) {
+			pending.reject(new Error('Execution worker disposed.'));
+		}
+		runPending.clear();
+		runWorker?.terminate();
+		runWorker = null;
+	});
+
 	$effect(() => {
 		const code = activeCode;
 		const fileId = activeTabId;
@@ -516,33 +622,23 @@
 		appendLog('info', `Running ${activeTabId}`);
 
 		try {
-			const bundlePath = '/mimo-web.bundle.js';
-			const mod = await import(bundlePath);
-			const Mimo = mod.Mimo;
-			const browserAdapter = mod.createBrowserAdapter ? mod.createBrowserAdapter() : mod.browserAdapter;
-
-			if (!Mimo || !browserAdapter) {
-				throw new Error('Bundle exports are missing. Run `bun run bundles` in playground/.');
-			}
-
-			/** @type {string[]} */
-			const logs = [];
-			const adapter = createZenFSBrowserAdapter(browserAdapter, {
-				/** @param {...unknown} args */
-				onLog: (...args) => logs.push(args.join(' ')),
-				/** @param {...unknown} args */
-				onError: (...args) => logs.push(`ERROR: ${args.join(' ')}`)
+			const workerResult = await runInWorker({
+				source: activeCode,
+				filePath: `/${activeTabId}`,
+				files: snapshotWorkspaceFiles()
 			});
-
-			const mimo = new Mimo(adapter);
-			const result = mimo.run(activeCode, `/${activeTabId}`);
-
-			const merged = [...logs];
-			if (result !== undefined && result !== null) merged.push(`Result: ${String(result)}`);
-			if (merged.length === 0) merged.push('Program finished with no output.');
-
-			outputLines = merged;
+			outputLines = workerResult.output ?? ['Program finished with no output.'];
 			errors = [];
+
+			if (workerResult.files && typeof workerResult.files === 'object') {
+				for (const [path, content] of Object.entries(workerResult.files)) {
+					writeWorkspaceFile(path, String(content ?? ''));
+				}
+				tabs = tabs.map((tab) => ({
+					...tab,
+					content: readWorkspaceFile(tab.id) ?? tab.content
+				}));
+			}
 			appendLog('success', 'Execution completed.');
 		} catch (error) {
 			const message = String(error);
@@ -590,12 +686,54 @@
 	}
 
 	async function shareWorkspace() {
-		const url = `${location.origin}/playground`;
+		shareOpen = true;
+		shareLinkError = '';
+	}
+
+	function downloadWorkspaceZip() {
 		try {
-			await navigator.clipboard.writeText(url);
-			appendLog('success', 'Share URL copied to clipboard.');
-		} catch {
-			appendLog('warning', `Copy failed. Share manually: ${url}`);
+			const files = snapshotWorkspaceFiles();
+			const blob = createZipBlob(files);
+			const url = URL.createObjectURL(blob);
+			const anchor = document.createElement('a');
+			anchor.href = url;
+			anchor.download = 'mimo-workspace.zip';
+			anchor.click();
+			URL.revokeObjectURL(url);
+			appendLog('success', 'Workspace ZIP download started.');
+		} catch (error) {
+			const message = `Failed to build ZIP: ${String(error)}`;
+			appendLog('error', message);
+			alert(message);
+		}
+	}
+
+	function generateShareLink() {
+		try {
+			const content = readWorkspaceFile(activeTabId) ?? activeCode;
+			const encoded = encodeShareBase64(content ?? '');
+			const url = new URL(location.href);
+			url.searchParams.set('file', activeTabId);
+			url.searchParams.set('code', encoded);
+			shareLink = url.toString();
+			shareLinkError = '';
+			appendLog('success', `Share link generated for ${activeTabId}`);
+		} catch (error) {
+			shareLink = '';
+			shareLinkError = String(error);
+			appendLog('error', `Failed to generate share link: ${String(error)}`);
+			alert(`Failed to generate share link: ${String(error)}`);
+		}
+	}
+
+	async function copyShareLink() {
+		if (!shareLink) return;
+		try {
+			await navigator.clipboard.writeText(shareLink);
+			appendLog('success', 'Share link copied to clipboard.');
+		} catch (error) {
+			appendLog('warning', `Copy failed. ${String(error)}`);
+			alert(`Failed to copy link: ${String(error)}`);
 		}
 	}
 </script>
@@ -605,8 +743,8 @@
 	<meta name="description" content="Advanced multi-panel playground for Mimo." />
 </svelte:head>
 
-	<div class={resolvedTheme === 'dark' ? 'dark' : ''}>
-		<div class="h-screen bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+	<div class={resolvedTheme === 'dark' ? 'dark' : resolvedTheme === 'light' ? 'light' : ''}>
+		<div class="h-screen bg-app-bg text-app-fg">
 			<HeaderBar
 				sidebarOpen={sidebarOpen}
 				{fsStatus}
@@ -616,80 +754,27 @@
 				onOpenSettings={() => (settingsOpen = true)}
 			/>
 
-		<main class="h-[calc(100vh-4.5rem)] p-3">
+		<main class="h-[calc(100vh-4.5rem)] overflow-hidden">
 			{#if sidebarOpen}
-				<SplitPane orientation="vertical" bind:ratio={sidebarRatio} min={14} max={35} className="rounded-2xl border border-zinc-200 dark:border-zinc-800">
+				<SplitPane orientation="vertical" bind:ratio={sidebarRatio} min={14} max={35}>
 						{#snippet first()}
-							<div class="h-full">
-								<SidebarExplorer
-									{tree}
-									activeFileId={activeTabId}
-									{selectedNodeId}
-									onSelectFile={openFile}
-									onSelectNode={selectNode}
-									onCreateFile={createFile}
-									onCreateFolder={createFolder}
-									onRename={renameNode}
-									onDelete={deleteNode}
-								/>
-							</div>
+							<SidebarExplorer
+								{tree}
+								activeFileId={activeTabId}
+								{selectedNodeId}
+								onSelectFile={openFile}
+								onSelectNode={selectNode}
+								onCreateFile={createFile}
+								onCreateFolder={createFolder}
+								onRename={renameNode}
+								onDelete={deleteNode}
+							/>
 					{/snippet}
 					{#snippet second()}
-						<div class="h-full bg-zinc-100 dark:bg-zinc-950">
-							<SplitPane orientation="vertical" bind:ratio={workspaceRatio} min={45} max={80}>
-								{#snippet first()}
-									<div class="h-full pr-2">
-										<SplitPane orientation="horizontal" bind:ratio={centerRatio} min={45} max={80}>
-											{#snippet first()}
-												<div class="h-full pb-2">
-													<EditorPanel
-														{tabs}
-														{activeTabId}
-														value={activeCode}
-														onSelectTab={selectTab}
-														onCloseTab={closeTab}
-														onChange={updateActiveCode}
-														{resolvedTheme}
-														{fontSize}
-														{tabSize}
-													/>
-												</div>
-											{/snippet}
-											{#snippet second()}
-												<div class="h-full pt-2">
-														<TerminalPanel logs={terminalLogs} onRunCommand={runCommand} onClearLogs={clearTerminalLogs} />
-												</div>
-											{/snippet}
-										</SplitPane>
-									</div>
-								{/snippet}
-								{#snippet second()}
-									<div class="h-full pl-2">
-										<SplitPane orientation="horizontal" bind:ratio={rightRatio} min={30} max={70}>
-											{#snippet first()}
-												<div class="h-full pb-2">
-													<AstViewerPanel {astData} {astError} {astLoading} />
-												</div>
-											{/snippet}
-											{#snippet second()}
-												<div class="h-full pt-2">
-														<OutputPanel output={outputLines} {errors} {warnings} onClearTab={clearOutputTab} />
-												</div>
-											{/snippet}
-										</SplitPane>
-									</div>
-								{/snippet}
-							</SplitPane>
-						</div>
-					{/snippet}
-				</SplitPane>
-			{:else}
-				<SplitPane orientation="vertical" bind:ratio={workspaceRatio} min={45} max={80} className="h-full rounded-2xl border border-zinc-200 dark:border-zinc-800">
-					{#snippet first()}
-						<div class="h-full pr-2">
-							<SplitPane orientation="horizontal" bind:ratio={centerRatio} min={45} max={80}>
-								{#snippet first()}
-									<div class="h-full pb-2">
+						<SplitPane orientation="vertical" bind:ratio={workspaceRatio} min={45} max={80}>
+							{#snippet first()}
+								<SplitPane orientation="horizontal" bind:ratio={centerRatio} min={45} max={80}>
+									{#snippet first()}
 										<EditorPanel
 											{tabs}
 											{activeTabId}
@@ -701,31 +786,56 @@
 											{fontSize}
 											{tabSize}
 										/>
-									</div>
-								{/snippet}
-								{#snippet second()}
-									<div class="h-full pt-2">
+									{/snippet}
+									{#snippet second()}
 										<TerminalPanel logs={terminalLogs} onRunCommand={runCommand} onClearLogs={clearTerminalLogs} />
-									</div>
-								{/snippet}
-							</SplitPane>
-						</div>
+									{/snippet}
+								</SplitPane>
+							{/snippet}
+							{#snippet second()}
+								<SplitPane orientation="horizontal" bind:ratio={rightRatio} min={30} max={70}>
+									{#snippet first()}
+										<AstViewerPanel {astData} {astError} {astLoading} />
+									{/snippet}
+									{#snippet second()}
+										<OutputPanel output={outputLines} {errors} {warnings} onClearTab={clearOutputTab} />
+									{/snippet}
+								</SplitPane>
+							{/snippet}
+						</SplitPane>
+					{/snippet}
+				</SplitPane>
+			{:else}
+				<SplitPane orientation="vertical" bind:ratio={workspaceRatio} min={45} max={80} className="h-full">
+					{#snippet first()}
+						<SplitPane orientation="horizontal" bind:ratio={centerRatio} min={45} max={80}>
+							{#snippet first()}
+								<EditorPanel
+									{tabs}
+									{activeTabId}
+									value={activeCode}
+									onSelectTab={selectTab}
+									onCloseTab={closeTab}
+									onChange={updateActiveCode}
+									{resolvedTheme}
+									{fontSize}
+									{tabSize}
+								/>
+							{/snippet}
+							{#snippet second()}
+								<TerminalPanel logs={terminalLogs} onRunCommand={runCommand} onClearLogs={clearTerminalLogs} />
+							{/snippet}
+						</SplitPane>
 					{/snippet}
 					{#snippet second()}
-						<div class="h-full pl-2">
-							<SplitPane orientation="horizontal" bind:ratio={rightRatio} min={30} max={70}>
-								{#snippet first()}
-									<div class="h-full pb-2">
-										<AstViewerPanel {astData} {astError} {astLoading} />
-									</div>
-								{/snippet}
-								{#snippet second()}
-									<div class="h-full pt-2">
-										<OutputPanel output={outputLines} {errors} {warnings} onClearTab={clearOutputTab} />
-									</div>
-								{/snippet}
-							</SplitPane>
-						</div>
+						<SplitPane orientation="horizontal" bind:ratio={rightRatio} min={30} max={70}>
+							{#snippet first()}
+								<AstViewerPanel {astData} {astError} {astLoading} />
+							{/snippet}
+							{#snippet second()}
+								<OutputPanel output={outputLines} {errors} {warnings} onClearTab={clearOutputTab} />
+							{/snippet}
+						</SplitPane>
 					{/snippet}
 				</SplitPane>
 			{/if}
@@ -738,6 +848,15 @@
 			bind:tabSize
 			bind:autoSave
 			onClose={() => (settingsOpen = false)}
+		/>
+		<ShareModal
+			open={shareOpen}
+			{shareLink}
+			linkError={shareLinkError}
+			onClose={() => (shareOpen = false)}
+			onGenerateLink={generateShareLink}
+			onDownloadZip={downloadWorkspaceZip}
+			onCopyLink={copyShareLink}
 		/>
 	</div>
 </div>

@@ -8,10 +8,10 @@
 	let { sidebarOpen = true, fsStatus = 'initializing', onToggleSidebar, onRun, onShare, onOpenSettings } = $props();
 
 	const buttonClass =
-		'inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800';
+		'inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-app-fg hover:bg-surface-elevated';
 </script>
 
-<header class="flex items-center justify-between gap-3 border-b border-zinc-200/80 bg-zinc-100/80 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
+<header class="flex items-center justify-between gap-3 border-b border-border bg-panel px-4 py-3 backdrop-blur">
 	<div class="flex items-center gap-2">
 		<button type="button" onclick={onToggleSidebar} class={buttonClass}>
 			{#if sidebarOpen}
@@ -21,9 +21,9 @@
 			{/if}
 			<span class="hidden md:inline">Explorer</span>
 		</button>
-		<div class="flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900">
-			<span class="rounded-md bg-zinc-900 px-2 py-1 text-xs font-semibold tracking-[0.2em] text-white dark:bg-zinc-100 dark:text-zinc-900">MIMO</span>
-			<p class="hidden text-xs tracking-[0.14em] text-zinc-500 md:block dark:text-zinc-400">PLAYGROUND</p>
+		<div class="flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2">
+			<span class="rounded-md bg-accent px-2 py-1 text-xs font-semibold tracking-[0.2em] text-accent-contrast">MIMO</span>
+			<p class="hidden text-xs tracking-[0.14em] text-text-soft md:block">PLAYGROUND</p>
 			<span
 				class={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] ${
 					fsStatus === 'indexeddb'

@@ -19,7 +19,7 @@
 
 	/** @type {Record<string, string>} */
 	const tone = {
-		output: 'border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100',
+		output: 'border-border bg-panel-alt text-app-fg',
 		errors: 'border-rose-300/60 bg-rose-50 text-rose-900 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200',
 		warnings: 'border-amber-300/60 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200'
 	};
@@ -41,8 +41,8 @@
 	}
 </script>
 
-<section class="flex h-full flex-col rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-	<div class="flex items-center justify-between border-b border-zinc-200 px-2 py-2 dark:border-zinc-800">
+<section class="flex h-full flex-col border border-border/40 bg-surface">
+	<div class="flex items-center justify-between border-b border-border px-2 py-2">
 		<div class="flex items-center">
 			{#each tabs as pane}
 				<button
@@ -50,13 +50,13 @@
 					onclick={() => (tab = pane.id)}
 					class={`mr-1 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium ${
 						tab === pane.id
-							? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-							: 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+							? 'bg-accent text-accent-contrast'
+							: 'text-text-muted hover:bg-surface-elevated'
 					}`}
 				>
 					<pane.icon size={14} />
 					<span>{pane.label}</span>
-					<span class="rounded-md bg-black/10 px-1 text-[10px] dark:bg-white/20">{countFor(pane.id)}</span>
+					<span class="rounded-md bg-surface-elevated px-1 text-[10px]">{countFor(pane.id)}</span>
 				</button>
 			{/each}
 		</div>
@@ -64,7 +64,7 @@
 			<button
 				type="button"
 				onclick={copyCurrent}
-				class="inline-flex items-center rounded-md border border-zinc-300 bg-zinc-100 p-1.5 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+				class="inline-flex items-center rounded-md border border-border bg-surface-elevated p-1.5 text-text-muted hover:bg-panel-alt"
 				aria-label="Copy current tab"
 			>
 				<Copy size={12} />
@@ -72,7 +72,7 @@
 			<button
 				type="button"
 				onclick={() => onClearTab?.(tab)}
-				class="inline-flex items-center rounded-md border border-zinc-300 bg-zinc-100 p-1.5 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+				class="inline-flex items-center rounded-md border border-border bg-surface-elevated p-1.5 text-text-muted hover:bg-panel-alt"
 				aria-label="Clear current tab"
 			>
 				<Trash2 size={12} />
@@ -81,7 +81,7 @@
 	</div>
 	<div class="min-h-0 flex-1 overflow-auto p-3 font-mono text-sm">
 		{#if items.length === 0}
-			<p class="text-zinc-500 dark:text-zinc-400">No {tab} yet.</p>
+			<p class="text-text-soft">No {tab} yet.</p>
 		{:else}
 			{#each items as item, index}
 				<div class={`mb-2 rounded-lg border p-2 ${tone[tab] ?? tone.output}`}>

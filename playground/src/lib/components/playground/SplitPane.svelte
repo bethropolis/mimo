@@ -52,10 +52,11 @@
 
 	let axisClass = $derived(orientation === 'vertical' ? 'flex-row' : 'flex-col');
 	let sizeStyle = $derived(orientation === 'vertical' ? `width:${ratio}%` : `height:${ratio}%`);
+	let lineClass = $derived(orientation === 'vertical' ? 'h-full w-px' : 'h-px w-full');
 	let handleClass = $derived(
 		orientation === 'vertical'
-			? 'w-1 cursor-col-resize border-x border-zinc-300/60 dark:border-zinc-700/60'
-			: 'h-1 cursor-row-resize border-y border-zinc-300/60 dark:border-zinc-700/60'
+			? 'h-12 w-3 -translate-x-1/2 cursor-col-resize'
+			: 'h-3 w-12 -translate-y-1/2 cursor-row-resize'
 	);
 </script>
 
@@ -63,12 +64,34 @@
 	<section style={sizeStyle} class="min-w-0 min-h-0 overflow-hidden">
 		{@render first?.()}
 	</section>
-	<button
-		type="button"
-		aria-label="Resize panel"
-		onpointerdown={startDrag}
-		class={`shrink-0 bg-zinc-200/80 hover:bg-zinc-300 dark:bg-zinc-800/90 dark:hover:bg-zinc-700 ${handleClass}`}
-	></button>
+	<div class={`relative shrink-0 bg-border/35 ${lineClass}`}>
+		<button
+			type="button"
+			aria-label="Resize panel"
+			onpointerdown={startDrag}
+			class={`group absolute left-1/2 top-1/2 grid place-items-center rounded-full border border-border/70 bg-surface shadow-sm hover:bg-handle-hover ${handleClass}`}
+		>
+			{#if orientation === 'vertical'}
+				<span class="grid grid-cols-2 gap-0.5">
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+				</span>
+			{:else}
+				<span class="grid grid-flow-col gap-0.5">
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+					<span class="h-0.5 w-0.5 rounded-full bg-text-soft"></span>
+				</span>
+			{/if}
+		</button>
+	</div>
 	<section class="min-w-0 min-h-0 flex-1 overflow-hidden">
 		{@render second?.()}
 	</section>

@@ -1,97 +1,138 @@
-import { syntaxHighlighting, HighlightStyle } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
-import { tags } from '@lezer/highlight';
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
+import { tags as t } from '@lezer/highlight';
 
-const darkSyntax = HighlightStyle.define([
-	{ tag: tags.comment, color: '#71717a', fontStyle: 'italic' },
-	{ tag: tags.string, color: '#4ade80' }, // Green-400
-	{ tag: tags.number, color: '#fbbf24' }, // Amber-400
-	{ tag: tags.bool, color: '#fb7185', fontWeight: 'bold' }, // Rose-400
-	{ tag: tags.keyword, color: '#818cf8', fontWeight: 'bold' }, // Indigo-400
-	{ tag: tags.operator, color: '#f472b6' }, // Pink-400
-	{ tag: [tags.typeName, tags.className], color: '#c084fc' }, // Purple-400
-	{ tag: tags.macroName, color: '#2dd4bf' }, // Teal-400
-	{ tag: tags.punctuation, color: '#a1a1aa' }, // Zinc-400
-	{ tag: tags.variableName, color: '#f4f4f5' } // Zinc-100
-]);
+const latte = {
+	dark: false,
+	text: '#4c4f69',
+	subtext0: '#6c6f85',
+	surface0: '#ccd0da',
+	surface1: '#bcc0cc',
+	surface2: '#acb0be',
+	base: '#eff1f5',
+	mantle: '#e6e9ef',
+	blue: '#1e66f5',
+	teal: '#179299',
+	sky: '#04a5e5',
+	mauve: '#8839ef',
+	peach: '#fe640b',
+	yellow: '#df8e1d',
+	green: '#40a02b',
+	red: '#d20f39',
+	pink: '#ea76cb',
+	lavender: '#7287fd',
+	overlay2: '#7c7f93',
+	rosewater: '#dc8a78'
+};
 
-const lightSyntax = HighlightStyle.define([
-	{ tag: tags.comment, color: '#71717a', fontStyle: 'italic' },
-	{ tag: tags.string, color: '#16a34a' }, // Green-600
-	{ tag: tags.number, color: '#d97706' }, // Amber-600
-	{ tag: tags.bool, color: '#e11d48', fontWeight: 'bold' }, // Rose-600
-	{ tag: tags.keyword, color: '#4f46e5', fontWeight: 'bold' }, // Indigo-600
-	{ tag: tags.operator, color: '#db2777' }, // Pink-600
-	{ tag: [tags.typeName, tags.className], color: '#9333ea' }, // Purple-600
-	{ tag: tags.macroName, color: '#0d9488' }, // Teal-600
-	{ tag: tags.punctuation, color: '#52525b' }, // Zinc-600
-	{ tag: tags.variableName, color: '#18181b' } // Zinc-900
-]);
+const mocha = {
+	dark: true,
+	text: '#cdd6f4',
+	subtext0: '#a6adc8',
+	surface0: '#313244',
+	surface1: '#45475a',
+	surface2: '#585b70',
+	base: '#1e1e2e',
+	mantle: '#181825',
+	blue: '#89b4fa',
+	teal: '#94e2d5',
+	sky: '#89dceb',
+	mauve: '#cba6f7',
+	peach: '#fab387',
+	yellow: '#f9e2af',
+	green: '#a6e3a1',
+	red: '#f38ba8',
+	pink: '#f5c2e7',
+	lavender: '#b4befe',
+	overlay2: '#9399b2',
+	rosewater: '#f5e0dc'
+};
 
-const darkUi = EditorView.theme(
-	{
-		'&': {
-			backgroundColor: '#09090b', // Zinc-950
-			color: '#f4f4f5'
+/** @param {typeof latte | typeof mocha} colors */
+function createTheme(colors) {
+	const theme = EditorView.theme(
+		{
+			'&': {
+				color: colors.text,
+				backgroundColor: colors.base
+			},
+			'.cm-content': {
+				caretColor: colors.rosewater
+			},
+			'.cm-cursor, .cm-dropCursor': {
+				borderLeftColor: colors.rosewater
+			},
+			'&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+				{
+					backgroundColor: `${colors.surface2}66`
+				},
+			'.cm-activeLine': {
+				backgroundColor: `${colors.surface0}99`
+			},
+			'.cm-selectionMatch': {
+				backgroundColor: `${colors.surface2}4d`
+			},
+			'.cm-gutters': {
+				backgroundColor: colors.base,
+				color: colors.subtext0,
+				borderRight: `1px solid ${colors.surface1}`
+			},
+			'.cm-activeLineGutter': {
+				backgroundColor: colors.surface0,
+				color: colors.text
+			},
+			'.cm-foldPlaceholder': {
+				backgroundColor: 'transparent',
+				border: 'none',
+				color: colors.overlay2
+			},
+			'.cm-tooltip': {
+				border: `1px solid ${colors.surface2}`,
+				backgroundColor: colors.mantle,
+				color: colors.text
+			},
+			'.cm-tooltip .cm-tooltip-arrow:before': {
+				borderTopColor: 'transparent',
+				borderBottomColor: 'transparent'
+			},
+			'.cm-tooltip .cm-tooltip-arrow:after': {
+				borderTopColor: colors.mantle,
+				borderBottomColor: colors.mantle
+			},
+			'.cm-tooltip-autocomplete > ul > li[aria-selected]': {
+				backgroundColor: colors.surface1,
+				color: colors.text
+			},
+			'.cm-panels': {
+				backgroundColor: colors.mantle,
+				color: colors.text
+			}
 		},
-		'.cm-content': {
-			caretColor: '#f4f4f5',
-			padding: '10px 0'
-		},
-		'.cm-cursor, .cm-dropCursor': {
-			borderLeftColor: '#f4f4f5'
-		},
-		'.cm-activeLine': {
-			backgroundColor: '#18181b' // Zinc-900
-		},
-		'.cm-selectionBackground, .cm-content ::selection': {
-			backgroundColor: '#3f3f46' // Zinc-700
-		},
-		'.cm-gutters': {
-			backgroundColor: '#09090b',
-			color: '#52525b', // Zinc-600
-			borderRight: 'none',
-			padding: '0 8px'
-		},
-		'.cm-activeLineGutter': {
-			backgroundColor: '#18181b',
-			color: '#a1a1aa' // Zinc-400
-		}
-	},
-	{ dark: true }
-);
+		{ dark: colors.dark }
+	);
 
-const lightUi = EditorView.theme({
-	'&': {
-		backgroundColor: '#ffffff',
-		color: '#18181b'
-	},
-	'.cm-content': {
-		caretColor: '#18181b',
-		padding: '10px 0'
-	},
-	'.cm-cursor, .cm-dropCursor': {
-		borderLeftColor: '#18181b'
-	},
-	'.cm-activeLine': {
-		backgroundColor: '#f4f4f5' // Zinc-100
-	},
-	'.cm-selectionBackground, .cm-content ::selection': {
-		backgroundColor: '#e4e4e7' // Zinc-200
-	},
-	'.cm-gutters': {
-		backgroundColor: '#ffffff',
-		color: '#a1a1aa', // Zinc-400
-		borderRight: 'none',
-		padding: '0 8px'
-	},
-	'.cm-activeLineGutter': {
-		backgroundColor: '#f4f4f5',
-		color: '#52525b' // Zinc-600
-	}
-});
+	const highlight = HighlightStyle.define([
+		{ tag: t.keyword, color: colors.mauve },
+		{ tag: [t.function(t.variableName), t.function(t.propertyName), t.propertyName, t.labelName], color: colors.blue },
+		{ tag: [t.typeName, t.className, t.annotation, t.namespace], color: colors.yellow },
+		{ tag: [t.operator], color: colors.sky },
+		{ tag: [t.bool, t.atom], color: colors.red },
+		{ tag: [t.number], color: colors.peach },
+		{ tag: [t.string], color: colors.green },
+		{ tag: [t.comment], color: colors.overlay2, fontStyle: 'italic' },
+		{ tag: [t.special(t.variableName)], color: colors.lavender },
+		{ tag: [t.variableName], color: colors.text },
+		{ tag: [t.punctuation], color: colors.overlay2 },
+		{ tag: [t.invalid], color: colors.red }
+	]);
 
-/** @param {boolean} isDark */
-export function mimoEditorTheme(isDark) {
-	return [isDark ? darkUi : lightUi, syntaxHighlighting(isDark ? darkSyntax : lightSyntax)];
+	return [theme, syntaxHighlighting(highlight)];
+}
+
+export const mimoLightTheme = createTheme(latte);
+export const mimoDarkTheme = createTheme(mocha);
+
+/** @param {'light'|'dark'} mode */
+export function getMimoTheme(mode) {
+	return mode === 'dark' ? mimoDarkTheme : mimoLightTheme;
 }
