@@ -17,7 +17,17 @@
     "mimo": "bun bin/cli.js",
     "dev": "bun test.js",
     "build": "bun build.js",
-    "convert": "bun tools/convert.js"
+    "convert": "bun tools/convert.js",
+    "test": "bun bin/cli.js test test/source",
+    "lint": "bun bin/cli.js lint test/source",
+    "lint:strict": "bun bin/cli.js lint --fail-on-warning test/source",
+    "format:check": "bun bin/cli.js fmt --check test/source",
+    "format:write": "bun bin/cli.js fmt --write test/source",
+    "check": "bun run lint:strict && bun run format:check && bun run test",
+    "ext:validate": "bun run --cwd extensions/mimo-vscode validate",
+    "ext:test": "bun run --cwd extensions/mimo-vscode test",
+    "ext:check": "bun run --cwd extensions/mimo-vscode check",
+    "ext:package": "bun run --cwd extensions/mimo-vscode package"
   },
   "devDependencies": {
     "@types/bun": "latest",
