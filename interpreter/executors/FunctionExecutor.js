@@ -61,7 +61,12 @@ export class FunctionExecutor extends BaseExecutor {
 
   executeShowStatement(node) {
     const value = this.interpreter.visitNode(node.expression);
-    console.log(stringify(value));
+    const rendered = stringify(value);
+    if (this.interpreter.adapter && typeof this.interpreter.adapter.log === "function") {
+      this.interpreter.adapter.log(rendered);
+    } else {
+      console.log(rendered);
+    }
     return value;
   }
 
