@@ -6,6 +6,7 @@ import { Interpreter } from "./interpreter/index.js";
 import { Lexer } from "./lexer/Lexer.js";
 import { Parser } from "./parser/Parser.js";
 import { stringify, highlightMimoCode } from "./interpreter/Utils.js";
+import { formatValue } from "./tools/replFormatter.js";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -60,16 +61,20 @@ class NestingTracker {
 }
 
 export function runRepl() {
-    console.log("\x1b[1;35mWelcome to Mimo REPL!\x1b[0m");
-    console.log("Type \x1b[36m.help\x1b[0m for commands or \x1b[36mexit\x1b[0m to leave.");
+    const isInteractive = process.stdin.isTTY;
 
-    const promptString = "\x1b[36m(mimo)\x1b[0m ";
-    const multilinePrompt = "\x1b[90m  ... \x1b[0m ";
+    if (isInteractive) {
+        console.log("\x1b[1;35mWelcome to Mimo REPL!\x1b[0m");
+        console.log("Type \x1b[36m.help\x1b[0m for commands or \x1b[36mexit\x1b[0m to leave.");
+    }
+
+    const promptString = isInteractive ? "\x1b[36m(mimo)\x1b[0m " : "";
+    const multilinePrompt = isInteractive ? "\x1b[90m  ... \x1b[0m " : "";
     const replFilePath = "/repl";
 
-    // Load history if exists
+    // Load history if exists and interactive
     let history = [];
-    if (fs.existsSync(HISTORY_FILE)) {
+    if (isInteractive && fs.existsSync(HISTORY_FILE)) {
         history = fs.readFileSync(HISTORY_FILE, "utf-8").split("\n").filter(Boolean);
     }
 
@@ -78,15 +83,17 @@ export function runRepl() {
         output: process.stdout,
         prompt: promptString,
         historySize: 1000,
-        history: history.reverse(),
+        history: isInteractive ? history.reverse() : [],
     });
 
     const interpreter = new Interpreter(adapter);
     const nesting = new NestingTracker();
 
     function processInput(input) {
-        // Save to history file
-        fs.appendFileSync(HISTORY_FILE, input.trim() + "\n");
+        // Save to history file if interactive
+        if (isInteractive) {
+            fs.appendFileSync(HISTORY_FILE, input.trim() + "\n");
+        }
 
         interpreter.currentFile = replFilePath;
         interpreter.errorHandler.addSourceFile(replFilePath, input);
@@ -110,7 +117,8 @@ export function runRepl() {
             const lastStatement = ast.body[ast.body.length - 1];
             if (lastStatement && lastStatement.type !== "ShowStatement" && lastStatement.type !== "FunctionDeclaration") {
                 if (result !== undefined && result !== null) {
-                    console.log(`\x1b[90m=>\x1b[0m ${stringify(result, true)}`);
+                    const prefix = isInteractive ? "\x1b[90m=>\x1b[0m " : "=> ";
+                    console.log(`${prefix}${formatValue(result, isInteractive)}`);
                 }
             }
         } catch (err) {
@@ -119,6 +127,7 @@ export function runRepl() {
     }
 
     function handleCommand(cmd) {
+        if (!isInteractive) return;
         const parts = cmd.trim().split(/\s+/);
         const action = parts[0].toLowerCase();
 
@@ -154,7 +163,7 @@ export function runRepl() {
             return;
         }
 
-        if (trimmed.startsWith(".")) {
+        if (trimmed.startsWith(".") && isInteractive) {
             handleCommand(trimmed);
             rl.prompt();
             return;
@@ -178,7 +187,9 @@ export function runRepl() {
     });
 
     rl.on('close', () => {
-        console.log("\nBye!");
+        if (isInteractive) {
+            console.log("\nBye!");
+        }
         process.exit(0);
     });
 

@@ -19,6 +19,12 @@ export function stringify(value, useColors = false) {
     return useColors ? `\x1b[90m[\x1b[0m${items}\x1b[90m]\x1b[0m` : `[${items}]`;
   }
 
+  // Handle Function objects to avoid printing the AST in 'show'
+  if (value && typeof value === 'object' && (value.constructor.name === "FunctionValue" || value.constructor.name === "BuiltinFunction")) {
+    const label = value.name === '<anonymous>' ? 'anonymous function' : `function ${value.name}`;
+    return useColors ? `\x1b[36m[${label}]\x1b[0m` : `[${label}]`;
+  }
+
   if (typeof value === "object" && value !== null) {
     const pairs = Object.entries(value).map(([key, val]) => {
       const k = useColors ? `\x1b[34m${key}\x1b[0m` : key;

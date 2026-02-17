@@ -1,7 +1,7 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 import fs from "node:fs";
 import path from "node:path";
-import { nodeAdapter } from "../adapters/nodeAdapter.js"; // Changed import name for clarity
+import { nodeAdapter } from "../adapters/nodeAdapter.js";
 import { Mimo } from "../index.js";
 import { runRepl } from "../repl.js";
 import { formatFile } from "../tools/formatter.js";
@@ -27,14 +27,68 @@ Commands:
   <file>            Run a Mimo file. (e.g., mimo examples/hello.mimo)
   run <file>        Explicitly run a Mimo file.
   repl              Start the Mimo Read-Eval-Print-Loop.
-  fmt <file(s)>...  Format Mimo source files. Use --write to apply changes.
-  lint <file(s)>... Statically analyze Mimo source files for problems.
+  fmt <paths>...    Format .mimo files from files/directories.
+                    Flags: --write, --check, --quiet
+  lint <paths>...   Statically analyze .mimo files from files/directories.
+                    Flags: --fail-on-warning, --quiet
   test [path]       Run test files. Defaults to current directory.
 
 Options:
   --version, -v     Show the version number.
   --help, -h        Show this help message.
+  --eval, -e <code> Evaluate a string of Mimo code.
+  -                 Read and execute Mimo code from STDIN.
     `);
+}
+
+async function readStdin() {
+  return new Promise((resolve) => {
+    let data = "";
+    process.stdin.setEncoding("utf-8");
+    process.stdin.on("data", (chunk) => {
+      data += chunk;
+    });
+    process.stdin.on("end", () => {
+      resolve(data);
+    });
+  });
+}
+
+function collectMimoFiles(targets) {
+  const resolvedTargets = targets.length === 0 ? ["."] : targets;
+  const seen = new Set();
+  const files = [];
+
+  function visit(targetPath) {
+    const absolutePath = path.resolve(process.cwd(), targetPath);
+    if (!fs.existsSync(absolutePath)) {
+      console.error(`Warning: Path not found: ${targetPath}`);
+      return;
+    }
+
+    const stat = fs.statSync(absolutePath);
+    if (stat.isDirectory()) {
+      for (const entry of fs.readdirSync(absolutePath)) {
+        visit(path.join(absolutePath, entry));
+      }
+      return;
+    }
+
+    if (!absolutePath.endsWith(".mimo")) {
+      return;
+    }
+
+    if (!seen.has(absolutePath)) {
+      seen.add(absolutePath);
+      files.push(absolutePath);
+    }
+  }
+
+  for (const target of resolvedTargets) {
+    visit(target);
+  }
+
+  return files;
 }
 
 // --- New Test Runner Logic ---
@@ -147,22 +201,61 @@ async function main() {
       runRepl();
       break;
     case "fmt": {
-      if (commandArgs.length === 0) {
-        console.error('Error: "fmt" command requires at least one file path.');
-        return;
-      }
       const shouldWrite = commandArgs.includes("--write");
-      const filesToFormat = commandArgs.filter((arg) => !arg.startsWith("--"));
-      filesToFormat.forEach((file) => formatFile(file, shouldWrite));
+      const shouldCheck = commandArgs.includes("--check");
+      const quiet = commandArgs.includes("--quiet");
+      const targets = commandArgs.filter((arg) => !arg.startsWith("--"));
+      const filesToFormat = collectMimoFiles(targets);
+
+      if (filesToFormat.length === 0) {
+        console.error("Error: No .mimo files found for formatting.");
+        process.exit(1);
+      }
+
+      let hadErrors = false;
+      let hadUnformatted = false;
+
+      for (const file of filesToFormat) {
+        const result = formatFile(file, {
+          write: shouldWrite,
+          check: shouldCheck,
+          quiet,
+        });
+        if (!result.ok) hadErrors = true;
+        if (shouldCheck && result.changed) hadUnformatted = true;
+      }
+
+      if (hadErrors || hadUnformatted) {
+        process.exit(1);
+      }
       break;
     }
     case "lint": {
-      if (commandArgs.length === 0) {
-        console.error('Error: "lint" command requires at least one file path.');
-        return;
+      const quiet = commandArgs.includes("--quiet");
+      const failOnWarning = commandArgs.includes("--fail-on-warning");
+      const targets = commandArgs.filter((arg) => !arg.startsWith("--"));
+      const filesToLint = collectMimoFiles(targets);
+
+      if (filesToLint.length === 0) {
+        console.error("Error: No .mimo files found for linting.");
+        process.exit(1);
       }
-      const filesToLint = commandArgs.filter((arg) => !arg.startsWith("--"));
-      filesToLint.forEach((file) => lintFile(file));
+
+      let hadErrors = false;
+      let warnings = 0;
+
+      for (const file of filesToLint) {
+        const result = lintFile(file, { quiet });
+        if (!result.ok) {
+          hadErrors = true;
+          continue;
+        }
+        warnings += result.messages.length;
+      }
+
+      if (hadErrors || (failOnWarning && warnings > 0)) {
+        process.exit(1);
+      }
       break;
     }
 
@@ -173,12 +266,61 @@ async function main() {
       break;
     }
 
+    case "--eval":
+    case "-e": {
+      const code = commandArgs[0];
+      if (!code) {
+        console.error("Error: No code provided to evaluate.");
+        process.exit(1);
+      }
+      const mimo = new Mimo(nodeAdapter);
+      try {
+        const result = mimo.run(code, "/eval");
+        if (result !== undefined && result !== null) {
+          console.log(result);
+        }
+      } catch (err) {
+        console.error(err);
+        process.exit(1);
+      }
+      break;
+    }
+
+    case "-": {
+      const source = await readStdin();
+      const mimo = new Mimo(nodeAdapter);
+      try {
+        mimo.run(source, "/stdin");
+      } catch (err) {
+        console.error(err);
+        process.exit(1);
+      }
+      break;
+    }
+
     case "run":
     default: {
       const filePath = command === "run" ? commandArgs[0] : command;
+
+      // If no file and stdin is not a TTY, read from stdin
+      if (!filePath && !process.stdin.isTTY) {
+        const source = await readStdin();
+        const mimo = new Mimo(nodeAdapter);
+        try {
+          mimo.run(source, "/stdin");
+        } catch (err) {
+          console.error(err);
+          process.exit(1);
+        }
+        return;
+      }
+
       if (!filePath) {
-        console.error("Error: No file specified to run.");
-        showHelp();
+        if (command === "run") {
+          console.error("Error: No file specified to run.");
+        } else {
+          showHelp();
+        }
         return;
       }
 
