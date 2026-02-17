@@ -6,8 +6,11 @@ import { Parser } from '../parser/Parser.js';
 import { Lexer } from '../lexer/Lexer.js';
 import { Linter } from './lint/Linter.js';
 
-export function lintFile(filePath) {
-    console.log(`Linting ${filePath}...`);
+export function lintFile(filePath, options = {}) {
+    const { quiet = false } = options;
+    if (!quiet) {
+        console.log(`Linting ${filePath}...`);
+    }
     try {
         const source = fs.readFileSync(filePath, 'utf-8');
         
@@ -25,8 +28,10 @@ export function lintFile(filePath) {
         const messages = linter.verify(ast, source, filePath);
         
         if (messages.length === 0) {
-            console.log('✅ No problems found.');
-            return;
+            if (!quiet) {
+                console.log('✅ No problems found.');
+            }
+            return { ok: true, messages };
         }
 
         console.log(`\nFound ${messages.length} problem(s) in ${filePath}:`);
@@ -44,6 +49,7 @@ export function lintFile(filePath) {
                 console.log(`  ${padding}\x1b[33m${squiggles}\x1b[0m`);
             }
         });
+        return { ok: true, messages };
         
     } catch (err) {
         console.error(`\n\x1b[31m❌ Error linting file ${filePath}:\x1b[0m`);
@@ -53,19 +59,36 @@ export function lintFile(filePath) {
         } else {
             console.error(err.message);
         }
+        return { ok: false, messages: [], error: err };
     }
 }
 
 // --- Main Execution ---
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const args = process.argv.slice(2);
+    const quiet = args.includes('--quiet');
+    const failOnWarning = args.includes('--fail-on-warning');
     const filePaths = args.filter(arg => !arg.startsWith('--'));
 
     if (filePaths.length === 0) {
         console.error('Error: No file path provided.');
-        console.log('Usage: node tools/linter.js <file1.mimo> ...');
+        console.log('Usage: node tools/linter.js [--fail-on-warning] [--quiet] <file1.mimo> ...');
         process.exit(1);
     }
 
-    filePaths.forEach(path => lintFile(path));
+    let hadErrors = false;
+    let warningCount = 0;
+
+    filePaths.forEach(path => {
+        const result = lintFile(path, { quiet });
+        if (!result.ok) {
+            hadErrors = true;
+            return;
+        }
+        warningCount += result.messages.length;
+    });
+
+    if (hadErrors || (failOnWarning && warningCount > 0)) {
+        process.exit(1);
+    }
 }

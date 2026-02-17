@@ -10,8 +10,8 @@ function fsUnavailable() {
   );
 }
 
-export const browserAdapter = {
-  // --- File System (Disabled) ---
+const baseBrowserAdapter = {
+  // --- File System (Disabled by default) ---
   readFileSync: fsUnavailable,
   readdirSync: fsUnavailable,
   existsSync: () => false, // Always return false, as no real file system exists
@@ -72,3 +72,9 @@ export const browserAdapter = {
   log: (...args) => console.log(...args),
   error: (...args) => console.error(...args),
 };
+
+export function createBrowserAdapter(overrides = {}) {
+  return { ...baseBrowserAdapter, ...overrides };
+}
+
+export const browserAdapter = createBrowserAdapter();

@@ -138,14 +138,17 @@ export class Linter {
     }
 
     initializeRules(scopeTracker) {
-        const context = {
+        const baseContext = {
             getScope: () => scopeTracker,
-            getParent: () => this.ancestry[this.ancestry.length - 1] || null,
-            report: (descriptor) => this.report(descriptor),
+            // The current node is at the end of ancestry; parent is one level up.
+            getParent: () => this.ancestry[this.ancestry.length - 2] || null,
         };
         const listeners = {};
         for (const ruleId in rules) {
-            context.report = (descriptor) => this.report({ ...descriptor, ruleId });
+            const context = {
+                ...baseContext,
+                report: (descriptor) => this.report({ ...descriptor, ruleId }),
+            };
             const ruleModule = rules[ruleId].create(context);
             for (const nodeType in ruleModule) {
                 if (!listeners[nodeType]) listeners[nodeType] = [];
