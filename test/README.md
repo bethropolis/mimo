@@ -31,28 +31,28 @@ JavaScript test files for the interactive REPL:
 
 ```bash
 # Run individual language tests
-node index.js test/source/all.mimo
-node index.js test/source/builtins.mimo
-node index.js test/source/stdlib_math.mimo
-node index.js test/source/stdlib_string.mimo
-node index.js test/source/stdlib_array.mimo
+bun index.js test/source/all.mimo
+bun index.js test/source/builtins.mimo
+bun index.js test/source/stdlib_math.mimo
+bun index.js test/source/stdlib_string.mimo
+bun index.js test/source/stdlib_array.mimo
 
 # Test specific features
-node index.js test/source/math_utils.mimo
-node index.js test/source/minus_operations_test.mimo
-node index.js test/source/pattern_matching.mimo
+bun index.js test/source/math_utils.mimo
+bun index.js test/source/minus_operations_test.mimo
+bun index.js test/source/pattern_matching.mimo
 ```
 
 ### REPL Tests
 
 ```bash
 # Run all REPL tests
-node test/run_repl_tests.js
+bun test/run_repl_tests.js
 
 # Run individual REPL tests
-node test/test_repl.js
-node test/test_repl_advanced.js
-node test/test_multiline.js
+bun test/test_repl.js
+bun test/test_repl_advanced.js
+bun test/test_multiline.js
 ```
 
 ## Test Structure
@@ -73,7 +73,7 @@ show "Actual result:", result
 
 ### REPL Test Files
 
-REPL tests use Node.js child processes to interact with the REPL programmatically:
+REPL tests use bun.js child processes to interact with the REPL programmatically:
 
 ```javascript
 const testCommands = [
@@ -149,11 +149,11 @@ Run the full test suite during development:
 
 ```bash
 # Quick validation
-echo 'show "Basic test"' | node repl.js
+echo 'show "Basic test"' | bun repl.js
 
 # Full language test
-node index.js test/source/all.mimo
+bun index.js test/source/all.mimo
 
 # Complete REPL validation
-node test/run_repl_tests.js
+bun test/run_repl_tests.js
 ```
