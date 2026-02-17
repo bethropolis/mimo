@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "mimo-ext: check",
+      "type": "shell",
+      "command": "bun run check",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "mimo-ext: package",
+      "type": "shell",
+      "command": "bun run package",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

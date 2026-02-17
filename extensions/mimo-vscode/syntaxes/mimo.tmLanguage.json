@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Mimo",
+  "scopeName": "source.mimo",
+  "patterns": [
+    {
+      "name": "comment.line.number-sign.mimo",
+      "match": "#.*$"
+    },
+    {
+      "name": "string.quoted.double.mimo",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.mimo",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "constant.numeric.mimo",
+      "match": "\\b-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\\b"
+    },
+    {
+      "name": "constant.language.boolean.mimo",
+      "match": "\\b(?:true|false|null)\\b"
+    },
+    {
+      "name": "keyword.control.mimo",
+      "match": "\\b(?:if|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|fn|end|import|export|from|as|show|call)\\b"
+    },
+    {
+      "name": "storage.type.variable.mimo",
+      "match": "\\b(?:set|let|const|global)\\b"
+    },
+    {
+      "name": "keyword.operator.mimo",
+      "match": "\\+|\\-|\\*|\\/|%|===|==|!==|!=|>=|<=|>|<|=|[\\&\\|]{2}|[\\!\\?\\:]|\\?\\?|\\?\\.|\\b(?:and|or|not)\\b"
+    },
+    {
+      "name": "support.class.mimo",
+      "match": "\\b(?:Math|String|Array|Datetime|JSON|Fs|Http)\\b"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+    "Function": {
+        "prefix": "fn",
+        "body": [
+            "function ${1:name}(${2:params})",
+            "\t$0",
+            "end"
+        ],
+        "description": "Define a Mimo function"
+    },
+    "Short Function": {
+        "prefix": "fnn",
+        "body": [
+            "fn ${1:name}(${2:params})",
+            "\t$0",
+            "end"
+        ],
+        "description": "Define a Mimo function (short syntax)"
+    },
+    "If Statement": {
+        "prefix": "if",
+        "body": [
+            "if (${1:condition})",
+            "\t$0",
+            "end"
+        ],
+        "description": "If statement"
+    },
+    "While Loop": {
+        "prefix": "while",
+        "body": [
+            "while (${1:condition})",
+            "\t$0",
+            "end"
+        ],
+        "description": "While loop"
+    },
+    "For In Loop": {
+        "prefix": "for",
+        "body": [
+            "for ${1:item} in ${2:list}",
+            "\t$0",
+            "end"
+        ],
+        "description": "For...in loop"
+    },
+    "Match": {
+        "prefix": "match",
+        "body": [
+            "match ${1:value}",
+            "\tcase ${2:pattern}",
+            "\t\t$0",
+            "end"
+        ],
+        "description": "Match expression"
+    },
+    "Try Catch": {
+        "prefix": "try",
+        "body": [
+            "try",
+            "\t$1",
+            "catch ${2:error}",
+            "\t$0",
+            "end"
+        ],
+        "description": "Try-catch block"
+    }
+}

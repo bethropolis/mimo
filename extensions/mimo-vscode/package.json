@@ -1,0 +1,78 @@
+{
+  "name": "mimo-vscode",
+  "displayName": "Mimo Language",
+  "description": "VS Code language support for Mimo (.mimo)",
+  "version": "0.0.1",
+  "publisher": "local",
+  "license": "MIT",
+  "icon": "icons/icon-128.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:mimo",
+    "onCommand:mimo.runFile"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "mimo",
+        "aliases": [
+          "Mimo",
+          "mimo"
+        ],
+        "extensions": [
+          ".mimo"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "mimo",
+        "scopeName": "source.mimo",
+        "path": "./syntaxes/mimo.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "mimo",
+        "path": "./snippets.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "mimo.runFile",
+        "title": "Mimo: Run Current File",
+        "icon": "$(play)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "mimo.runFile",
+          "group": "navigation",
+          "when": "resourceExtname == .mimo"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "mimo.runFile",
+          "group": "navigation",
+          "when": "resourceExtname == .mimo"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "validate": "node ./scripts/validate.cjs",
+    "test": "node ./scripts/smoke-test.cjs",
+    "check": "bun run validate && bun run test",
+    "package:dry": "bun run check && npx @vscode/vsce package --no-dependencies --allow-missing-repository --allow-star-activation --out mimo-vscode-dry.vsix",
+    "package": "bun run check && npx @vscode/vsce package --no-dependencies --allow-missing-repository --allow-star-activation"
+  }
+}
