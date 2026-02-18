@@ -18,17 +18,27 @@
 		node,
 		depth = 0,
 		expandedIds = new Set(),
-		onToggle
+		onToggle,
+		onSelect
 	} = $props();
 
 	let hasChildren = $derived((node.children?.length ?? 0) > 0);
 	let isExpanded = $derived(expandedIds.has(node.id));
+
+	function handleSelect(e) {
+		if (node.location?.line) {
+			onSelect(node.location.line, node.location.column ?? 1);
+		}
+	}
 </script>
 
 <div>
 	<button
 		type="button"
-		onclick={() => hasChildren && onToggle(node.id)}
+		onclick={(e) => {
+			if (hasChildren) onToggle(node.id);
+			handleSelect(e);
+		}}
 		class={`flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-surface-elevated ${hasChildren ? '' : 'opacity-95'}`}
 		style={`padding-left:${depth * 12 + 8}px`}
 	>
@@ -63,7 +73,7 @@
 
 	{#if hasChildren && isExpanded}
 		{#each node.children as child (child.id)}
-			<Self node={child} depth={depth + 1} {expandedIds} {onToggle} />
+			<Self node={child} depth={depth + 1} {expandedIds} {onToggle} {onSelect} />
 		{/each}
 	{/if}
 </div>

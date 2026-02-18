@@ -40,10 +40,12 @@
 		<button
 			type="button"
 			onclick={onRun}
+			title="Run Code (Ctrl + Enter)"
 			class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
 		>
 			<Play size={16} strokeWidth={2.4} />
-			Run
+			<span>Run</span>
+			<kbd class="hidden rounded bg-emerald-700/50 px-1 text-[10px] font-medium opacity-80 lg:inline-block">Ctrl+Enter</kbd>
 		</button>
 		<button type="button" onclick={onShare} class={buttonClass}>
 			<Share2 size={16} strokeWidth={2} />

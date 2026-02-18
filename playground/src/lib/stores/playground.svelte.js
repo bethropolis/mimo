@@ -47,6 +47,7 @@ export function createPlaygroundStore() {
 		{ id: 'modules/math.mimo', name: 'math.mimo', content: DEFAULT_FILE_CONTENTS['modules/math.mimo'] }
 	]);
 	let activeTabId = $state('src/main.mimo');
+	let editorSelection = $state(/** @type {{ line: number, column: number } | null} */ (null));
 
 	// Theme settings
 	let theme = $state('system');
@@ -146,7 +147,8 @@ export function createPlaygroundStore() {
 	// Methods
 	/** @param {'info'|'success'|'error'|'warning'} level @param {string} message */
 	function appendLog(level, message) {
-		terminalLogs = [...terminalLogs, { time: timestamp(), level, message }];
+		const newLogs = [...terminalLogs, { time: timestamp(), level, message }];
+		terminalLogs = newLogs.slice(-500);
 	}
 
 	/** @param {string} message */
@@ -517,6 +519,17 @@ export function createPlaygroundStore() {
 		return () => clearTimeout(timer);
 	});
 
+	/** @param {number} line @param {number} column */
+	function jumpToLocation(line, column) {
+		editorSelection = { line, column };
+		// Reset selection after a short delay to allow repeated jumps to same location
+		setTimeout(() => {
+			if (editorSelection?.line === line && editorSelection?.column === column) {
+				editorSelection = null;
+			}
+		}, 100);
+	}
+
 	return {
 		// State
 		get tree() { return tree; },
@@ -524,6 +537,7 @@ export function createPlaygroundStore() {
 		get tabs() { return tabs; },
 		get activeTabId() { return activeTabId; },
 		get activeCode() { return activeCode; },
+		get editorSelection() { return editorSelection; },
 		get theme() { return theme; },
 		set theme(v) { theme = v; },
 		get fontSize() { return fontSize; },

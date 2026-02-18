@@ -7,7 +7,8 @@
 	let {
 		astData = null,
 		astError = '',
-		astLoading = false
+		astLoading = false,
+		onSelectLocation
 	} = $props();
 
 	let expandedIds = $state(new Set());
@@ -101,7 +102,7 @@
 		</div>
 	{:else if astData}
 		<div class="min-h-0 flex-1 overflow-auto p-2">
-			<AstTreeNode node={astData} depth={0} {expandedIds} onToggle={toggleNode} />
+			<AstTreeNode node={astData} depth={0} {expandedIds} onToggle={toggleNode} onSelect={onSelectLocation} />
 		</div>
 	{:else}
 		<div class="flex min-h-0 flex-1 items-center justify-center text-sm text-text-soft">

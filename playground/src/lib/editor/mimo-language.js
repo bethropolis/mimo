@@ -1,5 +1,7 @@
 import { LanguageSupport, StreamLanguage } from '@codemirror/language';
 import { autocompletion, snippetCompletion } from '@codemirror/autocomplete';
+import { search, searchKeymap } from '@codemirror/search';
+import { keymap } from '@codemirror/view';
 
 const numberPattern = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b/;
 const booleanPattern = /^(?:true|false)\b/;
@@ -269,4 +271,8 @@ function mimoCompletionSource(context) {
 	};
 }
 
-export const mimoEditorExtensions = [autocompletion({ override: [mimoCompletionSource], activateOnTyping: true })];
+export const mimoEditorExtensions = [
+	autocompletion({ override: [mimoCompletionSource], activateOnTyping: true }),
+	search({ top: true }),
+	keymap.of(searchKeymap)
+];

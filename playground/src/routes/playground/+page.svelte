@@ -19,7 +19,19 @@
 
 	onMount(() => {
 		store.initialize();
-		return () => store.destroy();
+
+		const handleKeydown = (e) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+				e.preventDefault();
+				store.runActive();
+			}
+		};
+		window.addEventListener('keydown', handleKeydown);
+
+		return () => {
+			store.destroy();
+			window.removeEventListener('keydown', handleKeydown);
+		};
 	});
 </script>
 
@@ -64,6 +76,7 @@
 											tabs={store.tabs}
 											activeTabId={store.activeTabId}
 											value={store.activeCode}
+											selection={store.editorSelection}
 											onSelectTab={store.selectTab}
 											onCloseTab={store.closeTab}
 											onChange={store.updateActiveCode}
@@ -88,6 +101,7 @@
 											astData={store.astData}
 											astError={store.astError}
 											astLoading={store.astLoading}
+											onSelectLocation={store.jumpToLocation}
 										/>
 									{/snippet}
 									{#snippet second()}
@@ -112,6 +126,7 @@
 									tabs={store.tabs}
 									activeTabId={store.activeTabId}
 									value={store.activeCode}
+									selection={store.editorSelection}
 									onSelectTab={store.selectTab}
 									onCloseTab={store.closeTab}
 									onChange={store.updateActiveCode}
@@ -136,6 +151,7 @@
 									astData={store.astData}
 									astError={store.astError}
 									astLoading={store.astLoading}
+									onSelectLocation={store.jumpToLocation}
 								/>
 							{/snippet}
 							{#snippet second()}
