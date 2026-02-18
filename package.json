@@ -27,7 +27,10 @@
     "ext:validate": "bun run --cwd extensions/mimo-vscode validate",
     "ext:test": "bun run --cwd extensions/mimo-vscode test",
     "ext:check": "bun run --cwd extensions/mimo-vscode check",
-    "ext:package": "bun run --cwd extensions/mimo-vscode package"
+    "ext:package": "bun run --cwd extensions/mimo-vscode package",
+    "web:dev": "bun run --cwd playground dev",
+    "web:build": "bun run --cwd playground build",
+    "web:preview": "bun run --cwd playground preview"
   },
   "devDependencies": {
     "@types/bun": "latest",

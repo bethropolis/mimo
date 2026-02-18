@@ -155,7 +155,7 @@
 		const content =
 			readWorkspaceFile(fileId) ??
 			fileContents[/** @type {keyof typeof fileContents} */ (fileId)] ??
-			'# File not found';
+			'// File not found';
 		if (!found) {
 			tabs = [
 				...tabs,
