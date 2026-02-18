@@ -2,6 +2,7 @@ import { EditorView } from '@codemirror/view';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { tags as t } from '@lezer/highlight';
 
+// Catppuccin color palette for syntax highlighting
 const latte = {
 	dark: false,
 	text: '#4c4f69',
@@ -48,68 +49,79 @@ const mocha = {
 	rosewater: '#f5e0dc'
 };
 
-/** @param {typeof latte | typeof mocha} colors */
-function createTheme(colors) {
+/**
+ * Create a CodeMirror theme using CSS variables for UI elements
+ * and Catppuccin colors for syntax highlighting
+ * @param {{ dark: boolean }} options
+ */
+function createTheme({ dark }) {
 	const theme = EditorView.theme(
 		{
 			'&': {
-				color: colors.text,
-				backgroundColor: colors.base
+				color: 'var(--cm-fg)',
+				backgroundColor: 'var(--cm-bg)'
 			},
 			'.cm-content': {
-				caretColor: colors.rosewater
+				caretColor: 'var(--cm-caret)'
 			},
 			'.cm-cursor, .cm-dropCursor': {
-				borderLeftColor: colors.rosewater
+				borderLeftColor: 'var(--cm-caret)'
 			},
 			'&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
 				{
-					backgroundColor: `${colors.surface2}66`
+					backgroundColor: 'var(--cm-selection)'
 				},
 			'.cm-activeLine': {
-				backgroundColor: `${colors.surface0}99`
+				backgroundColor: 'var(--cm-active-line)'
 			},
 			'.cm-selectionMatch': {
-				backgroundColor: `${colors.surface2}4d`
+				backgroundColor: 'color-mix(in oklab, var(--cm-selection) 50%, transparent)'
 			},
 			'.cm-gutters': {
-				backgroundColor: colors.base,
-				color: colors.subtext0,
-				borderRight: `1px solid ${colors.surface1}`
+				backgroundColor: 'var(--cm-gutter-bg)',
+				color: 'var(--cm-gutter-fg)',
+				borderRight: '1px solid var(--cm-gutter-border)'
 			},
 			'.cm-activeLineGutter': {
-				backgroundColor: colors.surface0,
-				color: colors.text
+				backgroundColor: 'var(--cm-active-gutter-bg)',
+				color: 'var(--cm-active-gutter-fg)'
 			},
 			'.cm-foldPlaceholder': {
 				backgroundColor: 'transparent',
 				border: 'none',
-				color: colors.overlay2
+				color: 'var(--text-soft)'
 			},
 			'.cm-tooltip': {
-				border: `1px solid ${colors.surface2}`,
-				backgroundColor: colors.mantle,
-				color: colors.text
+				border: '1px solid var(--border)',
+				backgroundColor: 'var(--surface)',
+				color: 'var(--app-fg)'
 			},
 			'.cm-tooltip .cm-tooltip-arrow:before': {
 				borderTopColor: 'transparent',
 				borderBottomColor: 'transparent'
 			},
 			'.cm-tooltip .cm-tooltip-arrow:after': {
-				borderTopColor: colors.mantle,
-				borderBottomColor: colors.mantle
+				borderTopColor: 'var(--surface)',
+				borderBottomColor: 'var(--surface)'
 			},
 			'.cm-tooltip-autocomplete > ul > li[aria-selected]': {
-				backgroundColor: colors.surface1,
-				color: colors.text
+				backgroundColor: 'var(--surface-elevated)',
+				color: 'var(--app-fg)'
 			},
 			'.cm-panels': {
-				backgroundColor: colors.mantle,
-				color: colors.text
+				backgroundColor: 'var(--surface-muted)',
+				color: 'var(--app-fg)'
+			},
+			'.cm-search': {
+				backgroundColor: 'var(--surface)',
+				border: '1px solid var(--border)'
 			}
 		},
-		{ dark: colors.dark }
+		{ dark }
 	);
+
+	// Use Catppuccin colors for syntax highlighting
+	const colors = dark ? mocha : latte;
 
 	const highlight = HighlightStyle.define([
 		{ tag: t.keyword, color: colors.mauve },
@@ -129,10 +141,14 @@ function createTheme(colors) {
 	return [theme, syntaxHighlighting(highlight)];
 }
 
-export const mimoLightTheme = createTheme(latte);
-export const mimoDarkTheme = createTheme(mocha);
+// Pre-create themes for light and dark modes
+export const mimoLightTheme = createTheme({ dark: false });
+export const mimoDarkTheme = createTheme({ dark: true });
 
-/** @param {'light'|'dark'} mode */
+/**
+ * Get the appropriate theme based on mode
+ * @param {'light'|'dark'} mode
+ */
 export function getMimoTheme(mode) {
 	return mode === 'dark' ? mimoDarkTheme : mimoLightTheme;
 }
