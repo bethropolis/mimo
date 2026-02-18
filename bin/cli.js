@@ -5,7 +5,7 @@ import { nodeAdapter } from "../adapters/nodeAdapter.js";
 import { Mimo } from "../index.js";
 import { runRepl } from "../repl.js";
 import { formatFile } from "../tools/formatter.js";
-import { lintFile } from "../tools/linter.js";
+import { lintFile, lintFileJson, parseRuleFlags } from "../tools/linter.js";
 
 // --- Helper Functions ---
 function getVersion() {
@@ -30,7 +30,8 @@ Commands:
   fmt <paths>...    Format .mimo files from files/directories.
                     Flags: --write, --check, --quiet
   lint <paths>...   Statically analyze .mimo files from files/directories.
-                    Flags: --fail-on-warning, --quiet
+                    Flags: --fail-on-warning, --quiet, --json
+                    Rules: --rule:<name>=true|false
   test [path]       Run test files. Defaults to current directory.
 
 Options:
@@ -232,7 +233,9 @@ async function main() {
     }
     case "lint": {
       const quiet = commandArgs.includes("--quiet");
+      const json = commandArgs.includes("--json");
       const failOnWarning = commandArgs.includes("--fail-on-warning");
+      const rules = parseRuleFlags(commandArgs);
       const targets = commandArgs.filter((arg) => !arg.startsWith("--"));
       const filesToLint = collectMimoFiles(targets);
 
@@ -241,20 +244,35 @@ async function main() {
         process.exit(1);
       }
 
-      let hadErrors = false;
-      let warnings = 0;
-
-      for (const file of filesToLint) {
-        const result = lintFile(file, { quiet });
-        if (!result.ok) {
-          hadErrors = true;
-          continue;
+      if (json) {
+        const results = filesToLint.map((file) =>
+          lintFileJson(file, { rules })
+        );
+        console.log(JSON.stringify(results.length === 1 ? results[0] : results));
+        const hasErrors = results.some((r) => !r.ok);
+        const warningCount = results.reduce(
+          (sum, r) => sum + r.messages.length,
+          0
+        );
+        if (hasErrors || (failOnWarning && warningCount > 0)) {
+          process.exit(1);
         }
-        warnings += result.messages.length;
-      }
+      } else {
+        let hadErrors = false;
+        let warnings = 0;
 
-      if (hadErrors || (failOnWarning && warnings > 0)) {
-        process.exit(1);
+        for (const file of filesToLint) {
+          const result = lintFile(file, { quiet, rules });
+          if (!result.ok) {
+            hadErrors = true;
+            continue;
+          }
+          warnings += result.messages.length;
+        }
+
+        if (hadErrors || (failOnWarning && warnings > 0)) {
+          process.exit(1);
+        }
       }
       break;
     }

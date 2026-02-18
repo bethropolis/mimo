@@ -28,7 +28,7 @@
     "ext:test": "bun run --cwd extensions/mimo-vscode test",
     "ext:check": "bun run --cwd extensions/mimo-vscode check",
     "ext:package": "bun run --cwd extensions/mimo-vscode package",
-    "web:dev": "bun run --cwd playground dev",
+    "web:dev": "bun run --cwd playground dev --open",
     "web:build": "bun run --cwd playground build",
     "web:preview": "bun run --cwd playground preview"
   },

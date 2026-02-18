@@ -119,9 +119,10 @@ class LinterScopeTracker {
 // --- Linter Class ---
 
 export class Linter {
-    constructor() {
+    constructor(options = {}) {
         this.messages = [];
         this.ancestry = [];
+        this.ruleConfig = options.rules || {};
     }
 
     verify(ast, sourceCode, filePath) {
@@ -145,6 +146,10 @@ export class Linter {
         };
         const listeners = {};
         for (const ruleId in rules) {
+            // Skip disabled rules
+            if (this.ruleConfig[ruleId] === false) {
+                continue;
+            }
             const context = {
                 ...baseContext,
                 report: (descriptor) => this.report({ ...descriptor, ruleId }),

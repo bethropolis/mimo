@@ -66,6 +66,46 @@
           "when": "resourceExtname == .mimo"
         }
       ]
+    },
+    "configuration": {
+      "title": "Mimo",
+      "properties": {
+        "mimo.lint.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable linting for Mimo files"
+        },
+        "mimo.lint.onSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Lint files when saved"
+        },
+        "mimo.lint.onType": {
+          "type": "boolean",
+          "default": true,
+          "description": "Lint files as you type (debounced)"
+        },
+        "mimo.lint.delay": {
+          "type": "number",
+          "default": 500,
+          "description": "Delay in milliseconds before linting on type"
+        },
+        "mimo.lint.rules.no-unused-vars": {
+          "type": "boolean",
+          "default": true,
+          "description": "Warn about unused variables and parameters"
+        },
+        "mimo.lint.rules.prefer-const": {
+          "type": "boolean",
+          "default": true,
+          "description": "Suggest using 'const' for variables that are never reassigned"
+        },
+        "mimo.lint.rules.no-magic-numbers": {
+          "type": "boolean",
+          "default": false,
+          "description": "Warn about magic numbers in code"
+        }
+      }
     }
   },
   "scripts": {
