@@ -1,63 +1,281 @@
 const vscode = require("vscode");
-const { spawn } = require("child_process");
+const { spawn, execSync } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 
 let outputChannel;
+let statusBar;
+
+const KEYWORDS = [
+    { name: "set", doc: "Declare or update a mutable variable" },
+    { name: "let", doc: "Declare a block-scoped variable" },
+    { name: "const", doc: "Declare an immutable constant" },
+    { name: "global", doc: "Declare a global variable" },
+    { name: "if", doc: "Conditional statement" },
+    { name: "elif", doc: "Else-if clause in conditional" },
+    { name: "else", doc: "Else clause in conditional" },
+    { name: "while", doc: "While loop" },
+    { name: "for", doc: "For-in loop" },
+    { name: "in", doc: "Keyword for iteration" },
+    { name: "match", doc: "Pattern matching expression" },
+    { name: "case", doc: "Case clause in match" },
+    { name: "default", doc: "Default clause in match" },
+    { name: "break", doc: "Exit from loop" },
+    { name: "continue", doc: "Skip to next iteration" },
+    { name: "function", doc: "Define a function" },
+    { name: "call", doc: "Call a function" },
+    { name: "return", doc: "Return from function" },
+    { name: "try", doc: "Try block for error handling" },
+    { name: "catch", doc: "Catch block for error handling" },
+    { name: "throw", doc: "Throw an error" },
+    { name: "import", doc: "Import a module" },
+    { name: "export", doc: "Export from module" },
+    { name: "from", doc: "Module source keyword" },
+    { name: "as", doc: "Alias keyword" },
+    { name: "show", doc: "Print a value to output" },
+    { name: "end", doc: "End a block" },
+];
+
+const BUILTINS = [
+    { name: "len", doc: "Get length of string or array" },
+    { name: "get", doc: "Get element from array or property from object" },
+    { name: "update", doc: "Update element in array or property in object" },
+    { name: "type", doc: "Get type of a value" },
+    { name: "push", doc: "Add element to end of array" },
+    { name: "pop", doc: "Remove and return last element of array" },
+    { name: "slice", doc: "Extract portion of array" },
+    { name: "range", doc: "Create array of numbers in range" },
+    { name: "join", doc: "Join array elements into string" },
+    { name: "has_property", doc: "Check if object has property" },
+    { name: "keys", doc: "Get keys of object" },
+    { name: "values", doc: "Get values of object" },
+    { name: "entries", doc: "Get key-value pairs of object" },
+    { name: "get_arguments", doc: "Get command line arguments" },
+    { name: "get_env", doc: "Get environment variable" },
+    { name: "exit_code", doc: "Set exit code" },
+    { name: "coalesce", doc: "Return first non-null value" },
+    { name: "get_property_safe", doc: "Safely get property (null-safe)" },
+    { name: "if_else", doc: "Ternary-like function" },
+];
+
+const MODULES = [
+    { name: "array", doc: "Array manipulation functions (map, filter, reduce, etc.)" },
+    { name: "string", doc: "String manipulation functions (to_upper, trim, split, etc.)" },
+    { name: "math", doc: "Math functions (sqrt, pow, sin, cos, random, etc.)" },
+    { name: "json", doc: "JSON parse and stringify" },
+    { name: "fs", doc: "File system operations (read, write, exists, etc.)" },
+    { name: "http", doc: "HTTP requests (get, post)" },
+    { name: "datetime", doc: "Date and time operations" },
+    { name: "regex", doc: "Regular expression operations" },
+];
+
+const ARRAY_METHODS = [
+    "map", "filter", "reduce", "for_each", "find", "find_index",
+    "includes", "index_of", "last_index_of", "slice", "first", "last",
+    "is_empty", "sort", "reverse", "shuffle", "concat", "unique",
+    "intersection", "union", "difference"
+];
+
+const STRING_METHODS = [
+    "length", "to_upper", "to_lower", "to_title_case", "capitalize", "trim",
+    "substring", "slice", "contains", "starts_with", "ends_with", "index_of",
+    "replace", "split", "join"
+];
+
+const MATH_CONSTANTS = ["PI", "E"];
+const MATH_METHODS = ["abs", "sqrt", "pow", "floor", "ceil", "round", "sin", "cos", "tan", "random", "seed", "randint"];
+
+function detectRunner() {
+    try {
+        execSync("bun --version", { stdio: "ignore" });
+        return "bun";
+    } catch {
+        return "node";
+    }
+}
 
 function activate(context) {
-  outputChannel = vscode.window.createOutputChannel("Mimo Output");
+    outputChannel = vscode.window.createOutputChannel("Mimo Output");
 
-  const runFile = vscode.commands.registerCommand("mimo.runFile", (uri) => {
-    const document = uri ?
-      vscode.workspace.textDocuments.find(d => d.uri.toString() === uri.toString()) :
-      vscode.window.activeTextEditor?.document;
+    statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    statusBar.text = "Mimo";
+    statusBar.tooltip = "Mimo Language";
+    context.subscriptions.push(statusBar);
 
-    const filePath = uri ? uri.fsPath : document?.fileName;
+    const runFile = vscode.commands.registerCommand("mimo.runFile", (uri) => {
+        const document = uri ?
+            vscode.workspace.textDocuments.find(d => d.uri.toString() === uri.toString()) :
+            vscode.window.activeTextEditor?.document;
 
-    if (!filePath) {
-      vscode.window.showErrorMessage("No file selected to run.");
-      return;
+        const filePath = uri ? uri.fsPath : document?.fileName;
+
+        if (!filePath) {
+            vscode.window.showErrorMessage("No file selected to run.");
+            return;
+        }
+
+        if (document && document.isDirty) {
+            document.save();
+        }
+
+        outputChannel.clear();
+        outputChannel.show(true);
+        outputChannel.appendLine(`[Running] ${path.basename(filePath)}...`);
+
+        const mimoCliPath = path.resolve(__dirname, "../../bin/cli.js");
+
+        if (!fs.existsSync(mimoCliPath)) {
+            outputChannel.appendLine(`ERROR: Mimo CLI not found at ${mimoCliPath}`);
+            vscode.window.showErrorMessage("Mimo CLI not found. Make sure the extension is installed correctly.");
+            return;
+        }
+
+        const runner = detectRunner();
+
+        const proc = spawn(runner, [mimoCliPath, filePath], {
+            cwd: path.dirname(filePath)
+        });
+
+        proc.stdout.on("data", (data) => {
+            outputChannel.append(data.toString());
+        });
+
+        proc.stderr.on("data", (data) => {
+            outputChannel.append(data.toString());
+        });
+
+        proc.on("error", (err) => {
+            outputChannel.appendLine(`ERROR: Failed to run: ${err.message}`);
+            vscode.window.showErrorMessage(`Failed to run Mimo file: ${err.message}`);
+        });
+
+        proc.on("close", (code) => {
+            outputChannel.appendLine(`\n[Done] exited with code ${code}`);
+        });
+    });
+
+    const completionProvider = vscode.languages.registerCompletionItemProvider(
+        { language: "mimo", scheme: "file" },
+        {
+            provideCompletionItems(document, position) {
+                const items = [];
+                const linePrefix = document.lineAt(position).text.substring(0, position.character);
+
+                if (linePrefix.endsWith("array.")) {
+                    for (const method of ARRAY_METHODS) {
+                        const item = new vscode.CompletionItem(method, vscode.CompletionItemKind.Method);
+                        item.detail = "array method";
+                        items.push(item);
+                    }
+                    return items;
+                }
+
+                if (linePrefix.endsWith("string.")) {
+                    for (const method of STRING_METHODS) {
+                        const item = new vscode.CompletionItem(method, vscode.CompletionItemKind.Method);
+                        item.detail = "string method";
+                        items.push(item);
+                    }
+                    return items;
+                }
+
+                if (linePrefix.endsWith("math.")) {
+                    for (const method of MATH_METHODS) {
+                        const item = new vscode.CompletionItem(method, vscode.CompletionItemKind.Method);
+                        item.detail = "math function";
+                        items.push(item);
+                    }
+                    for (const constant of MATH_CONSTANTS) {
+                        const item = new vscode.CompletionItem(constant, vscode.CompletionItemKind.Constant);
+                        item.detail = "math constant";
+                        items.push(item);
+                    }
+                    return items;
+                }
+
+                for (const kw of KEYWORDS) {
+                    const item = new vscode.CompletionItem(kw.name, vscode.CompletionItemKind.Keyword);
+                    item.documentation = kw.doc;
+                    items.push(item);
+                }
+
+                for (const builtin of BUILTINS) {
+                    const item = new vscode.CompletionItem(builtin.name, vscode.CompletionItemKind.Function);
+                    item.documentation = builtin.doc;
+                    items.push(item);
+                }
+
+                for (const mod of MODULES) {
+                    const item = new vscode.CompletionItem(mod.name, vscode.CompletionItemKind.Module);
+                    item.documentation = mod.doc;
+                    items.push(item);
+                }
+
+                return items;
+            }
+        },
+        "."
+    );
+
+    const hoverProvider = vscode.languages.registerHoverProvider(
+        { language: "mimo", scheme: "file" },
+        {
+            provideHover(document, position) {
+                const range = document.getWordRangeAtPosition(position);
+                if (!range) return;
+
+                const word = document.getText(range);
+
+                const kw = KEYWORDS.find(k => k.name === word);
+                if (kw) {
+                    return new vscode.Hover(`**${word}** (keyword)\n\n${kw.doc}`);
+                }
+
+                const builtin = BUILTINS.find(b => b.name === word);
+                if (builtin) {
+                    return new vscode.Hover(`**${word}** (builtin function)\n\n${builtin.doc}`);
+                }
+
+                const mod = MODULES.find(m => m.name === word);
+                if (mod) {
+                    return new vscode.Hover(`**${word}** (module)\n\n${mod.doc}`);
+                }
+
+                return;
+            }
+        }
+    );
+
+    context.subscriptions.push(runFile);
+    context.subscriptions.push(completionProvider);
+    context.subscriptions.push(hoverProvider);
+
+    updateStatusBar();
+
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTextEditor(updateStatusBar)
+    );
+}
+
+function updateStatusBar() {
+    const editor = vscode.window.activeTextEditor;
+    if (editor && editor.document.languageId === "mimo") {
+        statusBar.show();
+    } else {
+        statusBar.hide();
     }
-
-    if (document && document.isDirty) {
-      document.save();
-    }
-
-    outputChannel.clear();
-    outputChannel.show(true);
-    outputChannel.appendLine(`[Running] ${path.basename(filePath)}...`);
-
-    // Determine the root of mimo-next to find the CLI
-    const mimoCliPath = path.resolve(__dirname, "../../bin/cli.js");
-
-    // Use bun if available
-    const runner = "bun";
-
-    const process = spawn(runner, [mimoCliPath, filePath]);
-
-    process.stdout.on("data", (data) => {
-      outputChannel.append(data.toString());
-    });
-
-    process.stderr.on("data", (data) => {
-      outputChannel.append(`ERROR: ${data.toString()}`);
-    });
-
-    process.on("close", (code) => {
-      outputChannel.appendLine(`\n[Done] exited with code ${code}`);
-    });
-  });
-
-  context.subscriptions.push(runFile);
 }
 
 function deactivate() {
-  if (outputChannel) {
-    outputChannel.dispose();
-  }
+    if (outputChannel) {
+        outputChannel.dispose();
+    }
+    if (statusBar) {
+        statusBar.dispose();
+    }
 }
 
 module.exports = {
-  activate,
-  deactivate,
+    activate,
+    deactivate,
 };

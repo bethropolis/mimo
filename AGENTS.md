@@ -1,6 +1,48 @@
 # Guide for AI Agents
 
-Welcome! This guide helps you navigate and understand the Mimo codebase efficiently.
+Welcome! This guide helps you navigate and understand the Mimo codebase efficiently. As an AI agent, you can leverage the CLI, REPL, and test suite to rapidly experiment and verify changes.
+
+---
+
+## Quick Start for AI Agents
+
+### Verify Your Changes Instantly
+```bash
+# 1. Test a quick expression
+bun bin/cli.js -e "show + 1 2"
+
+# 2. Run a file
+echo 'show "Hello from Mimo"' > temp.mimo
+bun bin/cli.js temp.mimo
+
+# 3. Start REPL for interactive testing
+bun repl.js
+
+# 4. Run the test suite
+bun test.js
+
+# 5. Lint and format
+bun bin/cli.js lint test/source/all.mimo
+bun bin/cli.js fmt test/source/all.mimo --check
+```
+
+### Common AI Agent Workflows
+```bash
+# Workflow 1: Test a new feature
+echo "your test code" | bun bin/cli.js
+bun test.js  # Ensure no regressions
+
+# Workflow 2: Debug parser issues
+bun bin/cli.js -e "your expression" 2>&1 | head -20
+
+# Workflow 3: Test standard library changes
+bun bin/cli.js -e "import math from 'math' \n show call math.sqrt 16"
+
+# Workflow 4: Validate syntax changes
+echo "function test() return 42 end" | bun bin/cli.js
+```
+
+---
 
 ## Mimo Philosophy
 Mimo is a minimal, prefix-notation (Polish notation) programming language. It prioritizes simplicity, embeddability, and a consistent syntax where operators always precede their operands.

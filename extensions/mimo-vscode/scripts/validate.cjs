@@ -34,7 +34,7 @@ function main() {
   assert(grammar.scopeName === "source.mimo", "grammar scopeName should be source.mimo");
   assert(Array.isArray(grammar.patterns), "grammar patterns must be an array");
 
-  assert(langConfig.comments?.lineComment === "#", "line comment should be #");
+  assert(langConfig.comments?.lineComment === "//", "line comment should be //");
   assert(typeof snippets === "object" && snippets !== null, "snippets.json must be a JSON object");
 
   const commandId = "mimo.runFile";
