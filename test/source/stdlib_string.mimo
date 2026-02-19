@@ -1,0 +1,90 @@
+// test/source/stdlib_string.mimo
+
+show "=== Standard Library: String Module Demo ==="
+
+import "string" as str
+
+set test_string "  Hello, Mimo World!  "
+set search_term "Mimo"
+set another_string "---===###"
+
+show "--- Case Conversion ---"
+// Corrected:
+call str.to_upper(test_string) -> upper_s
+show + (+ "to_upper: '" upper_s) "'"
+call str.to_lower(test_string) -> lower_s
+show + (+ "to_lower: '" lower_s) "'"
+
+show "--- Trimming ---"
+call str.trim(test_string) -> trimmed_s
+show + (+ "trim: '" trimmed_s) "'"
+call str.trim_start(test_string) -> trimmed_start_s
+show + (+ "trim_start: '" trimmed_start_s) "'"
+call str.trim_end(test_string) -> trimmed_end_s
+show + (+ "trim_end: '" trimmed_end_s) "'"
+
+show "--- Padding ---"
+call str.pad_start("mimo", 8, "*") -> pad_s1
+show + (+ "pad_start('mimo', 8, '*'): '" pad_s1) "'"
+call str.pad_end("mimo", 7) -> pad_s2
+show + (+ "pad_end('mimo', 7): '" pad_s2) "'"
+
+show "--- Searching & Checking ---"
+call str.contains(test_string, search_term) -> contains_res
+show + + "contains '" (+ search_term "': ") contains_res // Example of variable in first part
+call str.contains(test_string, "Planet") -> contains_false
+show + "contains 'Planet': " contains_false
+
+call str.starts_with(trimmed_s, "Hello") -> starts_res
+show + "starts_with 'Hello': " starts_res
+call str.ends_with(trimmed_s, "World!") -> ends_res
+show + "ends_with 'World!': " ends_res
+
+call str.index_of(trimmed_s, "Mimo") -> index_mimo
+show + "index_of 'Mimo': " index_mimo
+call str.last_index_of(trimmed_s, "o") -> last_o
+show + "last_index_of 'o': " last_o
+call str.index_of(trimmed_s, "X") -> index_x
+show + "index_of 'X': " index_x
+
+show "--- Substring & Slicing ---"
+call str.substring(trimmed_s, 7, 11) -> sub_mimo
+show + (+ "substring(7,11): '" sub_mimo) "'"
+call str.slice(trimmed_s, 7) -> slice_from_mimo
+show + (+ "slice(7): '" slice_from_mimo) "'"
+call str.slice(trimmed_s, -7, -1) -> slice_world
+show + (+ "slice(-7, -1): '" slice_world) "'"
+
+show "--- Splitting ---"
+set csv_string "apple,banana,cherry"
+call str.split(csv_string, ",") -> fruits_array
+show + "split by ',': " fruits_array
+call str.split(trimmed_s, " ") -> words_array
+show + "split by ' ': " words_array
+
+show "--- Replacement ---"
+call str.replace(trimmed_s, "World", "Universe") -> replaced_s
+show + (+ "replace 'World' with 'Universe': '" replaced_s) "'"
+call str.replace_all("ha ha ha", "ha", "hee") -> replaced_all_s
+show + (+ "replace_all 'ha' with 'hee': '" replaced_all_s) "'"
+
+show "--- Other Utilities ---"
+call str.repeat("xo", 3) -> repeat_s
+show + (+ "repeat 'xo' 3 times: '" repeat_s) "'"
+call str.char_at(trimmed_s, 7) -> char_m
+show + (+ "char_at 7: '" char_m) "'"
+
+show "--- Error Handling ---"
+try
+    call str.to_upper(123) -> err_res
+catch err
+    show + "Error to_upper(123): " err
+end
+
+try
+    call str.pad_start("a", "b") -> err_res_pad
+catch err
+    show + "Error pad_start('a', 'b'): " err
+end
+
+show "=== String Module Demo Complete ==="

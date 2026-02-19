@@ -1,0 +1,13 @@
+// Simple continue test for debugging
+show "Testing basic continue functionality"
+
+set i 0
+while < i 5
+    set i + i 1
+    if = i 3
+        show "Skipping i = 3"
+        continue
+    end
+    show i
+end
+show "Loop ended"

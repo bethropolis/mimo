@@ -1,0 +1,46 @@
+// Module error handling test
+
+show "=== Module Error Handling Test ==="
+
+// Test 1: Try to import non-existent module
+show "1. Testing non-existent module import:"
+try
+    //import "nonexistent_module" as missing
+catch err
+    show + "Caught import error: " err
+end
+
+// Test 2: Try to access non-existent property from valid module
+show "2. Testing non-existent property access:"
+import "simple_module" as mod
+try
+    show mod.nonexistent_property
+catch err
+    show + "Caught property error: " err
+end
+
+// Test 3: Try to access module that wasn't imported
+show "3. Testing unimported module access:"
+try
+    show unimported.something
+catch err
+    show + "Caught unimported module error: " err
+end
+
+// Test 4: Try to call non-existent function from module
+show "4. Testing non-existent function call:"
+try
+    call mod.nonexistent_function() -> result
+catch err
+    show + "Caught function call error: " err
+end
+
+// Test 5: Test module with relative path that doesn't exist
+show "5. Testing invalid relative path:"
+try
+    //import "./nonexistent/path" as invalid
+catch err
+    show + "Caught path error: " err
+end
+
+show "=== Module Error Handling Test Complete ==="

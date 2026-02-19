@@ -1,0 +1,58 @@
+show "=== Built-in Functions Demo ==="
+
+show "1. Testing len() function:"
+set numbers [1, 2, 3, 4, 5]
+call len(numbers) -> nums_length
+show nums_length
+
+set greeting "Hello"
+call len(greeting) -> str_length
+show str_length
+
+show "2. Testing type() function:"
+call type(numbers) -> nums_type
+show nums_type
+
+call type(42) -> num_type
+show num_type
+
+call type("text") -> str_type
+show str_type
+
+show "3. Testing push() function:"
+set fruits ["apple", "banana"]
+show fruits
+call push(fruits, "cherry") -> updated_fruits
+show updated_fruits
+
+show "4. Testing pop() function:"
+call pop(fruits) -> popped_item
+show popped_item
+show fruits
+
+show "5. Testing range() function:"
+call range(1, 5) -> range_result
+show range_result
+
+call range(10, 15) -> range2
+show range2
+
+show "6. Testing join() function:"
+set words ["hello", "world", "mimo"]
+call join(words, " ") -> sentence
+show sentence
+
+call join(range_result, "-") -> dashed_numbers
+show dashed_numbers
+
+show "7. Combining built-in functions:"
+call range(1, 10) -> big_range
+call len(big_range) -> big_range_len
+show big_range_len
+
+set colors ["red", "green", "blue"]
+call push(colors, "yellow")
+call join(colors, ", ") -> color_list
+show color_list
+
+show "=== Built-in Functions Demo Complete ==="

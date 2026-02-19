@@ -1,0 +1,5 @@
+// Simple import test
+show "Testing import"
+import "simple_module" as mod
+show mod.MESSAGE
+show "Import test complete"

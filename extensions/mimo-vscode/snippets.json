@@ -1,0 +1,220 @@
+{
+    "Function": {
+        "prefix": "fn",
+        "body": [
+            "function ${1:name}(${2:params})",
+            "\t$0",
+            "end"
+        ],
+        "description": "Define a Mimo function"
+    },
+    "If Statement": {
+        "prefix": "if",
+        "body": [
+            "if ${1:condition}",
+            "\t$0",
+            "end"
+        ],
+        "description": "If statement"
+    },
+    "If-Elif-Else": {
+        "prefix": "ifelif",
+        "body": [
+            "if ${1:condition}",
+            "\t$2",
+            "elif ${3:condition}",
+            "\t$4",
+            "else",
+            "\t$0",
+            "end"
+        ],
+        "description": "If-elif-else statement"
+    },
+    "While Loop": {
+        "prefix": "while",
+        "body": [
+            "while ${1:condition}",
+            "\t$0",
+            "end"
+        ],
+        "description": "While loop"
+    },
+    "For In Loop": {
+        "prefix": "for",
+        "body": [
+            "for ${1:item} in ${2:list}",
+            "\t$0",
+            "end"
+        ],
+        "description": "For...in loop"
+    },
+    "Match": {
+        "prefix": "match",
+        "body": [
+            "match ${1:value}",
+            "\tcase ${2:pattern}:",
+            "\t\t$0",
+            "\tdefault:",
+            "\t\t",
+            "end"
+        ],
+        "description": "Match expression"
+    },
+    "Case": {
+        "prefix": "case",
+        "body": [
+            "case ${1:pattern}:",
+            "\t$0"
+        ],
+        "description": "Case clause in match"
+    },
+    "Default Case": {
+        "prefix": "default",
+        "body": [
+            "default:",
+            "\t$0"
+        ],
+        "description": "Default clause in match"
+    },
+    "Try Catch": {
+        "prefix": "try",
+        "body": [
+            "try",
+            "\t$1",
+            "catch ${2:error}",
+            "\t$0",
+            "end"
+        ],
+        "description": "Try-catch block"
+    },
+    "Set Variable": {
+        "prefix": "set",
+        "body": [
+            "set ${1:name} ${2:value}"
+        ],
+        "description": "Set a mutable variable"
+    },
+    "Let Variable": {
+        "prefix": "let",
+        "body": [
+            "let ${1:name} ${2:value}"
+        ],
+        "description": "Declare a block-scoped variable"
+    },
+    "Const Variable": {
+        "prefix": "const",
+        "body": [
+            "const ${1:NAME} ${2:value}"
+        ],
+        "description": "Declare a constant"
+    },
+    "Global Variable": {
+        "prefix": "global",
+        "body": [
+            "global ${1:name} ${2:value}"
+        ],
+        "description": "Declare a global variable"
+    },
+    "Import Module": {
+        "prefix": "import",
+        "body": [
+            "import ${1:module} from \"${2:module}\""
+        ],
+        "description": "Import a module"
+    },
+    "Import Module with Alias": {
+        "prefix": "importas",
+        "body": [
+            "import ${1:module} from \"${2:module}\" as ${3:alias}"
+        ],
+        "description": "Import a module with an alias"
+    },
+    "Export": {
+        "prefix": "export",
+        "body": [
+            "export { ${1:items} }"
+        ],
+        "description": "Export items from module"
+    },
+    "Anonymous Function": {
+        "prefix": "lam",
+        "body": [
+            "function(${1:params})",
+            "\t$0",
+            "end"
+        ],
+        "description": "Anonymous function"
+    },
+    "Array Literal": {
+        "prefix": "arr",
+        "body": [
+            "[${1:items}]"
+        ],
+        "description": "Array literal"
+    },
+    "Object Literal": {
+        "prefix": "obj",
+        "body": [
+            "{ ${1:key}: ${2:value} }"
+        ],
+        "description": "Object literal"
+    },
+    "Call Function": {
+        "prefix": "call",
+        "body": [
+            "call ${1:function}(${2:args})"
+        ],
+        "description": "Call a function"
+    },
+    "Call with Result": {
+        "prefix": "callr",
+        "body": [
+            "call ${1:function}(${2:args}) -> ${3:result}"
+        ],
+        "description": "Call a function and store result"
+    },
+    "Array Map": {
+        "prefix": "map",
+        "body": [
+            "array.map ${1:arr} (fn ${2:x}, $0)"
+        ],
+        "description": "Map over array"
+    },
+    "Array Filter": {
+        "prefix": "filter",
+        "body": [
+            "array.filter ${1:arr} (fn ${2:x}, $0)"
+        ],
+        "description": "Filter array"
+    },
+    "Show": {
+        "prefix": "show",
+        "body": [
+            "show ${1:value}"
+        ],
+        "description": "Print a value"
+    },
+    "Return": {
+        "prefix": "ret",
+        "body": [
+            "return ${1:value}"
+        ],
+        "description": "Return from function"
+    },
+    "Throw Error": {
+        "prefix": "throw",
+        "body": [
+            "throw \"${1:error message}\""
+        ],
+        "description": "Throw an error"
+    },
+    "Range Loop": {
+        "prefix": "range",
+        "body": [
+            "for ${1:i} in range ${2:start} ${3:end}",
+            "\t$0",
+            "end"
+        ],
+        "description": "Loop over a range"
+    }
+}

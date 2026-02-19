@@ -1,0 +1,161 @@
+show "=== Object Methods and Properties Test ==="
+
+// 1. Bracket notation for property access
+show "1. Bracket notation property access:"
+set person {
+    name: "Alice",
+    age: 30,
+    occupation: "Engineer"
+}
+show person["name"]
+show person["age"]
+show person["occupation"]
+
+// 2. Dynamic property access with variables
+show "2. Dynamic property access:"
+set key "name"
+show person[key]
+set key "age"
+show person[key]
+
+// 3. Bracket notation property assignment
+show "3. Bracket notation property assignment:"
+set person["email"] "alice@example.com"
+set person["active"] true
+show person["email"]
+show person["active"]
+show person
+
+// 4. Mixed bracket and dot notation
+show "4. Mixed bracket and dot notation:"
+set company {
+    info: {
+        name: "TechCorp",
+        founded: 2020
+    }
+}
+show company.info["name"]
+show company["info"].founded
+// TODO: Chained bracket assignment not yet supported
+// set company["info"]["employees"] 50
+// set company.info.employees 50
+show company.info.employees
+show company
+
+// 5. Property existence checking
+show "5. Property existence checking:"
+call has_property(person, "name") -> has_name
+call has_property(person, "salary") -> has_salary
+show has_name
+show has_salary
+show "Expected: true, false"
+
+// 6. Object keys, values, and entries
+show "6. Object utility functions:"
+set config {
+    host: "localhost",
+    port: 3000,
+    debug: true
+}
+
+call keys(config) -> config_keys
+show config_keys
+show "Expected: [host, port, debug]"
+
+call values(config) -> config_values
+show config_values
+show "Expected: [localhost, 3000, true]"
+
+call entries(config) -> config_entries
+show config_entries
+show "Expected: [[host, localhost], [port, 3000], [debug, true]]"
+
+// 7. Array keys and values
+show "7. Array utility functions:"
+set arr ["apple", "banana", "cherry"]
+call keys(arr) -> arr_keys
+call values(arr) -> arr_values
+show arr_keys
+show arr_values
+
+// 8. Bracket notation with computed property names
+show "8. Computed property names:"
+set data {}
+set prefix "user_"
+set id 123
+set computed_key + prefix id
+set data[computed_key] "John Doe"
+show data
+show data[computed_key]
+
+// 9. Bracket notation with string expressions
+show "9. String expressions as property names:"
+set obj {}
+set obj[+ "prop" "_1"] "first"
+set obj[+ "prop" "_2"] "second"
+show obj
+show obj["prop_1"]
+show obj["prop_2"]
+
+// 10. Nested bracket access
+show "10. Nested bracket access:"
+set nested {
+    level1: {
+        level2: {
+            value: "deep"
+        }
+    }
+}
+show nested["level1"]["level2"]["value"]
+// TODO: Chained bracket assignment not yet supported
+// set nested["level1"]["level2"]["new"] "added"
+// set nested.level1.level2.new "added"
+show nested["level1"]["level2"]
+
+// 11. Error handling
+show "11. Error handling:"
+try
+    call has_property(null, "prop")
+    show "This should be false"
+catch err
+    show + "Caught: " err
+end
+
+try
+    call keys("not an object")
+catch err
+    show + "Caught: " err
+end
+
+try
+    call values(42)
+catch err
+    show + "Caught: " err
+end
+
+// 12. Property assignment on arrays
+show "12. Array element assignment:"
+set numbers [1, 2, 3]
+set numbers[1] 99
+show numbers
+show numbers[1]
+
+// 13. Mixed data types as property names
+show "13. Mixed property name types:"
+set mixed_keys {}
+set mixed_keys[42] "number key"
+set mixed_keys[true] "boolean key"
+set mixed_keys["string"] "string key"
+show mixed_keys
+show mixed_keys[42]
+show mixed_keys[true]
+show mixed_keys["string"]
+
+// 14. Property existence with different types
+show "14. Property existence with arrays:"
+call has_property(arr, 0) -> has_index_0
+call has_property(arr, 5) -> has_index_5
+show has_index_0
+show has_index_5
+
+show "=== Object methods and properties test complete ==="

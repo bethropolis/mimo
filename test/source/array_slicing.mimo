@@ -1,0 +1,149 @@
+show "=== Array Slicing Test ==="
+
+// 1. Basic array slicing
+show "1. Basic array slicing:"
+set numbers [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+show numbers
+show call slice(numbers, 2, 5)
+show "Expected: [2, 3, 4]"
+
+show call slice(numbers, 0, 3)
+show "Expected: [0, 1, 2]"
+
+show call slice(numbers, 7, 10)
+show "Expected: [7, 8, 9]"
+
+// 2. Slicing with omitted end (using null)
+show "2. Slicing with omitted end (to end of array):"
+show call slice(numbers, 5, null) // or simply call slice(numbers, 5) if your builtin handles 2 args for (arr, start)
+show "Expected: [5, 6, 7, 8, 9]"
+
+show call slice(numbers, 8, null)
+show "Expected: [8, 9]"
+
+// 3. Slicing with omitted start (using null)
+show "3. Slicing with omitted start (from beginning):"
+show call slice(numbers, null, 3)
+show "Expected: [0, 1, 2]"
+
+show call slice(numbers, null, 5)
+show "Expected: [0, 1, 2, 3, 4]"
+
+// 4. Full array slice
+show "4. Full array slice:"
+show call slice(numbers, null, null) // or simply call slice(numbers)
+show "Expected: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"
+
+// 5. Single element slices
+show "5. Single element slices:"
+show call slice(numbers, 3, 4)
+show "Expected: [3]"
+
+show call slice(numbers, 0, 1)
+show "Expected: [0]"
+
+// 6. Empty slices
+show "6. Empty slices:"
+show call slice(numbers, 5, 5)
+show "Expected: []"
+
+show call slice(numbers, 3, 2)
+show "Expected: [] (start > end)"
+
+// 7. Out of bounds handling
+show "7. Out of bounds handling:"
+show call slice(numbers, 8, 15)
+show "Expected: [8, 9] (clamped to array bounds)"
+
+show call slice(numbers, 15, 20)
+show "Expected: [] (start beyond array)"
+
+// 8. Negative indices - ensure your `slice` builtin handles negative indices
+// If your `arraySlice` builtin doesn't handle negative indices like JS slice,
+// you might need to adjust it or keep these commented out.
+// Assuming it acts like JS .slice(), which supports negative indices.
+show "8. Negative indices:"
+show call slice(numbers, -3, null)
+show "Expected: [7, 8, 9] (last 3 elements)"
+
+show call slice(numbers, null, -2)
+show "Expected: [0, 1, 2, 3, 4, 5, 6, 7] (all but last 2)"
+
+show call slice(numbers, -5, -2)
+show "Expected: [5, 6, 7] (from -5 to -2)"
+
+// 9. String arrays
+show "9. String array slicing:"
+set words ["apple", "banana", "cherry", "date", "elderberry"]
+show words
+show call slice(words, 1, 4)
+show "Expected: [banana, cherry, date]"
+
+show call slice(words, 2, null)
+show "Expected: [cherry, date, elderberry]"
+
+// 10. Mixed type arrays
+show "10. Mixed type array slicing:"
+set mixed [1, "hello", true, null, 42, false]
+show mixed
+show call slice(mixed, 1, 4)
+show "Expected: [hello, true, null]"
+
+// 11. Nested arrays
+show "11. Nested array slicing:"
+set matrix [[1, 2], [3, 4], [5, 6], [7, 8]]
+show matrix
+show call slice(matrix, 1, 3)
+show "Expected: [[3, 4], [5, 6]]"
+
+// 12. Slicing results in variables
+show "12. Storing slice results:"
+set first_half call slice(numbers, null, 5)
+set second_half call slice(numbers, 5, null)
+show first_half
+show second_half
+
+// 13. Slicing with expressions
+show "13. Slicing with computed indices:"
+set start_idx 2
+set stop_idx 6
+show call slice(numbers, start_idx, stop_idx)
+show "Expected: [2, 3, 4, 5]"
+
+set offset 3
+show call slice(numbers, offset, + offset 3) // + is prefix: `+ offset 3`
+show "Expected: [3, 4, 5]"
+
+// 14. Error handling
+show "14. Error handling:"
+try
+    show call slice("string", 1, 3) // If arraySlice supports strings (it does in your code!)
+catch err
+    show + "Caught: " err
+end
+
+try
+    show call slice(numbers, "not_a_number", 3)
+catch err
+    show + "Caught: " err
+end
+
+try
+    show call slice(numbers, 1, "also_not_a_number")
+catch err
+    show + "Caught: " err
+end
+
+// 15. Slicing in functions
+show "15. Slicing in functions:"
+function get_middle(arr)
+    call len(arr) -> length
+    set quarter / length 4
+    set three_quarters * quarter 3
+    return call slice(arr, quarter, three_quarters)
+end
+
+call get_middle(numbers) -> middle_section
+show middle_section
+
+show "=== Array slicing test complete ==="

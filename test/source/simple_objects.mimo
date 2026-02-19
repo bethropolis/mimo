@@ -1,0 +1,32 @@
+show "=== Simple Objects Test ==="
+
+show "1. Basic object creation:"
+set obj { name: "test" }
+show obj
+
+show "2. Property access:"
+show obj.name
+
+show "3. Property assignment:"
+set obj.name "updated"
+show obj.name
+
+show "4. Adding new property:"
+set obj.age 25
+show obj.age
+
+show "5. Object with number:"
+set nums { value: 42 }
+show nums.value
+
+show "6. Object with boolean:"
+set flags { active: true }
+show flags.active
+
+show "7. Empty object:"
+set empty {}
+show empty
+set empty.prop "added"
+show empty.prop
+
+show "=== Simple objects test complete ==="

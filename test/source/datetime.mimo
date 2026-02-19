@@ -1,0 +1,32 @@
+import "datetime" as dt
+
+show "=== Datetime Module Demo ==="
+
+show "1. Getting the current time:"
+call dt.now() -> now_obj
+show + "Current datetime object: "  now_obj
+
+show "\n2. Working with timestamps:"
+call dt.get_timestamp(now_obj) -> ts
+show + "Current timestamp (ms): "  ts
+
+call dt.from_timestamp(ts) -> from_ts_obj
+show + "Object from timestamp: "  from_ts_obj
+show + "Timestamps match? "  (= (call dt.get_timestamp(from_ts_obj)) ts)
+
+show "\n3. Formatting dates:"
+call dt.to_iso_string(now_obj) -> iso_str
+show + "ISO 8601 format: "  iso_str
+
+set format_string "YYYY-MM-DD at hh:mm:ss"
+call dt.format(now_obj, format_string) -> formatted_str
+show + + + "Custom format '"  format_string  "': "  formatted_str
+
+show "\n4. Creating a specific date:"
+// A timestamp for 2025-01-01 12:00:00 UTC
+set specific_ts 1735693200000
+call dt.from_timestamp(specific_ts) -> specific_date
+show + "Specific date object: "  specific_date
+show + "Formatted specific date: "  (call dt.format(specific_date, "YYYY/MM/DD"))
+
+show "=== Datetime Module Demo Complete ==="

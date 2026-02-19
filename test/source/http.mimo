@@ -1,0 +1,27 @@
+import "http" as http
+import "json" as json
+
+show "=== HTTP GET Test ==="
+
+set url "https://jsonplaceholder.typicode.com/todos/1"
+show + "Fetching: " url
+
+// 1. Execute GET request
+call http.get(url) -> response
+
+// 2. Check Status Code (Polish notation: = response.status 200)
+if = response.status 200
+    show "-> Status: 200 OK"
+
+    // 3. Parse Body
+    call json.parse(response.body) -> data
+
+    show "-> Response Data:"
+    show + "   ID: " data.id
+    show + "   Title: " data.title
+    show + "   Completed: " data.completed
+else
+    show + "-> Failed with status: " response.status
+end
+
+show "=== GET Test Complete ==="

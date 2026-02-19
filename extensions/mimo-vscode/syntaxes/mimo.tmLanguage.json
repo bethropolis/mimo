@@ -1,0 +1,265 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Mimo",
+  "scopeName": "source.mimo",
+  "patterns": [
+    {
+      "name": "comment.line.double-slash.mimo",
+      "match": "//.*$"
+    },
+    {
+      "name": "string.quoted.double.mimo",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.mimo",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.backtick.mimo",
+      "begin": "`",
+      "end": "`",
+      "patterns": [
+        {
+          "name": "constant.character.escape.mimo",
+          "match": "\\\\."
+        },
+        {
+          "name": "meta.interpolation.mimo",
+          "begin": "\\$\\{",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#expressions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "constant.numeric.mimo",
+      "match": "\\b-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\\b"
+    },
+    {
+      "name": "constant.language.boolean.mimo",
+      "match": "\\b(?:true|false)\\b"
+    },
+    {
+      "name": "constant.language.null.mimo",
+      "match": "\\bnull\\b"
+    },
+    {
+      "name": "keyword.control.mimo",
+      "match": "\\b(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|call|end|import|export|from|as|show)\\b"
+    },
+    {
+      "name": "storage.type.variable.mimo",
+      "match": "\\b(?:set|let|const|global)\\b"
+    },
+    {
+      "name": "keyword.operator.mimo",
+      "match": "\\+|\\-|\\*|\\/|%|===|==|!==|!=|>=|<=|>|<|=|\\&\\&|\\|\\||\\!|\\?\\.|\\?:|\\?|\\:"
+    },
+    {
+      "name": "support.module.mimo",
+      "match": "\\b(?:array|string|math|json|fs|http|datetime|regex)\\b"
+    },
+    {
+      "name": "support.function.builtin.mimo",
+      "match": "\\b(?:len|get|update|type|push|pop|slice|range|join|has_property|keys|values|entries|get_arguments|get_env|exit_code|coalesce|get_property_safe|if_else)\\b"
+    },
+    {
+      "name": "meta.array.literal.mimo",
+      "begin": "\\[",
+      "end": "\\]",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.array.begin.mimo" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.array.end.mimo" }
+      },
+      "patterns": [
+        {
+          "include": "#expressions"
+        },
+        {
+          "name": "punctuation.separator.comma.mimo",
+          "match": ","
+        }
+      ]
+    },
+    {
+      "name": "meta.object.literal.mimo",
+      "begin": "\\{",
+      "end": "\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.object.begin.mimo" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.object.end.mimo" }
+      },
+      "patterns": [
+        {
+          "name": "meta.object.key.mimo",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(:)",
+          "captures": {
+            "1": { "name": "entity.name.tag.mimo" },
+            "2": { "name": "punctuation.separator.key-value.mimo" }
+          }
+        },
+        {
+          "include": "#expressions"
+        },
+        {
+          "name": "punctuation.separator.comma.mimo",
+          "match": ","
+        }
+      ]
+    },
+    {
+      "name": "meta.function-call.mimo",
+      "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": { "name": "entity.name.function.mimo" },
+        "2": { "name": "punctuation.definition.arguments.begin.mimo" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.arguments.end.mimo" }
+      },
+      "patterns": [
+        {
+          "include": "#expressions"
+        },
+        {
+          "name": "punctuation.separator.comma.mimo",
+          "match": ","
+        }
+      ]
+    },
+    {
+      "name": "meta.property.access.mimo",
+      "match": "(\\.)\\s*([a-zA-Z_][a-zA-Z0-9_]*)",
+      "captures": {
+        "1": { "name": "punctuation.accessor.dot.mimo" },
+        "2": { "name": "variable.other.property.mimo" }
+      }
+    },
+    {
+      "name": "meta.bracket.access.mimo",
+      "begin": "\\[",
+      "end": "\\]",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.bracket.begin.mimo" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.bracket.end.mimo" }
+      },
+      "patterns": [
+        {
+          "include": "#expressions"
+        }
+      ]
+    },
+    {
+      "name": "punctuation.definition.group.begin.mimo",
+      "match": "\\("
+    },
+    {
+      "name": "punctuation.definition.group.end.mimo",
+      "match": "\\)"
+    },
+    {
+      "name": "keyword.operator.arrow.mimo",
+      "match": "->"
+    }
+  ],
+  "repository": {
+    "expressions": {
+      "patterns": [
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#keywords"
+        },
+        {
+          "include": "#identifiers"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.mimo",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.mimo",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.backtick.mimo",
+          "begin": "`",
+          "end": "`",
+          "patterns": [
+            {
+              "name": "constant.character.escape.mimo",
+              "match": "\\\\."
+            },
+            {
+              "name": "meta.interpolation.mimo",
+              "begin": "\\$\\{",
+              "end": "\\}"
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.mimo",
+          "match": "\\b-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.mimo",
+          "match": "\\b(?:true|false)\\b"
+        },
+        {
+          "name": "constant.language.null.mimo",
+          "match": "\\bnull\\b"
+        },
+        {
+          "name": "keyword.control.mimo",
+          "match": "\\b(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|call|end|import|export|from|as|show)\\b"
+        },
+        {
+          "name": "storage.type.variable.mimo",
+          "match": "\\b(?:set|let|const|global)\\b"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.other.mimo",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,183 @@
+
+show "=== All Test Modules ==="
+import "anonymous_functions" as anonymous_functions
+import "array_error" as array_error
+import "array_expr" as array_expr
+import "array_slicing" as array_slicing
+import "array_spreading" as array_spreading
+import "builtins" as builtins
+import "clean_end" as clean_end
+import "cli_interface" as cli_interface
+import "comments" as comments
+import "conditional_combined" as conditional_combined
+import "conditional_nullcoalescing" as conditional_nullcoalescing
+import "conditional_safenavigation" as conditional_safenavigation
+import "conditional_simple" as conditional_simple
+import "conditional_ternary" as conditional_ternary
+import "datetime" as datetime
+import "debug_array" as debug_array
+import "debug_bool" as debug_bool
+import "default_parameters" as default_parameters
+import "default_parameters_edge_cases" as default_parameters_edge_cases
+import "default_parameters_errors" as default_parameters_errors
+import "default_parameters_integration" as default_parameters_integration
+import "default_parameters_summary" as default_parameters_summary
+import "demo" as demo
+import "destructuring" as destructuring
+import "destructuring_comprehensive" as destructuring_comprehensive
+import "destructuring_edge_cases" as destructuring_edge_cases
+import "destructuring_errors" as destructuring_errors
+import "destructuring_mixed" as destructuring_mixed
+import "destructuring_object" as destructuring_object
+import "error_demo" as error_demo
+import "error_improvements" as error_improvements
+import "filesystem" as filesystem
+import "fs" as fs
+import "function_error" as function_error
+import "higher_order_functions" as higher_order_functions
+import "http" as http
+import "http_errors" as http_errors
+import "http_post" as http_post
+import "json_module_test" as json_module_test
+import "json_simple" as json_simple
+import "json_support" as json_support
+import "lint_magic_numbers" as lint_magic_numbers
+import "lint_test" as lint_test
+import "literals" as literals
+import "loop_enhancements" as loop_enhancements
+import "match_advanced" as match_advanced
+import "match_deep" as match_deep
+import "match_error" as match_error
+import "match_test" as match_test
+import "match_variants" as match_variants
+import "math_utils" as math_utils
+import "minimal_bracket" as minimal_bracket
+import "minimal_match" as minimal_match
+import "minus_edge_cases_test" as minus_edge_cases_test
+import "minus_operations_test" as minus_operations_test
+import "module_comprehensive" as module_comprehensive
+import "module_errors" as module_errors
+import "module_test" as module_test
+import "object_methods" as object_methods
+import "objects" as objects
+import "pattern_matching" as pattern_matching
+import "phase5_tests" as phase5_tests
+import "polish" as polish
+import "position_errors" as position_errors
+import "regex" as regex
+import "regex_edge_cases" as regex_edge_cases
+import "safe_nav" as safe_nav
+import "scoping" as scoping
+import "scoping_errors" as scoping_errors
+import "simple_anonymous" as simple_anonymous
+import "simple_bracket" as simple_bracket
+import "simple_break" as simple_break
+import "simple_continue" as simple_continue
+import "simple_import" as simple_import
+import "simple_loop" as simple_loop
+import "simple_match" as simple_match
+import "simple_module" as simple_module
+import "simple_objects" as simple_objects
+import "simple_slicing" as simple_slicing
+import "stdlib_array" as stdlib_array
+import "stdlib_coalesce" as stdlib_coalesce
+import "stdlib_math" as stdlib_math
+import "stdlib_string" as stdlib_string
+import "string_utils" as string_utils
+import "strings" as strings
+import "template_literals" as template_literals
+import "variadic_edge_cases" as variadic_edge_cases
+import "variadic_functions" as variadic_functions
+
+show "All modules imported successfully!"
+show "Available namespaces:"
+show "  - anonymous_functions (from anonymous_functions.mimo)"
+show "  - array_error (from array_error.mimo)"
+show "  - array_expr (from array_expr.mimo)"
+show "  - array_slicing (from array_slicing.mimo)"
+show "  - array_spreading (from array_spreading.mimo)"
+show "  - builtins (from builtins.mimo)"
+show "  - clean_end (from clean_end.mimo)"
+show "  - cli_interface (from cli_interface.mimo)"
+show "  - comments (from comments.mimo)"
+show "  - conditional_combined (from conditional_combined.mimo)"
+show "  - conditional_nullcoalescing (from conditional_nullcoalescing.mimo)"
+show "  - conditional_safenavigation (from conditional_safenavigation.mimo)"
+show "  - conditional_simple (from conditional_simple.mimo)"
+show "  - conditional_ternary (from conditional_ternary.mimo)"
+show "  - datetime (from datetime.mimo)"
+show "  - debug_array (from debug_array.mimo)"
+show "  - debug_bool (from debug_bool.mimo)"
+show "  - default_parameters (from default_parameters.mimo)"
+show "  - default_parameters_edge_cases (from default_parameters_edge_cases.mimo)"
+show "  - default_parameters_errors (from default_parameters_errors.mimo)"
+show "  - default_parameters_integration (from default_parameters_integration.mimo)"
+show "  - default_parameters_summary (from default_parameters_summary.mimo)"
+show "  - demo (from demo.mimo)"
+show "  - destructuring (from destructuring.mimo)"
+show "  - destructuring_comprehensive (from destructuring_comprehensive.mimo)"
+show "  - destructuring_edge_cases (from destructuring_edge_cases.mimo)"
+show "  - destructuring_errors (from destructuring_errors.mimo)"
+show "  - destructuring_mixed (from destructuring_mixed.mimo)"
+show "  - destructuring_object (from destructuring_object.mimo)"
+show "  - error_demo (from error_demo.mimo)"
+show "  - error_improvements (from error_improvements.mimo)"
+show "  - filesystem (from filesystem.mimo)"
+show "  - fs (from fs.mimo)"
+show "  - function_error (from function_error.mimo)"
+show "  - higher_order_functions (from higher_order_functions.mimo)"
+show "  - http (from http.mimo)"
+show "  - http_errors (from http_errors.mimo)"
+show "  - http_post (from http_post.mimo)"
+show "  - json_module_test (from json_module_test.mimo)"
+show "  - json_simple (from json_simple.mimo)"
+show "  - json_support (from json_support.mimo)"
+show "  - lint_magic_numbers (from lint_magic_numbers.mimo)"
+show "  - lint_test (from lint_test.mimo)"
+show "  - literals (from literals.mimo)"
+show "  - loop_enhancements (from loop_enhancements.mimo)"
+show "  - match_advanced (from match_advanced.mimo)"
+show "  - match_deep (from match_deep.mimo)"
+show "  - match_error (from match_error.mimo)"
+show "  - match_test (from match_test.mimo)"
+show "  - match_variants (from match_variants.mimo)"
+show "  - math_utils (from math_utils.mimo)"
+show "  - minimal_bracket (from minimal_bracket.mimo)"
+show "  - minimal_match (from minimal_match.mimo)"
+show "  - minus_edge_cases_test (from minus_edge_cases_test.mimo)"
+show "  - minus_operations_test (from minus_operations_test.mimo)"
+show "  - module_comprehensive (from module_comprehensive.mimo)"
+show "  - module_errors (from module_errors.mimo)"
+show "  - module_test (from module_test.mimo)"
+show "  - object_methods (from object_methods.mimo)"
+show "  - objects (from objects.mimo)"
+show "  - pattern_matching (from pattern_matching.mimo)"
+show "  - phase5_tests (from phase5_tests.mimo)"
+show "  - polish (from polish.mimo)"
+show "  - position_errors (from position_errors.mimo)"
+show "  - regex (from regex.mimo)"
+show "  - regex_edge_cases (from regex_edge_cases.mimo)"
+show "  - safe_nav (from safe_nav.mimo)"
+show "  - scoping (from scoping.mimo)"
+show "  - scoping_errors (from scoping_errors.mimo)"
+show "  - simple_anonymous (from simple_anonymous.mimo)"
+show "  - simple_bracket (from simple_bracket.mimo)"
+show "  - simple_break (from simple_break.mimo)"
+show "  - simple_continue (from simple_continue.mimo)"
+show "  - simple_import (from simple_import.mimo)"
+show "  - simple_loop (from simple_loop.mimo)"
+show "  - simple_match (from simple_match.mimo)"
+show "  - simple_module (from simple_module.mimo)"
+show "  - simple_objects (from simple_objects.mimo)"
+show "  - simple_slicing (from simple_slicing.mimo)"
+show "  - stdlib_array (from stdlib_array.mimo)"
+show "  - stdlib_coalesce (from stdlib_coalesce.mimo)"
+show "  - stdlib_math (from stdlib_math.mimo)"
+show "  - stdlib_string (from stdlib_string.mimo)"
+show "  - string_utils (from string_utils.mimo)"
+show "  - strings (from strings.mimo)"
+show "  - template_literals (from template_literals.mimo)"
+show "  - variadic_edge_cases (from variadic_edge_cases.mimo)"
+show "  - variadic_functions (from variadic_functions.mimo)"
+
+show "=== End All Test Modules ==="

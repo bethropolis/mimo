@@ -1,0 +1,30 @@
+// Debug boolean values in mimo
+
+show "Testing boolean assignment and type checking"
+
+set flag true
+show flag
+call type(flag) -> flag_type
+show flag_type
+
+set other false
+show other
+call type(other) -> other_type
+show other_type
+
+show "Testing boolean comparison"
+if = flag true
+    show "flag equals true"
+else
+    show "flag does not equal true"
+end
+
+show "Testing match with boolean"
+match flag
+case true:
+    show "Boolean match: true"
+case false:
+    show "Boolean match: false"
+default:
+    show "Boolean match: default"
+end

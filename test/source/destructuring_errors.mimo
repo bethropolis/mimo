@@ -1,0 +1,29 @@
+show "=== Testing Destructuring Error Cases ==="
+
+show "1. Testing destructuring from non-array/object:"
+try
+    destructure [a, b] from "hello"
+catch err
+    show "Caught string error correctly"
+end
+
+show "2. Testing destructuring from number:"
+try  
+    destructure [x, y] from 123
+catch err
+    show "Caught number error correctly"
+end
+
+show "3. Testing destructuring from null:"
+try
+    destructure [p, q] from null  
+catch err
+    show "Caught null error correctly"
+end
+
+show "4. Testing valid destructuring from empty array:"
+destructure [m, n] from []
+show m // Should be null
+show n // Should be null
+
+show "=== Error testing complete ==="

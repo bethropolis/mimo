@@ -1,0 +1,53 @@
+// Simple pattern matching test for mimo
+
+show "=== Simple Pattern Matching Test ==="
+
+show "1. Basic number matching:"
+set value 5
+match value
+case 1:
+    show "It's one"
+case 5:
+    show "It's five"
+default:
+    show "It's something else"
+end
+
+show "2. String matching:"
+set name "hello"
+match name
+case "hi":
+    show "Hi there"
+case "hello":
+    show "Hello world"
+default:
+    show "Unknown"
+end
+
+show "3. Boolean matching:"
+set flag true
+match flag
+case true:
+    show "Flag is true"
+case false:
+    show "Flag is false"
+end
+
+show "4. Variable binding:"
+set num 42
+match num
+case x:
+    show "Bound to variable x:"
+    show x
+end
+
+show "5. Simple array matching:"
+set arr [1, 2]
+match arr
+case [1, 2]:
+    show "Matched [1, 2]"
+default:
+    show "No match"
+end
+
+show "=== End Simple Test ==="

@@ -1,0 +1,29 @@
+show "=== Array Literal with Expressions Test ==="
+
+set x 10
+set y 5
+set arr1 [x, y, + x y, * x y, / x y, - x y]
+show arr1
+show "Expected: [10, 5, 15, 50, 2, 5]"
+
+set a 2
+set b 3
+set arr2 [a, b, + a b, * a b, / a b, - a b]
+show arr2
+show "Expected: [2, 3, 5, 6, 0.666..., -1]"
+
+set nums [1, 2, 3]
+set idx 1
+set arr3 [nums[idx], nums[+ idx 1], nums[- idx 1]]
+show arr3
+show "Expected: [2, 3, 1]"
+
+set arr4 [* 2 3, + 4 5, / 10 2, - 7 1]
+show arr4
+show "Expected: [6, 9, 5, 6]"
+
+set arr5 [x, * x 2, + x 100, / x 2, - x 3]
+show arr5
+show "Expected: [10, 20, 110, 5, 7]"
+
+show "=== End array literal with expressions test ==="

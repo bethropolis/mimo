@@ -1,0 +1,29 @@
+show "=== Testing Deep Nesting ==="
+
+show "--- Testing deeply nested array patterns ---"
+set deep_data [1, [2, [3, [4, 5]]]]
+match deep_data
+    case [a, [b, [c, [d, e]]]]:
+        show "  -> Matched deeply nested pattern!"
+        show + "    a = " a
+        show + "    b = " b
+        show + "    c = " c
+        show + "    d = " d
+        show + "    e = " e
+    default:
+        show "  -> Failed to match deep pattern"
+end
+
+show "--- Testing partial deep match ---"
+set partial_data [1, [2, 3]]
+match partial_data
+    case [x, [y, z]]:
+        show "  -> Matched partial nested pattern!"
+        show + "    x = " x
+        show + "    y = " y
+        show + "    z = " z
+    default:
+        show "  -> Failed to match partial pattern"
+end
+
+show "=== Deep Nesting Complete ==="

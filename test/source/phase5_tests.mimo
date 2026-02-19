@@ -1,0 +1,116 @@
+import "math" as math
+import "string" as string
+import "datetime" as dt
+
+show "=== Phase 5 Standard Library Expansion Tests ==="
+
+show "1. Math Tests"
+call math.seed(42)
+set r1 call math.random()
+set r2 call math.random()
+show + "Random 1: " r1
+show + "Random 2: " r2
+if != r1 r2
+    show "PASS: Seeds generate different numbers sequentially"
+else
+    show "FAIL: Seeds generate same numbers sequentially"
+end
+
+call math.seed(42)
+set r3 call math.random()
+if == r1 r3
+    show "PASS: Same seed generates same first number"
+else
+    show "FAIL: Same seed generates different first number"
+end
+
+set ri call math.randint(1, 10)
+show + "RandInt(1, 10): " ri
+if && (>= ri 1) (<= ri 10)
+    show "PASS: RandInt within range"
+else
+    show "FAIL: RandInt out of range"
+end
+
+show "2. String Tests"
+set tc call string.to_title_case("hello world FROM MIMO")
+show + "Title Case: " tc
+if == tc "Hello World From Mimo"
+    show "PASS: to_title_case works"
+else
+    show "FAIL: to_title_case failed"
+end
+
+set cap call string.capitalize("mimo language")
+show + "Capitalize: " cap
+if == cap "Mimo language"
+    show "PASS: capitalize works"
+else
+    show "FAIL: capitalize failed"
+end
+
+show "3. Array Tests"
+set arr [1, 2, 2, 3, 4, 4, 5]
+set uniq call Array.unique(arr)
+show + "Unique: " uniq
+if == (call len(uniq)) 5
+    show "PASS: unique works"
+else
+    show "FAIL: unique failed"
+end
+
+set a1 [1, 2, 3]
+set a2 [3, 4, 5]
+set inter call Array.intersection(a1, a2)
+show + "Intersection: " inter
+if && (== (call len(inter)) 1) (== (call get(inter, 0)) 3)
+    show "PASS: intersection works"
+else
+    show "FAIL: intersection failed"
+end
+
+set uni call Array.union(a1, a2)
+show + "Union: " uni
+if == (call len(uni)) 5
+    show "PASS: union works"
+else
+    show "FAIL: union failed"
+end
+
+set diff call Array.difference(a1, a2)
+show + "Difference: " diff
+if && (== (call len(diff)) 2) (== (call get(diff, 0)) 1)
+    show "PASS: difference works"
+else
+    show "FAIL: difference failed"
+end
+
+set shuf call Array.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+show + "Shuffled: " shuf
+if != shuf ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    show "PASS: shuffle likely worked (arrays differ)"
+else
+    show "FAIL: shuffle returned same array (unlikely but possible)"
+end
+
+show "4. Datetime Tests"
+set d1 call dt.now()
+show + "Now: " (call dt.to_iso_string(d1))
+
+set d2 call dt.add(d1, 1, "days")
+show + "Now + 1 day: " (call dt.to_iso_string(d2))
+if > (call dt.get_timestamp(d2)) (call dt.get_timestamp(d1))
+    show "PASS: add days works"
+else
+    show "FAIL: add days failed"
+end
+
+set d3 call dt.subtract(d1, 1, "hours")
+show + "Now - 1 hour: " (call dt.to_iso_string(d3))
+if < (call dt.get_timestamp(d3)) (call dt.get_timestamp(d1))
+    show "PASS: subtract hours works"
+else
+    show "FAIL: subtract hours failed"
+end
+
+show "=== Phase 5 Tests Complete ==="

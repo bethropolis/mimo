@@ -1,80 +1,51 @@
-import { generateTokens } from "./compiler/lexer/tokenizer.js";
-import { parseTokens } from "./compiler/parser/parser.js";
-import { interpret } from "./compiler/execute/interpreter.js";
-import { generateCodeJsFromAstArray } from "./converter/js/convert.js";
-
-
-
 /**
- * @typedef {import('./compiler/lexer/tokenizer.js').Token} Token
+ * @file The Mimo library entry point for NODE.JS environments.
+ * Exports the Mimo class and Node.js-specific helpers.
  */
 
-/**
- * @typedef {import('./compiler/parser/parser.js').Node} Node
- */
+import { Interpreter } from './interpreter/index.js';
+import { Lexer } from './lexer/Lexer.js';
+import { Parser } from './parser/Parser.js';
+import { MimoError } from './interpreter/MimoError.js';
+import { nodeAdapter } from './adapters/nodeAdapter.js';
 
+export class Mimo {
+    constructor(adapter = nodeAdapter) {
+        this.interpreter = new Interpreter(adapter);
+    }
 
-/**
- * The main class for the Mimo language.
- */
-export default class Mimo {
-  constructor() {
-    // Initialize the environment for variables
-    this.env = {};
-  }
+    run(source, filePath) {
+        if (!filePath) {
+            throw new Error("Mimo.run() requires a filePath argument in a Node.js environment for module resolution.");
+        }
 
-  /**
-   * Tokenize the given code into a list of tokens.
-   * @param {string} code - The code to be tokenized.
-   * @returns {Promise<Token[]>} A promise that resolves to an array of tokens.
-   */
-  async tokenize(code) {
-    return generateTokens(code);
-  }
+        try {
+            const lexer = new Lexer(source, filePath);
+            const tokens = [];
+            let token;
+            while ((token = lexer.nextToken()) !== null) {
+                tokens.push(token);
+            }
 
-  /**
-   * Parse the list of tokens into an abstract syntax tree (AST).
-   * @param {Token[]} tokens - The list of tokens to be parsed.
-   * @returns {Promise<Node[]>} A promise that resolves to an array of AST nodes.
-   */
-  async parse(tokens) {
-    return parseTokens(tokens);
-  }
+            const parser = new Parser(tokens, filePath);
+            this.interpreter.errorHandler.addSourceFile(filePath, source);
+            parser.setErrorHandler(this.interpreter.errorHandler);
+            const ast = parser.parse();
 
-  /**
-   * Interpret the AST and execute the code.
-   * @param {Node[]} program - The AST to be interpreted.
-   * @returns {Promise<Object>} A promise that resolves to the result of interpreting the AST.
-   */
-  async interpret(program) {
-    return interpret(program, this.env);
-  }
+            const result = this.interpreter.interpret(ast, filePath);
 
-  /**
-   * Run the given code by tokenizing, parsing, and interpreting it.
-   * @param {string} code - The code to be run.
-   * @returns {Promise<{program: Node[], env: Object}>} A promise that resolves to an object containing the AST and the environment.
-   */
-  async run(code) {
-    const tokens = await this.tokenize(code);
-    const program = await this.parse(tokens, this.env);
-    const env = await this.interpret(program);
-    return { program, env };
-  }
+            return result;
 
-  /**
-   * Clear the environment for variables.
-   */
-  clearEnv() {
-    this.env = {};
-  }
-
-  /**
-   * Convert the AST to JavaScript code.
-   * @param {Node[]} ast - The AST to be converted.
-   * @returns {string} The generated JavaScript code.
-   */
-  toJS(ast) {
-    return generateCodeJsFromAstArray(ast);
-  }
+        } catch (error) {
+            if (error instanceof MimoError) {
+                throw error.format(this.interpreter.errorHandler.getLine(error.location.file, error.location.line));
+            } else {
+                throw error;
+            }
+        }
+    }
 }
+
+
+// Export Node.js specific helpers and other components
+export { Interpreter, Lexer, Parser, MimoError, nodeAdapter };

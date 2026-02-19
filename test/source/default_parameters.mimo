@@ -1,0 +1,70 @@
+// Test default parameters functionality
+
+// Function with all default parameters
+function greet(name: "World", greeting: "Hello")
+    set message + + + greeting ", "  name "!"
+    show message
+end
+
+// Function with mixed required and default parameters
+function introduce(firstName, lastName: "Smith", title: "Mr.")
+    set fullName + + title " " + firstName + " " lastName
+    show fullName
+end
+
+// Function with numeric defaults
+function calculate(a, b: 10, c: 1)
+    return + a + b c
+end
+
+// Test 1: Call greet with no arguments (use all defaults)
+show "=== Test 1: All defaults ==="
+call greet()
+
+// Test 2: Call greet with one argument (partial defaults)  
+show "=== Test 2: Partial defaults ==="
+call greet("Alice")
+
+// Test 3: Call greet with all arguments (no defaults used)
+show "=== Test 3: No defaults used ==="
+call greet("Bob", "Hi")
+
+// Test 4: Function with required and default parameters
+show "=== Test 4: Mixed required/default ==="
+call introduce("John") 
+call introduce("Jane", "Doe")
+call introduce("Alice", "Johnson", "Dr.")
+
+// Test 5: Numeric defaults with returns
+show "=== Test 5: Numeric defaults ==="
+call calculate(5) -> result1
+call calculate(3, 7) -> result2
+call calculate(1, 2, 3) -> result3
+
+show result1
+show result2
+show result3
+
+// Test 6: Store results in variables
+show "=== Test 6: Store in variables ==="
+call greet("World", "Welcome") -> message
+show message
+
+// Test 7: Expression as default value
+function power(base: 2, exponent: 3)
+    set result 1
+    set i 0
+    while < i exponent
+        set result * result base
+        set i + i 1
+    end
+    return result
+end
+
+call power() -> defaultPower
+call power(3) -> customBase
+call power(2, 4) -> customBoth
+
+show defaultPower
+show customBase
+show customBoth

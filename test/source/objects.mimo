@@ -1,0 +1,178 @@
+show "=== Object/Map Support Test ==="
+
+// 1. Basic object creation and access
+show "1. Basic object creation and property access:"
+set person {
+    name: "Alice",
+    age: 30,
+    city: "New York"
+}
+show person
+show person.name
+show person.age
+show person.city
+
+// 2. Object property assignment
+show "2. Object property modification:"
+set person.age 31
+set person.email "alice@example.com"
+show person.age
+show person.email
+show person
+
+// 3. Objects with mixed data types
+show "3. Objects with mixed data types:"
+set mixed_object {
+    number: 42,
+    text: "hello",
+    flag: true,
+    nothing: null,
+    list: [1, 2, 3]
+}
+show mixed_object
+show mixed_object.number
+show mixed_object.text
+show mixed_object.flag
+show mixed_object.nothing
+show mixed_object.list
+
+// 4. Nested objects
+show "4. Nested objects:"
+set company {
+    name: "TechCorp",
+    address: {
+        street: "123 Main St",
+        city: "San Francisco",
+        country: "USA"
+    },
+    employees: 150
+}
+show company
+show company.name
+show company.address
+show company.address.street
+show company.address.city
+set company.address.zipcode "94102"
+show company.address
+
+// 5. Arrays of objects
+show "5. Arrays of objects:"
+set users [
+    { name: "Alice", role: "admin" },
+    { name: "Bob", role: "user" },
+    { name: "Charlie", role: "moderator" }
+]
+show users
+show users[0]
+show users[0].name
+show users[1].role
+// TODO: Array element property assignment not yet implemented
+// set users[2].active true
+// show users[2]
+
+// 6. Objects in functions
+show "6. Objects as function parameters and returns:"
+function create_user(name, age)
+    return {
+        name: name,
+        age: age,
+        created: "today"
+    }
+end
+
+call create_user("David", 25) -> new_user
+show new_user
+show new_user.name
+show new_user.created
+
+function greet_user(user)
+    return + + "Hello, " user.name "!"
+end
+
+call greet_user(new_user) -> greeting
+show greeting
+
+// 7. Object property existence and type checking
+show "7. Type checking and property operations:"
+call type(person) -> person_type
+show person_type
+show "Expected: object"
+
+call type(person.name) -> name_type
+show name_type
+show "Expected: string"
+
+// 8. Dynamic property access with strings
+show "8. Dynamic property names:"
+set key "name"
+// Note: This would require bracket notation which we might implement later
+// show person[key]
+
+// 9. Object modification in loops
+show "9. Object modification in loops:"
+for user in users
+    set user.processed true
+    show user
+end
+
+// 10. Empty objects
+show "10. Empty objects:"
+set empty_obj {}
+show empty_obj
+set empty_obj.first_prop "added later"
+show empty_obj
+
+// 11. Object with string keys containing spaces/special chars
+show "11. Complex object structures:"
+set config {
+    database: {
+        host: "localhost",
+        port: 5432,
+        credentials: {
+            username: "admin",
+            password: "secret"
+        }
+    },
+    features: [
+        { name: "authentication", enabled: true },
+        { name: "logging", enabled: false }
+    ]
+}
+show config.database.host
+show config.database.credentials.username
+show config.features[0].name
+show config.features[1].enabled
+
+// 12. Error handling
+show "12. Error handling with objects:"
+try
+    show null.property
+catch err
+    show + "Caught: " err
+end
+
+try
+    show "string".property
+catch err
+    show + "Caught: " err
+end
+
+// TODO: Property assignment on null not supported in parser yet
+// try
+//     set null.prop "value"
+// catch err
+//     show + "Caught: " err
+// end
+
+// 13. Objects with function-like behavior
+show "13. Objects with methods (functions as properties):"
+// TODO: Function expressions in object literals not yet supported
+// set calculator {
+//     value: 0,
+//     result: function() return calculator.value end
+// }
+// set calculator.value 42
+// // Note: Method calls would need special syntax, for now just showing structure
+// show calculator.value
+
+show "=== Object support test complete ==="

@@ -173,6 +173,10 @@ dist
 
 # Finder (MacOS) folder config
 .DS_Store
-test/output/
-test/index.txt
-i.js
+
+# Codebase
+codebase.md
+guides/
+
+test/output
+.mimo_history

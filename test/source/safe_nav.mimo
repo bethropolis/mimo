@@ -1,0 +1,31 @@
+show "=== Safe Navigation Operator Tests (?. ) ==="
+
+set user { name: "Alice", details: { age: 30 } }
+set no_user null
+
+show "1. Accessing property on a valid object:"
+show + "User name: "  user?.name
+
+show "\n2. Accessing nested property on a valid object:"
+show + "User age: "  user?.details?.age // Expected: 30
+
+show "\n3. Accessing property on a null object:"
+show + "Name from null user: "  no_user?.name // Expected: null
+
+show "\n4. Accessing nested property on a null object:"
+show + "Details from null user: "  no_user?.details?.age // Expected: null
+
+show "\n5. Accessing nested property where intermediate is null:"
+set user_no_details { name: "Bob", details: null }
+show + "Age from user with null details: "  user_no_details?.details?.age // Expected: null
+
+show "\n6. Should still error on non-objects (after the object is confirmed not-null):"
+try
+    set bad_val 123
+    show bad_val?.property
+catch err
+    show "Caught error as expected."
+    show err.message // Uncomment for detailed error
+end
+
+show "=== Safe Navigation Tests Complete ==="

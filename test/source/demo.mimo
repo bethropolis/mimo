@@ -1,0 +1,86 @@
+show "=== Demo of mimo programming language ==="
+
+show "1. Variable declarations and basic operations:"
+set x 10
+set y 3
+show x
+show y
+
+show "2. Arithmetic operations:"
+set sum + x y
+set diff - x y
+set product * x y
+set quotient / x y
+show sum
+show diff
+show product
+show quotient
+
+show "3. Comparison operations:"
+if > x y
+    show "x is greater than y"
+else
+    show "x is not greater than y"
+end
+
+if = x 10
+    show "x equals 10"
+end
+
+show "4. While loop example:"
+set counter 0
+while < counter 3
+    show counter
+    set counter + counter 1
+end
+
+show "5. Function definition and calling:"
+function multiply(a, b)
+    return * a b
+end
+
+call multiply(x, y) -> result
+show result
+
+function greet(name)
+    return + + "Hello, " name "!"
+end
+
+call greet("mimo") -> greeting
+show greeting
+
+show "6. Arrays and array access:"
+set numbers [1, 2, 3, 4, 5]
+show numbers
+show numbers[0]
+show numbers[2]
+show numbers[4]
+
+set fruits ["apple", "banana", "cherry"]
+show fruits[1]
+
+show "7. For-in loops with arrays:"
+for item in numbers
+    show item
+end
+
+for fruit in fruits
+    show fruit
+end
+
+show "8. Error handling with try-catch:"
+try
+    show undefined_variable
+catch error
+    show + "Caught error: " error
+end
+
+show "9. Nested control structures:"
+set matrix [[1, 2], [3, 4], [5, 6]]
+for row in matrix
+    for element in row
+        show element
+    end
+end
+
+show "=== Demo complete! ==="

@@ -1,0 +1,100 @@
+// Test variadic functions functionality
+
+// Function with only rest parameter
+function sum(...numbers)
+    set total 0
+    for n in numbers
+        set total + total n
+    end
+    return total
+end
+
+// Function with regular params and rest parameter
+function introduce(greeting, ...names)
+    set message greeting
+    for name in names
+        set message + message + " " name
+    end
+    show message
+end
+
+// Function with defaults and rest parameter
+function calculate(operation: "sum", ...values)
+    if = operation "sum"
+        set result 0
+        for v in values
+            set result + result v
+        end
+        return result
+    else
+        set result 1
+        for v in values
+            set result * result v
+        end
+        return result
+    end
+end
+
+// Test 1: Basic rest parameter
+show "=== Test 1: Basic rest parameter ==="
+call sum() -> result1
+call sum(1) -> result2
+call sum(1, 2, 3) -> result3
+call sum(5, 10, 15, 20) -> result4
+
+show result1
+show result2
+show result3
+show result4
+
+// Test 2: Mixed regular and rest parameters
+show "=== Test 2: Mixed parameters ==="
+call introduce("Hello")
+call introduce("Hi", "Alice")
+call introduce("Welcome", "Bob", "Charlie", "Diana")
+
+// Test 3: Defaults with rest parameters
+show "=== Test 3: Defaults with rest ==="
+call calculate("sum", 1, 2, 3) -> sum1
+call calculate("product", 2, 3, 4) -> prod1
+call calculate() -> empty1
+
+show sum1
+show prod1
+show empty1
+
+// Test 4: Empty rest parameter handling
+function showArgs(prefix, ...args)
+    show + prefix + " received " + args " args"
+end
+
+show "=== Test 4: Empty rest handling ==="
+call showArgs("Test")
+call showArgs("Numbers", 1, 2, 3)
+
+// Test 5: Array operations on rest parameter
+function checkLength(...nums)
+    call len(nums) -> numCount
+    return numCount
+end
+
+function getFirst(...nums)
+    call len(nums) -> numCount
+    if = numCount 0
+        return "empty"
+    else
+        return nums[0]
+    end
+end
+
+show "=== Test 5: Array operations ==="
+call checkLength() -> len1
+call checkLength(1, 2, 3) -> len2
+
+call getFirst() -> first1
+call getFirst(42) -> first2
+
+show len1
+show len2
+show first1
+show first2

@@ -1,0 +1,38 @@
+show "=== Destructuring Assignment Test (New Syntax) ==="
+
+show "1. Array destructuring:"
+set arr [10, 20, 30]
+destructure [a, b, c] from arr
+show a // Expected: 10
+show b // Expected: 20
+show c // Expected: 30
+
+show "\n2. Partial array destructuring:"
+destructure [x, y] from [1, 2, 3]
+show x // Expected: 1
+show y // Expected: 2
+
+show "\n3. Destructuring with extra variables:"
+destructure [p, q, r, s] from [5, 6]
+show p // Expected: 5
+show q // Expected: 6
+show r // Expected: null
+show s // Expected: null
+
+show "\n4. Destructuring from function return:"
+function get_coords()
+    return [3, 4]
+end
+destructure [cx, cy] from call get_coords()
+show cx // Expected: 3
+show cy // Expected: 4
+
+show "\n5. Error handling:"
+try
+    destructure [bad1, bad2] from 42
+catch err
+    show "Caught error as expected."
+    // show + "Caught: " + err.message
+end
+
+show "=== Destructuring assignment test complete ==="

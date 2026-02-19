@@ -1,0 +1,142 @@
+{
+  "name": "mimo-vscode",
+  "displayName": "Mimo Language",
+  "description": "VS Code language support for Mimo (.mimo)",
+  "version": "0.0.8",
+  "publisher": "local",
+  "license": "MIT",
+  "icon": "icons/icon-128.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:mimo",
+    "onCommand:mimo.runFile",
+    "workspaceContains:*.mimo"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "mimo",
+        "aliases": [
+          "Mimo",
+          "mimo"
+        ],
+        "extensions": [
+          ".mimo"
+        ],
+        "icon": {
+          "light": "./icons/mimo.svg",
+          "dark": "./icons/mimo.svg"
+        },
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "mimo",
+        "scopeName": "source.mimo",
+        "path": "./syntaxes/mimo.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "mimo",
+        "path": "./snippets.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "mimo.runFile",
+        "title": "Mimo: Run Current File",
+        "category": "Mimo",
+        "icon": "$(play)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "mimo.runFile",
+          "group": "navigation",
+          "when": "resourceExtname == .mimo"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "mimo.runFile",
+          "group": "navigation",
+          "when": "resourceExtname == .mimo"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Mimo",
+      "properties": {
+        "mimo.executablePath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Path to the Mimo CLI executable or script (cli.js). If empty, the extension will attempt to find 'mimo' in your PATH."
+        },
+        "mimo.format.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Enable/disable formatting for Mimo files."
+        },
+        "mimo.lint.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Enable/disable linting for Mimo files."
+        },
+        "mimo.lint.onSave": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Lint files when saved."
+        },
+        "mimo.lint.onType": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Lint files as you type (debounced)."
+        },
+        "mimo.lint.delay": {
+          "type": "number",
+          "default": 500,
+          "scope": "resource",
+          "description": "Delay in milliseconds before linting on type."
+        },
+        "mimo.lint.rules.no-unused-vars": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Warn about unused variables and parameters."
+        },
+        "mimo.lint.rules.prefer-const": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Suggest using 'const' for variables that are never reassigned."
+        },
+        "mimo.lint.rules.no-magic-numbers": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "description": "Warn about magic numbers in code."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "validate": "node ./scripts/validate.cjs",
+    "test": "node ./scripts/smoke-test.cjs",
+    "check": "bun run validate && bun run test",
+    "package": "bun run check && npx @vscode/vsce package --no-dependencies --allow-missing-repository --allow-star-activation"
+  }
+}

@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
+
+@theme {
+  --color-app-bg: var(--app-bg);
+  --color-app-fg: var(--app-fg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-panel: var(--panel);
+  --color-panel-alt: var(--panel-alt);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-muted: var(--text-muted);
+  --color-text-soft: var(--text-soft);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-muted: var(--accent-muted);
+  --color-handle: var(--handle);
+  --color-handle-hover: var(--handle-hover);
+  --color-overlay: var(--overlay);
+}
+
+:root {
+  color-scheme: light;
+  --app-bg: var(--color-slate-100);
+  --app-fg: var(--color-slate-900);
+  --surface: var(--color-white);
+  --surface-muted: var(--color-slate-50);
+  --surface-elevated: var(--color-slate-100);
+  --panel: var(--color-slate-100);
+  --panel-alt: var(--color-slate-50);
+  --border: var(--color-slate-300);
+  --border-strong: var(--color-slate-400);
+  --text-muted: var(--color-slate-600);
+  --text-soft: var(--color-slate-500);
+  --accent: var(--color-indigo-600);
+  --accent-contrast: var(--color-white);
+  --accent-muted: color-mix(in oklab, var(--color-indigo-100) 80%, transparent);
+  --handle: color-mix(in oklab, var(--color-slate-300) 70%, transparent);
+  --handle-hover: var(--color-slate-300);
+  --overlay: color-mix(in oklab, var(--color-slate-950) 55%, transparent);
+
+  --cm-bg: var(--color-slate-50);
+  --cm-fg: var(--color-slate-900);
+  --cm-caret: var(--color-slate-900);
+  --cm-active-line: var(--color-sky-50);
+  --cm-selection: var(--color-sky-100);
+  --cm-gutter-bg: var(--color-slate-100);
+  --cm-gutter-fg: var(--color-slate-600);
+  --cm-gutter-border: var(--color-slate-300);
+  --cm-active-gutter-bg: var(--color-slate-200);
+  --cm-active-gutter-fg: var(--color-slate-800);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --app-bg: color-mix(in oklab, var(--color-slate-950) 88%, var(--color-blue-950) 12%);
+    --app-fg: var(--color-slate-100);
+    --surface: color-mix(in oklab, var(--color-slate-900) 86%, var(--color-blue-950) 14%);
+    --surface-muted: color-mix(in oklab, var(--color-slate-900) 78%, var(--color-blue-950) 22%);
+    --surface-elevated: color-mix(in oklab, var(--color-slate-800) 80%, var(--color-blue-900) 20%);
+    --panel: color-mix(in oklab, var(--color-slate-900) 84%, var(--color-blue-950) 16%);
+    --panel-alt: color-mix(in oklab, var(--color-slate-900) 74%, var(--color-blue-950) 26%);
+    --border: color-mix(in oklab, var(--color-slate-700) 75%, var(--color-blue-700) 25%);
+    --border-strong: color-mix(in oklab, var(--color-slate-600) 70%, var(--color-blue-600) 30%);
+    --text-muted: var(--color-slate-300);
+    --text-soft: var(--color-slate-400);
+    --accent: color-mix(in oklab, var(--color-sky-500) 65%, var(--color-indigo-500) 35%);
+    --accent-contrast: var(--color-slate-950);
+    --accent-muted: color-mix(in oklab, var(--color-sky-500) 20%, transparent);
+    --handle: color-mix(in oklab, var(--color-slate-700) 80%, transparent);
+    --handle-hover: color-mix(in oklab, var(--color-slate-600) 80%, var(--color-blue-600) 20%);
+    --overlay: color-mix(in oklab, var(--color-slate-950) 72%, transparent);
+
+    --cm-bg: color-mix(in oklab, var(--color-slate-950) 90%, var(--color-blue-950) 10%);
+    --cm-fg: var(--color-slate-100);
+    --cm-caret: var(--color-sky-300);
+    --cm-active-line: color-mix(in oklab, var(--color-slate-800) 74%, var(--color-blue-900) 26%);
+    --cm-selection: color-mix(in oklab, var(--color-slate-700) 72%, var(--color-blue-700) 28%);
+    --cm-gutter-bg: color-mix(in oklab, var(--color-slate-900) 85%, var(--color-blue-950) 15%);
+    --cm-gutter-fg: var(--color-slate-400);
+    --cm-gutter-border: color-mix(in oklab, var(--color-slate-800) 74%, var(--color-blue-800) 26%);
+    --cm-active-gutter-bg: color-mix(in oklab, var(--color-slate-800) 76%, var(--color-blue-800) 24%);
+    --cm-active-gutter-fg: var(--color-slate-200);
+  }
+}
+
+.light {
+  color-scheme: light;
+  --app-bg: var(--color-slate-100);
+  --app-fg: var(--color-slate-900);
+  --surface: var(--color-white);
+  --surface-muted: var(--color-slate-50);
+  --surface-elevated: var(--color-slate-100);
+  --panel: var(--color-slate-100);
+  --panel-alt: var(--color-slate-50);
+  --border: var(--color-slate-300);
+  --border-strong: var(--color-slate-400);
+  --text-muted: var(--color-slate-600);
+  --text-soft: var(--color-slate-500);
+  --accent: var(--color-indigo-600);
+  --accent-contrast: var(--color-white);
+  --accent-muted: color-mix(in oklab, var(--color-indigo-100) 80%, transparent);
+  --handle: color-mix(in oklab, var(--color-slate-300) 70%, transparent);
+  --handle-hover: var(--color-slate-300);
+  --overlay: color-mix(in oklab, var(--color-slate-950) 55%, transparent);
+
+  --cm-bg: var(--color-slate-50);
+  --cm-fg: var(--color-slate-900);
+  --cm-caret: var(--color-slate-900);
+  --cm-active-line: var(--color-sky-50);
+  --cm-selection: var(--color-sky-100);
+  --cm-gutter-bg: var(--color-slate-100);
+  --cm-gutter-fg: var(--color-slate-600);
+  --cm-gutter-border: var(--color-slate-300);
+  --cm-active-gutter-bg: var(--color-slate-200);
+  --cm-active-gutter-fg: var(--color-slate-800);
+}
+
+.dark {
+  color-scheme: dark;
+  --app-bg: color-mix(in oklab, var(--color-slate-950) 88%, var(--color-blue-950) 12%);
+  --app-fg: var(--color-slate-100);
+  --surface: color-mix(in oklab, var(--color-slate-900) 86%, var(--color-blue-950) 14%);
+  --surface-muted: color-mix(in oklab, var(--color-slate-900) 78%, var(--color-blue-950) 22%);
+  --surface-elevated: color-mix(in oklab, var(--color-slate-800) 80%, var(--color-blue-900) 20%);
+  --panel: color-mix(in oklab, var(--color-slate-900) 84%, var(--color-blue-950) 16%);
+  --panel-alt: color-mix(in oklab, var(--color-slate-900) 74%, var(--color-blue-950) 26%);
+  --border: color-mix(in oklab, var(--color-slate-700) 75%, var(--color-blue-700) 25%);
+  --border-strong: color-mix(in oklab, var(--color-slate-600) 70%, var(--color-blue-600) 30%);
+  --text-muted: var(--color-slate-300);
+  --text-soft: var(--color-slate-400);
+  --accent: color-mix(in oklab, var(--color-sky-500) 65%, var(--color-indigo-500) 35%);
+  --accent-contrast: var(--color-slate-950);
+  --accent-muted: color-mix(in oklab, var(--color-sky-500) 20%, transparent);
+  --handle: color-mix(in oklab, var(--color-slate-700) 80%, transparent);
+  --handle-hover: color-mix(in oklab, var(--color-slate-600) 80%, var(--color-blue-600) 20%);
+  --overlay: color-mix(in oklab, var(--color-slate-950) 72%, transparent);
+
+  --cm-bg: color-mix(in oklab, var(--color-slate-950) 90%, var(--color-blue-950) 10%);
+  --cm-fg: var(--color-slate-100);
+  --cm-caret: var(--color-sky-300);
+  --cm-active-line: color-mix(in oklab, var(--color-slate-800) 74%, var(--color-blue-900) 26%);
+  --cm-selection: color-mix(in oklab, var(--color-slate-700) 72%, var(--color-blue-700) 28%);
+  --cm-gutter-bg: color-mix(in oklab, var(--color-slate-900) 85%, var(--color-blue-950) 15%);
+  --cm-gutter-fg: var(--color-slate-400);
+  --cm-gutter-border: color-mix(in oklab, var(--color-slate-800) 74%, var(--color-blue-800) 26%);
+  --cm-active-gutter-bg: color-mix(in oklab, var(--color-slate-800) 76%, var(--color-blue-800) 24%);
+  --cm-active-gutter-fg: var(--color-slate-200);
+}

@@ -1,0 +1,51 @@
+show "=== Simple Array Slicing Test ==="
+
+import "array" as array
+
+
+show "1. Basic array creation:"
+set numbers [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+show numbers
+
+show "2. Basic slicing with start and end:"
+show call array.slice(numbers, 2, 5)
+show call array.slice(numbers, 0, 3)
+show call array.slice(numbers, 7, 9)
+
+show "3. Slicing to end of array:"
+show call array.slice(numbers, 5)
+show call array.slice(numbers, 8)
+
+show "4. Slicing from beginning:"
+show call array.slice(numbers, 0, 3)
+show call array.slice(numbers, 0, 5)
+
+show "5. Full array slice:"
+show call array.slice(numbers)
+
+show "6. Single element slices:"
+show call array.slice(numbers, 3, 4)
+show call array.slice(numbers, 0, 1)
+
+show "7. Empty slices:"
+show call array.slice(numbers, 5, 5)
+show call array.slice(numbers, 8, 7)
+
+show "8. String array slicing:"
+set words ["apple", "banana", "cherry", "date"]
+show call array.slice(words, 1, 3)
+show call array.slice(words, 2)
+show call array.slice(words, 0, 2)
+
+show "9. Storing slice results:"
+set first_part call array.slice(numbers, 0, 5)
+set last_part call array.slice(numbers, 5)
+show first_part
+show last_part
+
+show "10. Slicing with variables:"
+set start 2
+set stop 6
+show call array.slice(numbers, start, stop)
+
+show "=== Simple slicing test complete ==="

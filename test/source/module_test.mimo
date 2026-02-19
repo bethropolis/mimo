@@ -1,0 +1,22 @@
+// Module system test - imports and uses math_utils
+
+show "=== Module System Test ==="
+
+// Import module
+import "math_utils" as math
+
+show "1. Testing basic constants:"
+show math.PI
+
+show "2. Testing math functions:"
+call math.add(10, 5) -> sum
+show sum
+
+show "3. Testing global variables from modules:"
+show math_loaded
+
+show "4. Testing module property access in expressions:"
+set pi_doubled (* math.PI 2)
+show pi_doubled
+
+show "=== Module System Test Complete ==="

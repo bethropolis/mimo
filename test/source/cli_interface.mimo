@@ -1,0 +1,36 @@
+// test/source/cli_interface.mimo
+show "=== Command Line Interface Demo ==="
+
+show "1. Getting Command Line Arguments:"
+call get_arguments() -> args
+show "Arguments received:"
+show args
+// To test, run: bun cli.js cli_interface arg1 "hello world" 123
+
+show "2. Getting Environment Variables:"
+// For Node.js, set some env vars before running:
+// export MIMO_TEST_VAR="Hello from Environment"
+// export ANOTHER_VAR="12345"
+// bun cli.js cli_interface ...
+
+call get_env("MIMO_TEST_VAR") -> test_var_val
+show + "MIMO_TEST_VAR: " test_var_val // Expected: "Hello from Environment" or null
+
+call get_env("ANOTHER_VAR") -> another_var_val
+show + "ANOTHER_VAR: " another_var_val // Expected: "12345" or null
+
+call get_env("NON_EXISTENT_VAR") -> non_existent_val
+show + "NON_EXISTENT_VAR: " non_existent_val // Expected: null
+
+show "3. Programmatic Exit (will attempt to exit with code 7):"
+// This part will terminate the script, so it should be last or conditional.
+set exit_flag true // Set to false to skip exit for full test run
+if exit_flag
+    show "Attempting to exit with code 7..."
+    // call exit_code(7) commented out to prevent actual exit during testing
+    show "This line should NOT be printed if exit_code works!"
+else
+    show "Skipping exit_code test."
+end
+
+show "=== CLI Interface Demo Complete (if not exited) ==="

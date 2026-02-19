@@ -1,0 +1,25 @@
+show "=== Simple Bracket Notation Test ==="
+
+show "1. Basic bracket access:"
+set obj { name: "test" }
+show obj["name"]
+
+show "2. Bracket assignment:"
+set obj["age"] 25
+show obj["age"]
+
+show "3. Variable as key:"
+set key "name"
+show obj[key]
+
+show "4. Simple array access:"
+set arr [1, 2, 3]
+show arr[0]
+set arr[1] 99
+show arr[1]
+
+show "5. Property existence:"
+call has_property(obj, "name") -> exists
+show exists
+
+show "=== Simple bracket test complete ==="

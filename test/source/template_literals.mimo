@@ -1,0 +1,90 @@
+// test/source/template_literals.mimo
+show "=== Template Literals Demo ==="
+
+set name "Mimo User"
+set version 1.0
+set count 3
+set item "apples"
+set obj { kind: "fruit", color: "red" }
+
+show "--- Basic Interpolation ---"
+let greeting `Hello, ${name}!`
+show greeting // Expected: Hello, Mimo User!
+
+let info `Version: ${version}, Count: ${count}`
+show info // Expected: Version: 1, Count: 3
+
+show "--- Multi-line Strings ---"
+let multi_line_message `This is the first line.
+And this is the second line.
+Welcome, ${name}!`
+show multi_line_message
+// Expected:
+// This is the first line.
+// And this is the second line.
+// Welcome, Mimo User!
+
+show "--- Expressions in Interpolation ---"
+let calculation `Two plus two is ${+ 2 2}.`
+show calculation // Expected: Two plus two is 4.
+
+let item_summary `You have ${count} ${item}. Total cost: ${* count 0.5}`
+show item_summary // Expected: You have 3 apples. Total cost: 1.5
+
+show "--- Object Property Access ---"
+let object_desc `Item: ${obj.kind}, Color: ${obj.color}`
+show object_desc // Expected: Item: fruit, Color: red
+
+show "--- Array Access ---"
+set my_array [10, 20, 30]
+let array_item_desc `Second item: ${my_array[1]}`
+show array_item_desc // Expected: Second item: 20
+
+
+
+show "--- Function Calls in Interpolation ---"
+function get_status(val)
+    if (> val 0) return "positive" else return "non-positive" end
+end
+let status_message `The number ${count} is ${call get_status(count)}.`
+show status_message // Expected: The number 3 is positive.
+
+show "--- Nested Template Literals via Function ---"
+let outer_name "Outer"
+function get_inner_template(val)
+    return `Inner value: ${val}`
+end
+let nested_via_func `Outer: ${outer_name}, Content: ${call get_inner_template((* count 10))}`
+show nested_via_func // Expected: Outer: Outer, Content: Inner value: 30
+
+show "--- Edge Cases & Escaping ---"
+let literal_interp `Literal \${not interpolated}`
+show literal_interp // Expected: Literal ${not interpolated}
+
+let literal_backtick `A literal backtick: \``
+show literal_backtick // Expected: A literal backtick: `
+
+let empty_template ``
+show + "Empty template: '" (+ empty_template "'") // Expected: Empty template: ''
+
+let only_expr_template `${+ 10 20}`
+show + "Only expr template: '" (+ only_expr_template "'") // Expected: Only expr template: '30'
+
+let template_with_quotes `String with "double" and 'single' quotes.`
+show template_with_quotes // Expected: String with "double" and 'single' quotes.
+
+show "--- Complex Expressions ---"
+let complex_expr `Result: ${+ (* 2 3) (/ 10 2)}`
+show complex_expr // Expected: Result: 11
+
+show "--- Boolean Values ---"
+let bool_val true
+let bool_template `Boolean value: ${bool_val}`
+show bool_template // Expected: Boolean value: true
+
+show "--- Null Values ---"
+let null_val null
+let null_template `Null value: ${null_val}`
+show null_template // Expected: Null value: null
+
+show "=== Template Literals Demo Complete ==="

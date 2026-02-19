@@ -1,0 +1,8 @@
+// Simple anonymous function test
+
+set add function(a, b)
+    return + a b
+end
+
+call add(5, 3) -> result
+show result

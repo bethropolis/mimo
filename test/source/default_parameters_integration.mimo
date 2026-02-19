@@ -1,0 +1,94 @@
+// Integration test: Default parameters with other mimo features
+
+// Test 1: Default parameters with conditionals
+function calculate(x: 5, y: 3, operation: "add")
+    if = operation "add"
+        return + x y
+    else
+        return * x y
+    end
+end
+
+show "=== Integration Test 1: Conditionals + Defaults ==="
+call calculate() -> result1
+call calculate(2) -> result2
+call calculate(3, 4) -> result3
+call calculate(2, 3, "multiply") -> result4
+
+show result1
+show result2
+show result3
+show result4
+
+// Test 2: Default parameters with arrays
+function getElement(arr: [10, 20, 30], index: 0)
+    return arr[index]
+end
+
+show "=== Integration Test 2: Arrays + Defaults ==="
+call getElement() -> elem1
+call getElement([5, 15, 25]) -> elem2
+call getElement([1, 2, 3], 2) -> elem3
+
+show elem1
+show elem2
+show elem3
+
+// Test 3: Default parameters with pattern matching
+function processValue(value: 42, mode: "double")
+    match mode
+    case "double":
+        return * value 2
+    case "square":
+        return * value value
+    default:
+        return value
+    end
+end
+
+show "=== Integration Test 3: Pattern Matching + Defaults ==="
+call processValue() -> doubled
+call processValue(5, "square") -> squared
+call processValue(10, "none") -> unchanged
+
+show doubled
+show squared
+show unchanged
+
+// Test 4: Default parameters with error handling
+function safeOperation(a: 10, b: 2, throwError: false)
+    if throwError
+        throw "Intentional error"
+    end
+    return / a b
+end
+
+show "=== Integration Test 4: Error Handling + Defaults ==="
+call safeOperation() -> safe1
+call safeOperation(20, 4) -> safe2
+
+try
+    call safeOperation(8, 4, true) -> unsafe
+catch e
+    show "Caught expected error"
+end
+
+show safe1
+show safe2
+
+// Test 5: Default parameters with loops
+function countdown(start: 5)
+    set i start
+    while > i 0
+        show i
+        set i - i 1
+    end
+    return "Done"
+end
+
+show "=== Integration Test 5: Loops + Defaults ==="
+call countdown() -> result1
+call countdown(3) -> result2
+
+show result1
+show result2

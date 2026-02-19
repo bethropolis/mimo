@@ -1,0 +1,34 @@
+show "=== Testing Both Array and Object Destructuring ==="
+
+show "--- Array Destructuring ---"
+set arr [1, 2, 3, 4]
+destructure [a, b, c] from arr
+show a  // Expected: 1
+show b  // Expected: 2
+show c  // Expected: 3
+
+show "--- Object Destructuring ---"
+set obj { x: 10, y: 20, z: 30 }
+destructure {x, y, z} from obj
+show x  // Expected: 10
+show y  // Expected: 20
+show z  // Expected: 30
+
+show "--- Mixed Testing ---"
+set mixed_data { 
+    numbers: [100, 200], 
+    config: { debug: true } 
+}
+
+destructure {numbers, config} from mixed_data
+show numbers  // Expected: [100, 200]
+show config   // Expected: {debug: true}
+
+destructure [first, second] from numbers
+show first   // Expected: 100
+show second  // Expected: 200
+
+destructure {debug} from config
+show debug   // Expected: true
+
+show "=== Both Destructuring Types Work! ==="

@@ -1,0 +1,66 @@
+// Test ternary operator (condition ? consequent : alternate)
+
+// Basic ternary with boolean condition
+set age 25
+set status call if_else(> age 18, "adult", "minor")
+show status  // Should show "adult"
+
+// Ternary with false condition
+set young_age 15
+set young_status call if_else(> young_age 18, "adult", "minor")
+show young_status  // Should show "minor"
+
+// Ternary with string conditions
+set name "Alice"
+set greeting call if_else(= name "Alice", "Hello Alice!", "Hello stranger!")
+show greeting  // Should show "Hello Alice!"
+
+// Ternary with numeric values
+set score 85
+set grade call if_else(> score 90, "A", call if_else(> score 80, "B", "C"))
+show grade  // Should show "B"
+
+// Nested ternary expressions
+set temp 75
+set weather_desc call if_else(> temp 80, "hot", call if_else(> temp 60, "warm", "cold"))
+show weather_desc  // Should show "warm"
+
+// Ternary with array values
+set numbers [1, 2, 3]
+call len(numbers) -> numbers_length
+set result call if_else(> numbers_length 2, "many", "few")
+show result  // Should show "many"
+
+// Ternary with null values
+set user null
+set display_name call if_else(= user null, "Guest", user)
+show display_name  // Should show "Guest"
+
+// Ternary with object properties
+set person { name: "Bob", age: 30 }
+set can_vote call if_else(> person.age 18, true, false)
+show can_vote  // Should show true
+
+// Complex expression in condition
+set x 10
+set y 5
+set comparison_result call if_else(> (+ x y) (* x 2), "sum wins", "product wins")
+show comparison_result  // Should show "product wins" (15 vs 20)
+
+// Ternary with function calls in consequent/alternate
+set count 3
+call join(["Items:", count], " ") -> items_text
+set message call if_else(> count 0, items_text, "No items")
+show message  // Should show "Items: 3"
+
+// Using ternary in variable assignments
+set balance 100
+set account_status call if_else(> balance 0, "active", "inactive")
+show account_status  // Should show "active"
+
+// Ternary with boolean values directly
+set is_admin true
+set permissions call if_else(is_admin, "full", "limited")
+show permissions  // Should show "full"
+
+show "All ternary operator tests completed"

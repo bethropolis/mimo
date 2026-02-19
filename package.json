@@ -11,20 +11,30 @@
   "module": "index.js",
   "type": "module",
   "bin": {
-    "mimo": "./cli.js"
+    "mimo": "./bin/cli.js"
   },
   "scripts": {
-    "mimo": "bun cli.js",
-    "dev": "bun index.js",
-    "test": "node test/index.js",
-    "build": "vite build"
+    "mimo": "bun bin/cli.js",
+    "dev": "bun test.js",
+    "build": "bun build.js",
+    "convert": "bun tools/convert.js",
+    "test": "bun bin/cli.js test test/source",
+    "lint": "bun bin/cli.js lint test/source",
+    "lint:strict": "bun bin/cli.js lint --fail-on-warning test/source",
+    "format:check": "bun bin/cli.js fmt --check test/source",
+    "format:write": "bun bin/cli.js fmt --write test/source",
+    "check": "bun run lint:strict && bun run format:check && bun run test",
+    "ext:validate": "bun run --cwd extensions/mimo-vscode validate",
+    "ext:test": "bun run --cwd extensions/mimo-vscode test",
+    "ext:check": "bun run --cwd extensions/mimo-vscode check",
+    "ext:package": "bun run --cwd extensions/mimo-vscode package",
+    "web:dev": "bun run --cwd playground dev --open",
+    "web:build": "bun run --cwd playground build",
+    "web:preview": "bun run --cwd playground preview"
   },
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "dependencies": {
-    "js-beautify": "^1.15.1",
-    "vite": "^5.2.10"
+    "@types/bun": "latest",
+    "esbuild": "^0.25.5"
   },
   "repository": {
     "type": "git",

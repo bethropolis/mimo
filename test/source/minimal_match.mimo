@@ -1,0 +1,11 @@
+// Minimal pattern matching test for debugging
+
+show "Testing basic pattern matching"
+
+set x 5
+match x
+case 5:
+    show "Matched 5"
+default:
+    show "No match"
+end

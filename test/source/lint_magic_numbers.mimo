@@ -1,0 +1,20 @@
+show "=== Linter: Magic Numbers Test ==="
+
+// This is the correct way, should NOT produce a warning.
+const TAX_RATE 0.075
+set price 50
+set total + price (* price TAX_RATE)
+
+// These are magic numbers, they SHOULD produce warnings.
+set item_height 150 // Warning for 150
+set item_width 300  // Warning for 300
+
+// These numbers are in the "allowed" list, so they should NOT produce warnings.
+set counter 0
+set is_active 1
+set offset -1
+
+// A number used in a const declaration is NOT magic. No warning here.
+const MAX_RETRIES 5
+
+show "Test complete."

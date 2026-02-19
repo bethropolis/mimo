@@ -1,0 +1,3 @@
+show "Debug array test"
+set simple_array [1]
+show simple_array

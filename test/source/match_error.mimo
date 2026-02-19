@@ -1,0 +1,17 @@
+show "=== Testing Error Case ==="
+
+show "--- Testing match without default and no match ---"
+set test_value "unmatched"
+
+try
+    match test_value
+        case "hello":
+            show "  -> Matched hello"
+        case "world":
+            show "  -> Matched world"
+    end
+catch e
+    show + "  -> Caught an error: " e
+end
+
+show "This shouldn't be reached if the match fails. (theoretically)"

@@ -1,0 +1,46 @@
+show "=== Builtin: coalesce Demo ==="
+
+set user_name null
+set defined_name "Mimo"
+set empty_string ""
+set zero_val 0
+set false_val false
+
+call coalesce(user_name, "Default User") -> name1
+show + "coalesce(null, 'Default User'): " name1 // Expected: Default User
+
+call coalesce(defined_name, "Default User") -> name2
+show + "coalesce('Mimo', 'Default User'): " name2 // Expected: Mimo
+
+show "--- Testing with falsy but not nullish values ---"
+call coalesce(empty_string, "fallback") -> res_empty_str
+show + + "coalesce('', 'fallback'): '" res_empty_str "'" // Expected: '' (empty string)
+
+call coalesce(zero_val, 100) -> res_zero
+show + "coalesce(0, 100): " res_zero // Expected: 0
+
+call coalesce(false_val, true) -> res_false
+show + "coalesce(false, true): " res_false // Expected: false
+
+show "--- Using coalesce directly in an expression ---"
+let config_setting null
+show + "Effective setting: " (call coalesce(config_setting, "System Default"))
+
+set val_a 10
+set val_b null
+show + + "Calculation: "  val_a (call coalesce(val_b, 5)) // Expected: 15
+
+show "--- Error Handling: Arity ---"
+try
+    call coalesce(null) -> coalesce_err1
+catch err
+    show + "Error coalesce(null): " err
+end
+
+try
+    call coalesce(null, "default", "extra") -> coalesce_err2
+catch err
+    show + "Error coalesce(null, 'default', 'extra'): " err
+end
+
+show "=== coalesce Demo Complete ==="

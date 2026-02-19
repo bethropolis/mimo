@@ -1,0 +1,31 @@
+show "=== Testing Match Statement Variants ==="
+
+show "--- Testing match with only default ---"
+set any_value 42
+match any_value
+    default:
+        show "  -> Default case caught everything"
+        show + "    value was: " any_value
+end
+
+show "--- Testing match with multiple cases before default ---"
+function test_number(n)
+    match n
+        case 1:
+            show "  -> Got one"
+        case 2:
+            show "  -> Got two"
+        case 3:
+            show "  -> Got three"
+        default:
+            show "  -> Got something else"
+            show + "    value: " n
+    end
+end
+
+call test_number(1)
+call test_number(2)
+call test_number(3)
+call test_number(99)
+
+show "=== Match Statement Variants Complete ==="

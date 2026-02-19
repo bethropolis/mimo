@@ -1,9 +1,0 @@
-function add(a,b)
-  return + a b
-endfunction
-
-set x 5
-set y 2
-
-call add(x,y) -> result
-show result

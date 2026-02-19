@@ -1,0 +1,103 @@
+// Focused edge case tests for variadic functions
+
+// Test 1: Function with only rest parameter
+function onlyRest(...items)
+    call len(items) -> count
+    return count
+end
+
+show "=== Test 1: Only rest parameter ==="
+call onlyRest() -> count1
+call onlyRest(1) -> count2
+call onlyRest(1, 2, 3, 4, 5) -> count3
+
+show count1
+show count2
+show count3
+
+// Test 2: Rest parameter with default parameters
+function mixedParams(required, optional: "default", ...extras)
+    call len(extras) -> extraCount
+    return + required + " " + optional + " " extraCount
+end
+
+show "=== Test 2: Required + Default + Rest ==="
+call mixedParams("hello") -> mixed1
+call mixedParams("hi", "custom") -> mixed2
+call mixedParams("hey", "test", 1, 2, 3) -> mixed3
+
+show mixed1
+show mixed2
+show mixed3
+
+// Test 3: Rest parameter with conditionals
+function conditionalProcess(...items)
+    call len(items) -> count
+    if = count 0
+        return "empty"
+    end
+
+    if > count 3
+        return "too many"
+    end
+
+    return + "count: " count
+end
+
+show "=== Test 3: Conditionals with rest ==="
+call conditionalProcess() -> cond1
+call conditionalProcess("a") -> cond2
+call conditionalProcess("x", "y", "z") -> cond3
+call conditionalProcess(1, 2, 3, 4, 5) -> cond4
+
+show cond1
+show cond2
+show cond3
+show cond4
+
+// Test 4: Rest parameter array access
+function getElements(...items)
+    call len(items) -> count
+    if = count 0
+        return "no items"
+    end
+    
+    if = count 1
+        return items[0]
+    end
+    
+    if > count 1
+        return + items[0] + " and " items[1]
+    end
+    
+    return "unknown"
+end
+
+show "=== Test 4: Array access ==="
+call getElements() -> elem1
+call getElements("first") -> elem2
+call getElements("a", "b") -> elem3
+
+show elem1
+show elem2
+show elem3
+
+// Test 5: Error handling with rest parameters
+function safeProcess(...items)
+    try
+        call len(items) -> count
+        if > count 5
+            throw "too many items"
+        end
+        return count
+    catch e
+        return 0
+    end
+end
+
+show "=== Test 5: Error handling ==="
+call safeProcess(1, 2, 3) -> safe1
+call safeProcess(1, 2, 3, 4, 5, 6, 7) -> safe2
+
+show safe1
+show safe2
