@@ -4,7 +4,7 @@ import path from "node:path";
 import { nodeAdapter } from "../adapters/nodeAdapter.js";
 import { Mimo } from "../index.js";
 import { runRepl } from "../repl.js";
-import { formatFile } from "../tools/formatter.js";
+import { formatFile, formatSource } from "../tools/formatter.js";
 import { lintFile, lintFileJson, parseRuleFlags } from "../tools/linter.js";
 
 // --- Helper Functions ---
@@ -206,6 +206,18 @@ async function main() {
       const shouldCheck = commandArgs.includes("--check");
       const quiet = commandArgs.includes("--quiet");
       const targets = commandArgs.filter((arg) => !arg.startsWith("--"));
+
+      if (targets.includes("-") || (targets.length === 0 && !process.stdin.isTTY)) {
+        const source = await readStdin();
+        try {
+          process.stdout.write(formatSource(source, "stdin"));
+          break;
+        } catch (err) {
+          console.error(err.message || err);
+          process.exit(1);
+        }
+      }
+
       const filesToFormat = collectMimoFiles(targets);
 
       if (filesToFormat.length === 0) {

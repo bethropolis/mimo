@@ -1,4 +1,7 @@
 <script>
+	import Upload from '@lucide/svelte/icons/upload';
+	import Download from '@lucide/svelte/icons/download';
+
 	let {
 		open = false,
 		shareLink = '',
@@ -7,11 +10,22 @@
 		onClose,
 		onGenerateLink,
 		onDownloadZip,
+		onUploadZip,
 		onCopyLink
 	} = $props();
 
 	let linkLength = $derived(shareLink.length);
-	let isLinkTooLong = $derived(linkLength > 2000); // Standard browser/server limits are around 2k-8k
+	let isLinkTooLong = $derived(linkLength > 2000);
+	let fileInput = $state(/** @type {HTMLInputElement | null} */(null));
+
+	/** @param {Event} e */
+	function handleFileChange(e) {
+		const file = /** @type {HTMLInputElement} */(e.target).files?.[0];
+		if (file && file.name.endsWith('.zip')) {
+			onUploadZip(file);
+			/** @type {HTMLInputElement} */(e.target).value = '';
+		}
+	}
 </script>
 
 {#if open}
@@ -30,15 +44,33 @@
 
 			<div class="space-y-3">
 				<div class="rounded-xl border border-border bg-surface p-3">
-					<p class="mb-2 text-sm font-medium">Download Workspace</p>
-					<p class="mb-3 text-xs text-text-muted">Export all files as `mimo-workspace.zip`.</p>
-					<button
-						type="button"
-						onclick={onDownloadZip}
-						class="rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-contrast hover:brightness-110"
-					>
-						Download ZIP
-					</button>
+					<p class="mb-2 text-sm font-medium">Workspace ZIP</p>
+					<p class="mb-3 text-xs text-text-muted">Download or upload a workspace as a ZIP file. Uploading will replace all files.</p>
+					<div class="flex gap-2">
+						<button
+							type="button"
+							onclick={onDownloadZip}
+							class="flex items-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-contrast hover:brightness-110"
+						>
+							<Download size={14} />
+							Download
+						</button>
+						<button
+							type="button"
+							onclick={() => fileInput?.click()}
+							class="flex items-center gap-2 rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm font-semibold hover:bg-surface-muted"
+						>
+							<Upload size={14} />
+							Upload
+						</button>
+						<input
+							type="file"
+							accept=".zip"
+							bind:this={fileInput}
+							onchange={handleFileChange}
+							class="hidden"
+						/>
+					</div>
 				</div>
 
 				<div class="rounded-xl border border-border bg-surface p-3">

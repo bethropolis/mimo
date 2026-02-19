@@ -297,6 +297,7 @@ export class PrettyPrinter {
     }
 
     // --- Expression Visitors ---
+    // --- Expression Visitors ---
     visitBinaryExpression(node) {
         this.write(`${node.operator} `);
         this.visitNode(node.left);

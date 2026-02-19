@@ -25,9 +25,9 @@
 	let hasChildren = $derived((node.children?.length ?? 0) > 0);
 	let isExpanded = $derived(expandedIds.has(node.id));
 
-	function handleSelect(e) {
+	function handleSelect() {
 		if (node.location?.line) {
-			onSelect(node.location.line, node.location.column ?? 1);
+			onSelect?.(node.location.line, node.location.column ?? 1);
 		}
 	}
 </script>
@@ -35,9 +35,9 @@
 <div>
 	<button
 		type="button"
-		onclick={(e) => {
-			if (hasChildren) onToggle(node.id);
-			handleSelect(e);
+		onclick={() => {
+			if (hasChildren) onToggle?.(node.id);
+			handleSelect();
 		}}
 		class={`flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-surface-elevated ${hasChildren ? '' : 'opacity-95'}`}
 		style={`padding-left:${depth * 12 + 8}px`}

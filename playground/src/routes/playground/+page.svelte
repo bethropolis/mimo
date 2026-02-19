@@ -96,7 +96,8 @@
 										{/snippet}
 										{#snippet second()}
 											<TerminalPanel
-												logs={store.terminalLogs}
+												entries={store.terminalEntries}
+												history={store.commandHistory}
 												onRunCommand={store.runCommand}
 												onClearLogs={store.clearTerminalLogs}
 											/>
@@ -148,7 +149,8 @@
 								{/snippet}
 								{#snippet second()}
 									<TerminalPanel
-										logs={store.terminalLogs}
+										entries={store.terminalEntries}
+										history={store.commandHistory}
 										onRunCommand={store.runCommand}
 										onClearLogs={store.clearTerminalLogs}
 									/>
@@ -196,6 +198,7 @@
 						onClose={() => (store.shareOpen = false)}
 						onGenerateLink={store.generateShareLink}
 						onDownloadZip={store.downloadWorkspaceZip}
+						onUploadZip={store.uploadWorkspaceZip}
 						onCopyLink={store.copyShareLink}
 					/>
 					<DeleteConfirmationModal

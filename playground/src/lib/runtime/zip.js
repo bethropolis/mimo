@@ -116,3 +116,84 @@ export function createZipBlob(files) {
 	const zipData = concatChunks([...localChunks, centralData, end.bytes]);
 	return new Blob([zipData], { type: 'application/zip' });
 }
+
+/**
+ * Extract files from a ZIP blob
+ * @param {Blob} blob
+ * @returns {Promise<Record<string, string>>}
+ */
+export async function extractZipBlob(blob) {
+	const buffer = new Uint8Array(await blob.arrayBuffer());
+	const view = new DataView(buffer.buffer);
+	const decoder = new TextDecoder();
+	
+	/** @type {Record<string, string>} */
+	const files = {};
+	
+	// Find end of central directory record (search backwards)
+	let eocdOffset = buffer.length - 22;
+	while (eocdOffset >= 0) {
+		if (view.getUint32(eocdOffset, true) === 0x06054b50) break;
+		eocdOffset--;
+	}
+	
+	if (eocdOffset < 0) {
+		throw new Error('Invalid ZIP file: cannot find end of central directory');
+	}
+	
+	const centralDirOffset = view.getUint32(eocdOffset + 16, true);
+	const entryCount = view.getUint16(eocdOffset + 8, true);
+	
+	let offset = centralDirOffset;
+	
+	for (let i = 0; i < entryCount; i++) {
+		if (view.getUint32(offset, true) !== 0x02014b50) {
+			throw new Error('Invalid ZIP file: cannot find central directory entry');
+		}
+		
+		const compressionMethod = view.getUint16(offset + 10, true);
+		const compressedSize = view.getUint32(offset + 20, true);
+		const uncompressedSize = view.getUint32(offset + 24, true);
+		const nameLength = view.getUint16(offset + 28, true);
+		const extraLength = view.getUint16(offset + 30, true);
+		const commentLength = view.getUint16(offset + 32, true);
+		const localHeaderOffset = view.getUint32(offset + 42, true);
+		
+		const name = decoder.decode(buffer.slice(offset + 46, offset + 46 + nameLength));
+		
+		// Skip directories
+		if (!name.endsWith('/')) {
+			const localDataOffset = localHeaderOffset + 30 + view.getUint16(localHeaderOffset + 26, true) + view.getUint16(localHeaderOffset + 28, true);
+			
+			let data;
+			if (compressionMethod === 0) {
+				// No compression
+				data = buffer.slice(localDataOffset, localDataOffset + uncompressedSize);
+			} else if (compressionMethod === 8) {
+				// Deflate - use DecompressionStream API
+				const compressed = buffer.slice(localDataOffset, localDataOffset + compressedSize);
+				const ds = new DecompressionStream('deflate-raw');
+				const writer = ds.writable.getWriter();
+				writer.write(compressed);
+				writer.close();
+				const reader = ds.readable.getReader();
+				/** @type {Uint8Array[]} */
+				const chunks = [];
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+					chunks.push(value);
+				}
+				data = concatChunks(chunks);
+			} else {
+				throw new Error(`Unsupported compression method: ${compressionMethod}`);
+			}
+			
+			files[name] = decoder.decode(data);
+		}
+		
+		offset += 46 + nameLength + extraLength + commentLength;
+	}
+	
+	return files;
+}

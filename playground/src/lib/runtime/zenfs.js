@@ -67,6 +67,21 @@ export function workspacePath(fileId) {
 	return normalize(`${WORKSPACE_ROOT}/${fileId}`);
 }
 
+/** Check if workspace has any files */
+export function isWorkspaceEmpty() {
+	if (!zenfs.existsSync(WORKSPACE_ROOT)) return true;
+	const entries = zenfs.readdirSync(WORKSPACE_ROOT);
+	return entries.length === 0;
+}
+
+/** Clear all files in workspace */
+export function clearWorkspace() {
+	if (zenfs.existsSync(WORKSPACE_ROOT)) {
+		zenfs.rmSync(WORKSPACE_ROOT, { recursive: true, force: true });
+	}
+	zenfs.mkdirSync(WORKSPACE_ROOT, { recursive: true });
+}
+
 /** @param {Record<string, string>} seedFiles */
 export function seedWorkspaceFiles(seedFiles) {
 	for (const [fileId, content] of Object.entries(seedFiles)) {
@@ -75,6 +90,16 @@ export function seedWorkspaceFiles(seedFiles) {
 			ensureDirForFile(fullPath);
 			zenfs.writeFileSync(fullPath, content, { encoding: 'utf-8' });
 		}
+	}
+}
+
+/** @param {Record<string, string>} files - files to write (will replace entire workspace) */
+export function replaceWorkspaceFiles(files) {
+	clearWorkspace();
+	for (const [fileId, content] of Object.entries(files)) {
+		const fullPath = workspacePath(fileId);
+		ensureDirForFile(fullPath);
+		zenfs.writeFileSync(fullPath, content, { encoding: 'utf-8' });
 	}
 }
 

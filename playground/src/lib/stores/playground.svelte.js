@@ -6,7 +6,9 @@ import { getContext, setContext } from 'svelte';
 import {
 	initZenFS,
 	isIndexedDBActive,
+	isWorkspaceEmpty,
 	seedWorkspaceFiles,
+	replaceWorkspaceFiles,
 	readWorkspaceFile,
 	writeWorkspaceFile,
 	workspaceExists,
@@ -14,39 +16,33 @@ import {
 	createWorkspaceFolder,
 	renameWorkspacePath,
 	deleteWorkspacePath,
-	createZenFSBrowserAdapter
+	createZenFSBrowserAdapter,
+	workspacePath,
+	listWorkspaceEntries
 } from '$lib/runtime/zenfs.js';
-import { createZipBlob } from '$lib/runtime/zip.js';
+import { createZipBlob, extractZipBlob } from '$lib/runtime/zip.js';
 import { createRunner } from '$lib/runtime/runner.svelte.js';
 import { normalizeAst } from '$lib/utils/ast.js';
 import { encodeShareBase64, decodeShareBase64, sanitizeSharedPath } from '$lib/utils/share.js';
 import { parentPath, firstAvailableFileId, buildTreeFromFs, snapshotWorkspaceFiles } from '$lib/utils/workspace.js';
+import { DEFAULT_FILE_CONTENTS, DEFAULT_TABS, DEFAULT_ACTIVE_TAB } from '$lib/utils/workspace-setup.js';
+import { executeCommand, getCommandSuggestions } from '$lib/terminal/commands.js';
+import { formatCommand, formatOutput, formatError, formatSystem, createEntry } from '$lib/terminal/formatter.js';
 
 const PLAYGROUND_CONTEXT = Symbol('playground');
 
-/** @type {Record<string, string>} */
-const DEFAULT_FILE_CONTENTS = {
-	'src/main.mimo': `import "modules/math.mimo" as math\n\nfunction bootstrap(name)\n  set score call math.double(21)\n  show + "hello, " name\n  show + "score=" score\n  return score\nend\n\ncall bootstrap("developer") -> result\nshow result`,
-	'src/app.mimo': `function greet(person)\n  return + "Welcome " person\nend\n\ncall greet("Mimo") -> banner\nshow banner`,
-	'modules/math.mimo': `export function double(value)\n  return * value 2\nend\n\nexport function sum(a, b)\n  return + a b\nend`,
-	'modules/strings.mimo': `export function loud(text)\n  return + text "!"\nend`
-};
-
-function timestamp() {
+function localTimestamp() {
 	return new Date().toLocaleTimeString('en-US', { hour12: false });
 }
 
 export function createPlaygroundStore() {
 	// Explorer state
 	let tree = $state(/** @type {import('$lib/utils/workspace.js').ExplorerNode[]} */ ([]));
-	let selectedNodeId = $state('src/main.mimo');
+	let selectedNodeId = $state(DEFAULT_ACTIVE_TAB);
 
-	// Editor state
-	let tabs = $state([
-		{ id: 'src/main.mimo', name: 'main.mimo', content: DEFAULT_FILE_CONTENTS['src/main.mimo'] },
-		{ id: 'modules/math.mimo', name: 'math.mimo', content: DEFAULT_FILE_CONTENTS['modules/math.mimo'] }
-	]);
-	let activeTabId = $state('src/main.mimo');
+	// Editor state - start with empty tabs, will be populated during initialize
+	let tabs = $state(/** @type {Array<{ id: string; name: string; content: string }>} */([]));
+	let activeTabId = $state(DEFAULT_ACTIVE_TAB);
 	let editorSelection = $state(/** @type {{ line: number, column: number } | null} */ (null));
 	let recentFiles = $state(/** @type {string[]} */ ([]));
 
@@ -92,11 +88,11 @@ export function createPlaygroundStore() {
 	// Output state
 	let outputLines = $state(['Mimo playground ready.']);
 	let errors = $state(/** @type {string[]} */ ([]));
-	let warnings = $state(['Imports are shown as static samples in this mock project tree.']);
-	let terminalLogs = $state([
-		{ time: timestamp(), level: 'info', message: 'Boot sequence complete.' },
-		{ time: timestamp(), level: 'warning', message: 'Filesystem modules are mocked in browser mode.' }
-	]);
+	let warnings = $state(/** @type {string[]} */ ([]));
+	let terminalEntries = $state(/** @type {import('$lib/terminal/formatter.js').TerminalEntry[]} */([]));
+
+	// Terminal history for autocomplete
+	let commandHistory = $state(/** @type {string[]} */([]));
 
 	// AST state
 	let astData = $state(/** @type {any | null} */ (null));
@@ -168,10 +164,15 @@ export function createPlaygroundStore() {
 	});
 
 	// Methods
-	/** @param {'info'|'success'|'error'|'warning'} level @param {string} message */
+	/** @param {'info'|'success'|'error'|'warning'|'system'} level @param {string} message */
 	function appendLog(level, message) {
-		const newLogs = [...terminalLogs, { time: timestamp(), level, message }];
-		terminalLogs = newLogs.slice(-500);
+		const entry = createEntry(level, message);
+		terminalEntries = [...terminalEntries.slice(-499), entry];
+	}
+	
+	/** @param {import('$lib/terminal/formatter.js').TerminalEntry} entry */
+	function addTerminalEntry(entry) {
+		terminalEntries = [...terminalEntries.slice(-499), entry];
 	}
 
 	/** @param {string} message */
@@ -462,43 +463,73 @@ export function createPlaygroundStore() {
 	}
 
 	/** @param {string} command */
-	function runCommand(command) {
+	async function runCommand(command) {
 		const next = command.trim();
 		if (!next) return;
-		appendLog('info', `> ${next}`);
-		if (next === 'clear') {
-			terminalLogs = [];
-		} else if (next === 'clear output') {
-			outputLines = [];
-		} else if (next === 'clear errors') {
-			errors = [];
-		} else if (next === 'clear warnings') {
-			warnings = [];
-		} else if (next.includes('run')) {
-			runActive();
-		} else {
-			// Try to eval as Mimo code
-			runner
-				.evalInWorker({
-					source: next,
-					files: snapshotWorkspaceFiles()
-				})
-				.then((result) => {
-					if (result.output && result.output.length) {
-						result.output.forEach((line) => {
-							if (line.startsWith('=>')) appendLog('success', line);
-							else appendLog('info', line);
-						});
-					}
-				})
-				.catch((error) => {
-					appendLog('error', String(error));
-				});
+		
+		// Add to history
+		commandHistory = [next, ...commandHistory.filter(/** @param {string} c */(c) => c !== next)].slice(0, 50);
+		
+		// Show command in terminal
+		addTerminalEntry(formatCommand(next));
+		
+		// Build command context
+		/** @type {import('$lib/terminal/commands.js').CommandContext} */
+		const context = {
+			fs: {
+				/** @param {string} path */
+				readFile: (path) => readWorkspaceFile(path),
+				/** @param {string} path @param {string} content */
+				writeFile: (path, content) => writeWorkspaceFile(path, content),
+				/** @param {string} path */
+				exists: (path) => workspaceExists(path),
+				/** @param {string} path */
+				isDirectory: (path) => workspaceIsDirectory(path),
+				/** @param {string} path */
+				listDir: (path) => listWorkspaceEntries(path),
+				pwd: () => '/'
+			},
+			runner: {
+				/** @param {string} source */
+				eval: async (source) => {
+					return runner.evalInWorker({ source, files: snapshotWorkspaceFiles() });
+				},
+				/** @param {string} file */
+				run: async (file) => {
+					await runActive();
+				}
+			},
+			workspace: {
+				snapshot: () => snapshotWorkspaceFiles(),
+				activeFile: activeTabId
+			},
+			terminal: {
+				clear: () => { terminalEntries = []; },
+				/** @param {'info'|'success'|'error'|'warning'|'system'} level @param {string} msg */
+				log: (level, msg) => addTerminalEntry(createEntry(level, msg))
+			}
+		};
+		
+		try {
+			const result = await executeCommand(next, context);
+			
+			if (result.clear) {
+				terminalEntries = [];
+			} else if (result.output?.length) {
+				addTerminalEntry(formatOutput(result.output, result.level || 'output'));
+			}
+		} catch (error) {
+			addTerminalEntry(formatError(/** @type {Error|string} */(error)));
 		}
+	}
+	
+	/** @param {string} partial */
+	function getTerminalSuggestions(partial) {
+		return getCommandSuggestions(partial);
 	}
 
 	function clearTerminalLogs() {
-		terminalLogs = [];
+		terminalEntries = [];
 	}
 
 	/** @param {'output'|'errors'|'warnings'} tab */
@@ -528,6 +559,43 @@ export function createPlaygroundStore() {
 			const message = `Failed to build ZIP: ${String(error)}`;
 			appendLog('error', message);
 			alert(message);
+		}
+	}
+
+	/** @param {File} file */
+	async function uploadWorkspaceZip(file) {
+		try {
+			appendLog('info', 'Uploading workspace ZIP...');
+			const files = await extractZipBlob(file);
+			
+			if (Object.keys(files).length === 0) {
+				appendLog('warning', 'ZIP file is empty.');
+				return false;
+			}
+			
+			// Replace entire workspace
+			replaceWorkspaceFiles(files);
+			
+			// Reset tabs to show first file
+			refreshExplorerFromFs();
+			
+			const firstFile = firstAvailableFileId(tree);
+			if (firstFile) {
+				tabs = [{ id: firstFile, name: firstFile.split('/').pop() ?? firstFile, content: readWorkspaceFile(firstFile) ?? '' }];
+				activeTabId = firstFile;
+				selectedNodeId = firstFile;
+			} else {
+				tabs = [];
+				activeTabId = '';
+			}
+			
+			appendLog('success', `Workspace replaced with ${Object.keys(files).length} files from ZIP.`);
+			return true;
+		} catch (error) {
+			const message = `Failed to extract ZIP: ${String(error)}`;
+			appendLog('error', message);
+			alert(message);
+			return false;
 		}
 	}
 
@@ -562,7 +630,15 @@ export function createPlaygroundStore() {
 
 	async function initialize() {
 		await initZenFS();
-		seedWorkspaceFiles(DEFAULT_FILE_CONTENTS);
+		
+		// Check if workspace is empty (first time user)
+		const isEmpty = isWorkspaceEmpty();
+		if (isEmpty) {
+			seedWorkspaceFiles(DEFAULT_FILE_CONTENTS);
+			tabs = [...DEFAULT_TABS];
+			activeTabId = DEFAULT_ACTIVE_TAB;
+			appendLog('info', 'Initialized default workspace.');
+		}
 
 		const params = new URLSearchParams(location.search);
 		const codeParam = params.get('code');
@@ -585,10 +661,22 @@ export function createPlaygroundStore() {
 
 		refreshExplorerFromFs();
 
-		tabs = tabs.map((tab) => ({
-			...tab,
-			content: readWorkspaceFile(tab.id) ?? tab.content
-		}));
+		// Update tabs with actual file contents from storage
+		if (tabs.length === 0) {
+			// If no tabs yet, open the first available file
+			const fallback = firstAvailableFileId(tree);
+			if (fallback) {
+				tabs = [{ id: fallback, name: fallback.split('/').pop() ?? fallback, content: readWorkspaceFile(fallback) ?? '' }];
+				activeTabId = fallback;
+				selectedNodeId = fallback;
+			}
+		} else {
+			tabs = tabs.map((tab) => ({
+				...tab,
+				content: readWorkspaceFile(tab.id) ?? tab.content
+			}));
+		}
+		
 		if (!workspaceExists(activeTabId)) {
 			const fallback = firstAvailableFileId(tree);
 			if (fallback) {
@@ -666,7 +754,8 @@ export function createPlaygroundStore() {
 		get outputLines() { return outputLines; },
 		get errors() { return errors; },
 		get warnings() { return warnings; },
-		get terminalLogs() { return terminalLogs; },
+		get terminalEntries() { return terminalEntries; },
+		get commandHistory() { return commandHistory; },
 		get recentFiles() { return recentFiles; },
 		get astData() { return astData; },
 		get astError() { return astError; },
@@ -694,12 +783,15 @@ export function createPlaygroundStore() {
 		formatActive,
 		runCommand,
 		clearTerminalLogs,
+		getTerminalSuggestions,
 		clearOutputTab,
 		shareWorkspace,
 		downloadWorkspaceZip,
+		uploadWorkspaceZip,
 		generateShareLink,
 		copyShareLink,
-		appendLog
+		appendLog,
+		jumpToLocation
 	};
 }
 

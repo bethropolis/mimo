@@ -238,12 +238,23 @@ function transpileFile(filePath, outDir, converterInfo, targetExtension) {
     fs.writeFileSync(outPath, output, 'utf-8');
 }
 
-function main() {
-    const options = parseArgs(process.argv.slice(2));
+async function readStdin() {
+    return new Promise((resolve) => {
+        let data = '';
+        process.stdin.setEncoding('utf-8');
+        process.stdin.on('data', (chunk) => { data += chunk; });
+        process.stdin.on('end', () => { resolve(data); });
+    });
+}
 
-    if (!options.in || !options.out) {
+async function main() {
+    const args = process.argv.slice(2);
+    const options = parseArgs(args);
+
+    if ((!options.in && process.stdin.isTTY) || !options.out) {
         const availableLanguages = converterRegistry.getLanguages().join(', ');
         console.error('Usage: node tools/convert.js --in <infile> --out <outfile|outdir> [--to <language>]');
+        console.error('Or pipe to stdin: echo "..." | node tools/convert.js --out <outfile> [--to <language>]');
         console.error(`Available target languages: ${availableLanguages}`);
         process.exit(1);
     }
@@ -267,11 +278,19 @@ function main() {
         // Output is a file, so extract the directory
         outDir = path.dirname(options.out);
         isFileOutput = true;
-        console.log(`Converting '${options.in}' to ${language.toUpperCase()} file '${options.out}'...`);
+        if (options.in) {
+            console.log(`Converting '${options.in}' to ${language.toUpperCase()} file '${options.out}'...`);
+        } else {
+            console.log(`Converting STDIN to ${language.toUpperCase()} file '${options.out}'...`);
+        }
     } else {
         // Output is a directory
         outDir = options.out;
-        console.log(`Converting '${options.in}' to ${language.toUpperCase()} in directory '${options.out}'...`);
+        if (options.in) {
+            console.log(`Converting '${options.in}' to ${language.toUpperCase()} in directory '${options.out}'...`);
+        } else {
+            console.log(`Converting STDIN to ${language.toUpperCase()} in directory '${options.out}'...`);
+        }
     }
 
     if (!fs.existsSync(outDir)) {
@@ -284,10 +303,28 @@ function main() {
     // Start the transpilation process
     if (isFileOutput) {
         // For single file output, only transpile the main file
-        transpileMainFile(options.in, options.out, converterInfo);
+        if (options.in) {
+            transpileMainFile(options.in, options.out, converterInfo);
+        } else {
+            const source = await readStdin();
+            const lexer = new Lexer(source, 'stdin');
+            const tokens = [];
+            let token;
+            while ((token = lexer.nextToken()) !== null) tokens.push(token);
+            const parser = new Parser(tokens, 'stdin');
+            const ast = parser.parse();
+            const converter = new converterInfo.ConverterClass();
+            const output = converter.convert(ast);
+            fs.writeFileSync(options.out, output, 'utf-8');
+        }
     } else {
         // For directory output, transpile all files recursively
-        transpileFile(options.in, outDir, converterInfo, targetExtension);
+        if (options.in) {
+            transpileFile(options.in, outDir, converterInfo, targetExtension);
+        } else {
+            console.error('Error: Directory output requires an input file to resolve dependencies.');
+            process.exit(1);
+        }
         
         // Copy the runtime file if specified for directory output
         if (converterInfo.runtimeFile) {
