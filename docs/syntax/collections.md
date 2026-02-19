@@ -29,6 +29,38 @@ set evens (array.filter numbers (fn x, = (% x 2) 0))
 set slice (array.slice numbers 1 4)  // [2, 3, 4]
 ```
 
+### Array Destructuring
+
+```mimo
+// Extract values into variables
+set coords [10, 20, 30]
+destructure [x, y, z] from coords
+show x  // 10
+show y  // 20
+
+// Partial destructuring
+destructure [first, second] from [1, 2, 3, 4]
+show first  // 1
+```
+
+See [Destructuring](./destructuring.md) for full details.
+
+### Array Spreading
+
+```mimo
+// Combine arrays
+set a [1, 2]
+set b [3, 4]
+set combined [...a, ...b]
+show combined  // [1, 2, 3, 4]
+
+// With additional elements
+set extended [0, ...a, 5]
+show extended  // [0, 1, 2, 5]
+```
+
+See [Array Operations](./array-operations.md) for slicing, spreading, and more.
+
 ## Objects
 
 ```mimo
@@ -64,6 +96,24 @@ set vals (values person)
 set entries (entries person)
 // [["name", "Alice"], ["age", 31], ...]
 ```
+
+### Object Destructuring
+
+```mimo
+// Extract properties into variables
+set user { name: "Bob", age: 25 }
+destructure {name, age} from user
+show name  // "Bob"
+show age   // 25
+
+// Missing properties become null
+set config { timeout: 5000 }
+destructure {timeout, retries} from config
+show timeout  // 5000
+show retries  // null
+```
+
+See [Destructuring](./destructuring.md) for full details.
 
 ## Iteration
 

@@ -25,17 +25,24 @@ set remainder % 10 3    // 1
 
 ## Strings
 
-Strings are sequences of characters enclosed in double quotes:
+Strings are sequences of characters enclosed in double quotes or backticks:
 
 ```mimo
-// String literals
+// String literals (double quotes)
 set message "Hello, World!"
 set empty ""
 set with_quotes "She said \"Hello\""
 
-// Template literals (backticks, with interpolation)
+// Template literals (backticks with interpolation)
 set name "Alice"
 set greeting `Hello, ${name}!`
+show greeting  // "Hello, Alice!"
+
+// Template literals support multi-line text
+set multiline `Line one
+Line two
+Line three`
+show multiline
 
 // String concatenation
 set greeting + "Hello, " "Alice"
@@ -44,10 +51,9 @@ show greeting  // "Hello, Alice"
 // Concatenate with numbers (converted to string)
 set message + "Count: " 42
 show message  // "Count: 42"
-
-// Multi-line strings (with explicit newline)
-set multiline + "Line 1\n" "Line 2"
 ```
+
+See [Template Literals](./template-literals.md) for more details on template syntax.
 
 ## Booleans
 

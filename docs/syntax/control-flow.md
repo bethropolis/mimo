@@ -110,3 +110,82 @@ for i in range 1 10
 end
 // Prints: 1 3 5 7 9
 ```
+
+## `loop` - Infinite Loop
+
+The `loop` statement creates an infinite loop. Use `break` to exit.
+
+```mimo
+// Basic infinite loop with break
+set counter 0
+loop
+    show counter
+    set counter + counter 1
+    if = counter 5
+        break
+    end
+end
+// Prints: 0 1 2 3 4
+
+// Loop with continue
+set x 0
+loop
+    set x + x 1
+    if < x 3
+        continue  // Skip printing for x < 3
+    end
+    show x
+    if = x 5
+        break
+    end
+end
+// Prints: 3 4 5
+
+// Event loop pattern
+set running true
+loop
+    if not running
+        break
+    end
+    // Process events...
+    // Set running to false when done
+end
+
+// Searching with early exit
+set items [1, 3, 5, 8, 10, 12]
+set target 8
+set found_index -1
+set i 0
+loop
+    if >= i (len items)
+        break
+    end
+    if = items[i] target
+        set found_index i
+        break
+    end
+    set i + i 1
+end
+show found_index  // 3
+```
+
+### Nested Loop Control
+
+```mimo
+// Breaking from nested loops
+set matrix [[1, 2], [3, 4], [5, 6]]
+set found false
+set target 4
+
+for row in matrix
+    for element in row
+        if = element target
+            set found true
+            break  // Only breaks inner loop
+        end
+    end
+    if found
+        break  // Break outer loop
+    end
+end
+```
