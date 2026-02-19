@@ -100,17 +100,18 @@ export class PrettyPrinter {
         if (node.isExported) this.write('export ');
         this.write(`function ${node.name}(`);
         const params = node.params.map((p) => {
-            const defaultNode = node.defaults[p];
+            const name = typeof p === 'string' ? p : p.name;
+            const defaultNode = node.defaults[name];
             if (defaultNode) {
-                // To properly format the default value, we need a temporary printer
                 const tempPrinter = new PrettyPrinter();
                 tempPrinter.visitNode(defaultNode);
-                return `${p}: ${tempPrinter.output}`;
+                return `${name}: ${tempPrinter.output}`;
             }
-            return p;
+            return name;
         });
         if (node.restParam) {
-            params.push(`...${node.restParam}`);
+            const restName = typeof node.restParam === 'string' ? node.restParam : node.restParam.name;
+            params.push(`...${restName}`);
         }
         this.write(params.join(', '));
         this.write(')\n');
@@ -156,9 +157,50 @@ export class PrettyPrinter {
     }
 
     visitLoopStatement(node) {
+        if (node.label) {
+            this.writeLine(`${node.label}:`);
+        }
         this.writeLine('loop');
         this.visitBlock(node.body);
         this.writeLine('end');
+    }
+
+    visitLabeledStatement(node) {
+        this.writeLine(`${node.label}:`);
+        this.visitNode(node.statement);
+    }
+
+    visitAnonymousFunction(node) {
+        this.write(`(function(`);
+        const params = node.params.map((p) => {
+            const name = typeof p === 'string' ? p : p.name;
+            const defaultNode = node.defaults[name];
+            if (defaultNode) {
+                const tempPrinter = new PrettyPrinter();
+                tempPrinter.visitNode(defaultNode);
+                return `${name}: ${tempPrinter.output}`;
+            }
+            return name;
+        });
+        if (node.restParam) {
+            const restName = typeof node.restParam === 'string' ? node.restParam : node.restParam.name;
+            params.push(`...${restName}`);
+        }
+        this.write(params.join(', '));
+        this.write(')\n');
+        this.visitBlock(node.body);
+        this.write(this.currentIndent + 'end)');
+    }
+
+    visitRangeLiteral(node) {
+        this.visitNode(node.start);
+        this.write(' .. ');
+        this.visitNode(node.end);
+    }
+
+    visitSpreadElement(node) {
+        this.write('...');
+        this.visitNode(node.argument);
     }
 
     visitBreakStatement(node) {

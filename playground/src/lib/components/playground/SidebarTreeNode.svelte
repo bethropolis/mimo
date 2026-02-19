@@ -67,6 +67,14 @@
 				<input
 					type="text"
 					value={draftName}
+					use={(node) => {
+						node.focus();
+						if (node.value.includes('.')) {
+							node.setSelectionRange(0, node.value.lastIndexOf('.'));
+						} else {
+							node.select();
+						}
+					}}
 					oninput={(event) => onDraftNameChange(event.currentTarget.value)}
 					onkeydown={(event) => {
 						if (event.key === 'Enter') onSubmitEdit();

@@ -41,52 +41,64 @@
 	}
 </script>
 
-<section class="flex h-full flex-col border border-border/40 bg-surface">
-	<div class="flex items-center justify-between border-b border-border px-2 py-2">
-		<div class="flex items-center">
+<section class="flex h-full flex-col border border-border/40 bg-surface shadow-sm">
+	<div class="flex items-center justify-between border-b border-border/40 bg-panel-alt/30 px-3 py-2">
+		<div class="flex items-center p-1 bg-surface-muted rounded-xl border border-border/30">
 			{#each tabs as pane}
 				<button
 					type="button"
 					onclick={() => (tab = pane.id)}
-					class={`mr-1 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium ${
+					class={`relative inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
 						tab === pane.id
-							? 'bg-accent text-accent-contrast'
-							: 'text-text-muted hover:bg-surface-elevated'
+							? 'bg-accent text-accent-contrast shadow-md scale-105 z-10'
+							: 'text-text-soft hover:bg-surface-elevated hover:text-app-fg'
 					}`}
 				>
-					<pane.icon size={14} />
+					<pane.icon size={14} strokeWidth={2.5} />
 					<span>{pane.label}</span>
-					<span class="rounded-md bg-surface-elevated px-1 text-[10px]">{countFor(pane.id)}</span>
+					<span class={`rounded-full px-1.5 py-0.5 text-[10px] ${
+						tab === pane.id ? 'bg-accent-contrast/20 text-accent-contrast' : 'bg-surface-elevated text-text-soft'
+					}`}>{countFor(pane.id)}</span>
 				</button>
 			{/each}
 		</div>
-		<div class="flex items-center gap-1">
+		<div class="flex items-center gap-2">
 			<button
 				type="button"
 				onclick={copyCurrent}
-				class="inline-flex items-center rounded-md border border-border bg-surface-elevated p-1.5 text-text-muted hover:bg-panel-alt"
-				aria-label="Copy current tab"
+				class="inline-flex items-center rounded-xl border border-border bg-surface px-3 py-2 text-text-soft hover:bg-surface-elevated hover:text-app-fg transition-colors"
+				title="Copy current tab"
 			>
-				<Copy size={12} />
+				<Copy size={14} />
 			</button>
 			<button
 				type="button"
 				onclick={() => onClearTab?.(tab)}
-				class="inline-flex items-center rounded-md border border-border bg-surface-elevated p-1.5 text-text-muted hover:bg-panel-alt"
-				aria-label="Clear current tab"
+				class="inline-flex items-center rounded-xl border border-border bg-surface px-3 py-2 text-text-soft hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+				title="Clear current tab"
 			>
-				<Trash2 size={12} />
+				<Trash2 size={14} />
 			</button>
 		</div>
 	</div>
-	<div class="min-h-0 flex-1 overflow-auto p-3 font-mono text-sm">
+	<div class="min-h-0 flex-1 overflow-auto bg-app-bg/30 p-4 font-mono text-sm scroll-smooth">
 		{#if items.length === 0}
-			<p class="text-text-soft">No {tab} yet.</p>
+			<div class="flex h-full flex-col items-center justify-center opacity-40">
+				<div class="mb-2 rounded-full bg-surface-elevated p-4">
+					<PackageCheck size={32} />
+				</div>
+				<p class="text-sm italic">No {tab} recorded.</p>
+			</div>
 		{:else}
 			{#each items as item, index}
-				<div class={`mb-2 rounded-lg border p-2 ${tone[tab] ?? tone.output}`}>
-					<p class="mb-1 text-[10px] opacity-70">#{index + 1}</p>
-					<p class="whitespace-pre-wrap break-words leading-relaxed">{item}</p>
+				<div class={`mb-3 last:mb-0 rounded-xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${tone[tab] ?? tone.output}`}>
+					<div class="flex items-center justify-between border-b border-current/10 bg-current/5 px-3 py-1.5">
+						<span class="text-[10px] font-bold uppercase tracking-wider opacity-60">Entry #{index + 1}</span>
+						<span class="text-[9px] opacity-40">{new Date().toLocaleTimeString()}</span>
+					</div>
+					<div class="p-3">
+						<p class="whitespace-pre-wrap break-words leading-relaxed">{item}</p>
+					</div>
 				</div>
 			{/each}
 		{/if}

@@ -2,10 +2,11 @@
 	import PanelLeftOpen from '@lucide/svelte/icons/panel-left-open';
 	import PanelLeftClose from '@lucide/svelte/icons/panel-left-close';
 	import Play from '@lucide/svelte/icons/play';
+	import AlignLeft from '@lucide/svelte/icons/align-left';
 	import Share2 from '@lucide/svelte/icons/share-2';
 	import Settings from '@lucide/svelte/icons/settings';
 
-	let { sidebarOpen = true, fsStatus = 'initializing', onToggleSidebar, onRun, onShare, onOpenSettings } = $props();
+	let { sidebarOpen = true, fsStatus = 'initializing', onToggleSidebar, onRun, onFormat, onShare, onOpenSettings } = $props();
 
 	const buttonClass =
 		'inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-app-fg hover:bg-surface-elevated';
@@ -46,6 +47,15 @@
 			<Play size={16} strokeWidth={2.4} />
 			<span>Run</span>
 			<kbd class="hidden rounded bg-emerald-700/50 px-1 text-[10px] font-medium opacity-80 lg:inline-block">Ctrl+Enter</kbd>
+		</button>
+		<button
+			type="button"
+			onclick={onFormat}
+			title="Format Code (Shift + Alt + F)"
+			class={buttonClass}
+		>
+			<AlignLeft size={16} strokeWidth={2} />
+			<span class="hidden lg:inline">Format</span>
 		</button>
 		<button type="button" onclick={onShare} class={buttonClass}>
 			<Share2 size={16} strokeWidth={2} />

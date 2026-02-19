@@ -4,6 +4,7 @@
     "": {
       "name": "playground",
       "dependencies": {
+        "@codemirror/lint": "^6.9.4",
         "@lucide/svelte": "^0.564.0",
         "@zenfs/core": "^2.5.0",
         "@zenfs/dom": "^1.2.7",

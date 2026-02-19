@@ -3,11 +3,15 @@
 		open = false,
 		shareLink = '',
 		linkError = '',
+		activeFileCharCount = 0,
 		onClose,
 		onGenerateLink,
 		onDownloadZip,
 		onCopyLink
 	} = $props();
+
+	let linkLength = $derived(shareLink.length);
+	let isLinkTooLong = $derived(linkLength > 2000); // Standard browser/server limits are around 2k-8k
 </script>
 
 {#if open}
@@ -38,7 +42,10 @@
 				</div>
 
 				<div class="rounded-xl border border-border bg-surface p-3">
-					<p class="mb-2 text-sm font-medium">Share Active File</p>
+					<div class="mb-2 flex items-center justify-between">
+						<p class="text-sm font-medium">Share Active File</p>
+						<span class="text-[10px] text-text-soft">{activeFileCharCount} characters</span>
+					</div>
 					<p class="mb-3 text-xs text-text-muted">Generate a URL containing the current file content encoded as base64.</p>
 					<div class="mb-2 flex gap-2">
 						<button
@@ -59,6 +66,16 @@
 					</div>
 					{#if linkError}
 						<p class="mb-2 text-xs text-rose-500">{linkError}</p>
+					{/if}
+					{#if shareLink}
+						<div class="mb-1 flex items-center justify-between text-[10px]">
+							<span class={isLinkTooLong ? 'text-amber-500' : 'text-text-soft'}>
+								URL Length: {linkLength} chars
+							</span>
+							{#if isLinkTooLong}
+								<span class="text-amber-500">Warning: URL may be too long for some browsers</span>
+							{/if}
+						</div>
 					{/if}
 					<input
 						type="text"

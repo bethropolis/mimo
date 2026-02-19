@@ -185,11 +185,16 @@ function createVirtualWorkspace(sourceFiles) {
 	};
 }
 
+/** @type {any | null} */
+let evalMimo = null;
+/** @type {any | null} */
+let evalWorkspace = null;
+
 self.onmessage = async (event) => {
 	const data = event.data;
-	if (!data || data.type !== 'run') return;
+	if (!data || !['run', 'eval', 'lint', 'format'].includes(data.type)) return;
 
-	const { id, source, filePath, files } = data;
+	const { id, type, source, filePath, files, rules } = data;
 	try {
 		const mod = await getBundle();
 		const Mimo = mod.Mimo;
@@ -198,35 +203,98 @@ self.onmessage = async (event) => {
 			throw new Error('Bundle exports are missing. Run `bun run bundles` in playground/.');
 		}
 
-		const workspace = createVirtualWorkspace(files);
-		/** @type {string[]} */
-		const logs = [];
-		const adapter = {
-			...browserAdapter,
-			...workspace,
-			/** @param {...unknown} args */
-			log: (...args) => logs.push(args.join(' ')),
-			/** @param {...unknown} args */
-			error: (...args) => logs.push(`ERROR: ${args.join(' ')}`)
-		};
+		if (type === 'run') {
+			const workspace = createVirtualWorkspace(files);
+			/** @type {string[]} */
+			const logs = [];
+			const adapter = {
+				...browserAdapter,
+				...workspace,
+				/** @param {...unknown} args */
+				log: (...args) => logs.push(args.join(' ')),
+				/** @param {...unknown} args */
+				error: (...args) => logs.push(`ERROR: ${args.join(' ')}`)
+			};
 
-		const mimo = new Mimo(adapter);
-		const result = mimo.run(source, filePath);
+			const mimo = new Mimo(adapter);
+			const result = mimo.run(source, filePath);
 
-		/** @type {string[]} */
-		const output = [...logs];
-		if (result !== undefined && result !== null) output.push(`Result: ${String(result)}`);
-		if (output.length === 0) output.push('Program finished with no output.');
+			/** @type {string[]} */
+			const output = [...logs];
+			if (result !== undefined && result !== null) output.push(`Result: ${String(result)}`);
+			if (output.length === 0) output.push('Program finished with no output.');
 
-		self.postMessage({
-			type: 'run:ok',
-			id,
-			output,
-			files: workspace.snapshot()
-		});
+			self.postMessage({
+				type: 'run:ok',
+				id,
+				output,
+				files: workspace.snapshot()
+			});
+		} else if (type === 'eval') {
+			// Persistent eval context
+			if (!evalWorkspace || files) {
+				evalWorkspace = createVirtualWorkspace(files ?? {});
+			}
+			
+			/** @type {string[]} */
+			const logs = [];
+			const adapter = {
+				...browserAdapter,
+				...evalWorkspace,
+				/** @param {...unknown} args */
+				log: (...args) => logs.push(args.join(' ')),
+				/** @param {...unknown} args */
+				error: (...args) => logs.push(`ERROR: ${args.join(' ')}`)
+			};
+
+			if (!evalMimo) {
+				evalMimo = new Mimo(adapter);
+			} else {
+				// Re-bind adapter to capture logs
+				evalMimo.interpreter.environment.adapter = adapter;
+			}
+
+			const result = evalMimo.run(source, 'repl.mimo');
+			/** @type {string[]} */
+			const output = [...logs];
+			if (result !== undefined && result !== null) output.push(`=> ${String(result)}`);
+
+			self.postMessage({
+				type: 'run:ok',
+				id,
+				output,
+				files: evalWorkspace.snapshot()
+			});
+		} else if (type === 'lint') {
+			const lintSource = mod.lintSource;
+			if (!lintSource) {
+				throw new Error('lintSource not exported from bundle. Run `bun run bundles` in playground/.');
+			}
+			const result = lintSource(source, filePath, rules);
+			self.postMessage({
+				type: 'lint:ok',
+				id,
+				...result
+			});
+		} else if (type === 'format') {
+			const formatSource = mod.formatSource;
+			if (!formatSource) {
+				throw new Error('formatSource not exported from bundle. Run `bun run bundles` in playground/.');
+			}
+			const result = formatSource(source);
+			if (result.ok) {
+				self.postMessage({
+					type: 'format:ok',
+					id,
+					formatted: result.formatted
+				});
+			} else {
+				throw new Error(result.error);
+			}
+		}
 	} catch (error) {
 		self.postMessage({
-			type: 'run:error',
+			type: `${type}:error`,
 			id,
 			error: String(error)
 		});

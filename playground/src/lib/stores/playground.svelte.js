@@ -48,12 +48,17 @@ export function createPlaygroundStore() {
 	]);
 	let activeTabId = $state('src/main.mimo');
 	let editorSelection = $state(/** @type {{ line: number, column: number } | null} */ (null));
+	let recentFiles = $state(/** @type {string[]} */ ([]));
 
 	// Theme settings
 	let theme = $state('system');
 	let fontSize = $state(14);
 	let tabSize = $state(2);
 	let autoSave = $state(true);
+
+	// Lint settings
+	let lintEnabled = $state(true);
+	let lintMessages = $state(/** @type {Array<{ line: number; column: number; endColumn: number; message: string; ruleId: string; severity: string }>} */ ([]));
 
 	// System theme detection
 	let prefersDark = $state(false);
@@ -71,6 +76,9 @@ export function createPlaygroundStore() {
 	let sidebarOpen = $state(true);
 	let settingsOpen = $state(false);
 	let shareOpen = $state(false);
+	let deleteModalOpen = $state(false);
+	let nodeToDelete = $state('');
+	let isDeletingFolder = $state(false);
 	let fsStatus = $state('initializing');
 	let shareLink = $state('');
 	let shareLinkError = $state('');
@@ -144,6 +152,21 @@ export function createPlaygroundStore() {
 	// Derived values
 	let activeCode = $derived(tabs.find((tab) => tab.id === activeTabId)?.content ?? '');
 
+	// Effect to lint when code changes
+	$effect(() => {
+		const code = activeCode;
+		const fileId = activeTabId;
+		const enabled = lintEnabled;
+		if (!enabled || !fileId.endsWith('.mimo')) {
+			lintMessages = [];
+			return;
+		}
+		const timer = setTimeout(() => {
+			lintActive();
+		}, 300);
+		return () => clearTimeout(timer);
+	});
+
 	// Methods
 	/** @param {'info'|'success'|'error'|'warning'} level @param {string} message */
 	function appendLog(level, message) {
@@ -182,6 +205,18 @@ export function createPlaygroundStore() {
 		}
 		activeTabId = fileId;
 		selectedNodeId = fileId;
+
+		// Update recent files
+		recentFiles = [fileId, ...recentFiles.filter((id) => id !== fileId)].slice(0, 10);
+
+		// Refresh AST on open if it's a mimo file
+		if (fileId.endsWith('.mimo')) {
+			refreshAst(content, `/${fileId}`);
+		}
+	}
+
+	function clearRecentFiles() {
+		recentFiles = [];
 	}
 
 	/** @param {string} tabId */
@@ -332,13 +367,22 @@ export function createPlaygroundStore() {
 
 	/** @param {string} nodeId */
 	function deleteNode(nodeId) {
-		if (!nodeId) return false;
+		if (!nodeId) return;
+		nodeToDelete = nodeId;
+		isDeletingFolder = workspaceIsDirectory(nodeId);
+		deleteModalOpen = true;
+	}
+
+	/** @param {string} nodeId */
+	function confirmDelete(nodeId) {
 		try {
 			deleteWorkspacePath(nodeId, workspaceIsDirectory(nodeId));
 			updateTabsForDelete(nodeId);
 			refreshExplorerFromFs();
 			selectedNodeId = activeTabId;
 			appendLog('warning', `Deleted ${nodeId}`);
+			deleteModalOpen = false;
+			nodeToDelete = '';
 			return true;
 		} catch (error) {
 			alertActionError(`Failed to delete: ${String(error)}`);
@@ -349,6 +393,11 @@ export function createPlaygroundStore() {
 	async function runActive() {
 		await initZenFS();
 		appendLog('info', `Running ${activeTabId}`);
+
+		// Refresh AST on run
+		if (activeTabId.endsWith('.mimo')) {
+			await refreshAst(activeCode, `/${activeTabId}`);
+		}
 
 		try {
 			const workerResult = await runner.runInWorker({
@@ -378,6 +427,40 @@ export function createPlaygroundStore() {
 		}
 	}
 
+	async function lintActive() {
+		if (!lintEnabled || !activeTabId.endsWith('.mimo')) {
+			lintMessages = [];
+			return;
+		}
+		try {
+			const result = await runner.lintInWorker({
+				source: activeCode,
+				filePath: `/${activeTabId}`
+			});
+			lintMessages = result.messages ?? [];
+		} catch (error) {
+			lintMessages = [];
+		}
+	}
+
+	async function formatActive() {
+		if (!activeTabId.endsWith('.mimo')) return false;
+		try {
+			const result = await runner.formatInWorker({
+				source: activeCode
+			});
+			if (result.formatted !== undefined && result.formatted !== activeCode) {
+				updateActiveCode(result.formatted);
+				appendLog('success', 'Code formatted.');
+				return true;
+			}
+			return false;
+		} catch (error) {
+			appendLog('error', `Format error: ${String(error)}`);
+			return false;
+		}
+	}
+
 	/** @param {string} command */
 	function runCommand(command) {
 		const next = command.trim();
@@ -394,7 +477,23 @@ export function createPlaygroundStore() {
 		} else if (next.includes('run')) {
 			runActive();
 		} else {
-			appendLog('warning', 'Unknown command. Try: run src/main.mimo or clear');
+			// Try to eval as Mimo code
+			runner
+				.evalInWorker({
+					source: next,
+					files: snapshotWorkspaceFiles()
+				})
+				.then((result) => {
+					if (result.output && result.output.length) {
+						result.output.forEach((line) => {
+							if (line.startsWith('=>')) appendLog('success', line);
+							else appendLog('info', line);
+						});
+					}
+				})
+				.catch((error) => {
+					appendLog('error', String(error));
+				});
 		}
 	}
 
@@ -492,7 +591,11 @@ export function createPlaygroundStore() {
 		}));
 		if (!workspaceExists(activeTabId)) {
 			const fallback = firstAvailableFileId(tree);
-			if (fallback) openFile(fallback);
+			if (fallback) {
+				activeTabId = fallback;
+				selectedNodeId = fallback;
+				openFile(fallback);
+			}
 		}
 
 		fsStatus = isIndexedDBActive() ? 'indexeddb' : 'memory';
@@ -502,22 +605,14 @@ export function createPlaygroundStore() {
 				? 'Filesystem online (IndexedDB mounted at /home).'
 				: 'Filesystem online in in-memory fallback mode.'
 		);
-		await refreshAst(activeCode, `/${activeTabId}`);
+		
+		const finalCode = tabs.find(t => t.id === activeTabId)?.content ?? activeCode;
+		await refreshAst(finalCode, `/${activeTabId}`);
 	}
 
 	function destroy() {
 		runner.terminate();
 	}
-
-	// Effect to refresh AST when code changes
-	$effect(() => {
-		const code = activeCode;
-		const fileId = activeTabId;
-		const timer = setTimeout(() => {
-			refreshAst(code, `/${fileId}`);
-		}, 180);
-		return () => clearTimeout(timer);
-	});
 
 	/** @param {number} line @param {number} column */
 	function jumpToLocation(line, column) {
@@ -553,6 +648,10 @@ export function createPlaygroundStore() {
 		set settingsOpen(v) { settingsOpen = v; },
 		get shareOpen() { return shareOpen; },
 		set shareOpen(v) { shareOpen = v; },
+		get deleteModalOpen() { return deleteModalOpen; },
+		set deleteModalOpen(v) { deleteModalOpen = v; },
+		get nodeToDelete() { return nodeToDelete; },
+		get isDeletingFolder() { return isDeletingFolder; },
 		get fsStatus() { return fsStatus; },
 		get shareLink() { return shareLink; },
 		get shareLinkError() { return shareLinkError; },
@@ -568,14 +667,19 @@ export function createPlaygroundStore() {
 		get errors() { return errors; },
 		get warnings() { return warnings; },
 		get terminalLogs() { return terminalLogs; },
+		get recentFiles() { return recentFiles; },
 		get astData() { return astData; },
 		get astError() { return astError; },
 		get astLoading() { return astLoading; },
+		get lintEnabled() { return lintEnabled; },
+		set lintEnabled(v) { lintEnabled = v; },
+		get lintMessages() { return lintMessages; },
 
 		// Methods
 		initialize,
 		destroy,
 		openFile,
+		clearRecentFiles,
 		closeTab,
 		selectTab,
 		updateActiveCode,
@@ -584,7 +688,10 @@ export function createPlaygroundStore() {
 		createFolder,
 		renameNode,
 		deleteNode,
+		confirmDelete,
 		runActive,
+		lintActive,
+		formatActive,
 		runCommand,
 		clearTerminalLogs,
 		clearOutputTab,

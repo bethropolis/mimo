@@ -7,6 +7,8 @@ import { Interpreter } from './interpreter/index.js';
 import { Lexer } from './lexer/Lexer.js';
 import { Parser } from './parser/Parser.js';
 import { MimoError } from './interpreter/MimoError.js';
+import { Linter } from './tools/lint/Linter.js';
+import { PrettyPrinter } from './tools/PrettyPrinter.js';
 
 /**
  * Tokenizer module - handles lexical analysis
@@ -265,3 +267,89 @@ export { Interpreter } from './interpreter/index.js';
 export { Lexer } from './lexer/Lexer.js';
 export { Parser } from './parser/Parser.js';
 export { MimoError } from './interpreter/MimoError.js';
+export { Linter } from './tools/lint/Linter.js';
+export { PrettyPrinter } from './tools/PrettyPrinter.js';
+
+const DEFAULT_LINT_RULES = {
+    'no-unused-vars': true,
+    'prefer-const': true,
+    'no-magic-numbers': false
+};
+
+export function lintSource(source, filePath = '/playground.mimo', rules = {}) {
+    const enabledRules = { ...DEFAULT_LINT_RULES, ...rules };
+    
+    try {
+        const lexer = new Lexer(source, filePath);
+        const tokens = [];
+        let token;
+        while ((token = lexer.nextToken()) !== null) {
+            tokens.push(token);
+        }
+        
+        const parser = new Parser(tokens, filePath);
+        const ast = parser.parse();
+        
+        const linter = new Linter({ rules: enabledRules });
+        const messages = linter.verify(ast, source, filePath);
+        
+        return { 
+            ok: true, 
+            file: filePath,
+            messages: messages.map(msg => ({
+                line: msg.line,
+                column: msg.column,
+                endColumn: msg.endColumn,
+                message: msg.message,
+                ruleId: msg.ruleId,
+                severity: 'warning'
+            }))
+        };
+    } catch (err) {
+        // Convert syntax/parse errors into lint diagnostics
+        return { 
+            ok: false, 
+            file: filePath,
+            error: {
+                message: err.message,
+                line: err.location?.line || 1,
+                column: err.location?.column || 1
+            },
+            messages: [{
+                line: err.location?.line || 1,
+                column: err.location?.column || 1,
+                endColumn: (err.location?.column || 1) + 1,
+                message: err.message,
+                ruleId: 'syntax-error',
+                severity: 'error'
+            }]
+        };
+    }
+}
+
+export function formatSource(source) {
+    try {
+        const lexer = new Lexer(source, '/format.mimo');
+        const tokens = [];
+        let token;
+        while ((token = lexer.nextToken()) !== null) {
+            tokens.push(token);
+        }
+        
+        const parser = new Parser(tokens, '/format.mimo');
+        const ast = parser.parse();
+        
+        const printer = new PrettyPrinter();
+        const formatted = printer.format(ast);
+        
+        return {
+            ok: true,
+            formatted: formatted.trimEnd()
+        };
+    } catch (err) {
+        return {
+            ok: false,
+            error: err.message
+        };
+    }
+}

@@ -3,6 +3,8 @@
 	import FolderPlus from '@lucide/svelte/icons/folder-plus';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import History from '@lucide/svelte/icons/history';
+	import FileText from '@lucide/svelte/icons/file-text';
 	import SidebarTreeNode from './SidebarTreeNode.svelte';
 
 	/**
@@ -17,6 +19,7 @@
 
 	let {
 		tree = /** @type {ExplorerNode[]} */ ([]),
+		recentFiles = /** @type {string[]} */ ([]),
 		activeFileId = '',
 		selectedNodeId = '',
 		onSelectFile,
@@ -24,10 +27,12 @@
 		onCreateFile,
 		onCreateFolder,
 		onRename,
-		onDelete
+		onDelete,
+		onClearRecent
 	} = $props();
 
 	let collapsed = $state(/** @type {Record<string, boolean>} */ ({}));
+	let recentCollapsed = $state(false);
 	let action = $state(/** @type {'new-file'|'new-folder'|'rename'|null} */ (null));
 	let draftName = $state('');
 	let deleteArmedId = $state('');
@@ -266,4 +271,41 @@
 			/>
 		{/each}
 	</div>
+
+	{#if recentFiles.length > 0}
+		<div class="border-t border-border bg-panel-alt/20">
+			<button
+				type="button"
+				onclick={() => (recentCollapsed = !recentCollapsed)}
+				class="flex w-full items-center justify-between px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft hover:bg-surface-elevated"
+			>
+				<div class="flex items-center gap-2">
+					<History size={12} />
+					<span>Recent</span>
+				</div>
+				<span class="rounded bg-surface-elevated px-1">{recentFiles.length}</span>
+			</button>
+			{#if !recentCollapsed}
+				<div class="max-h-48 overflow-auto pb-2">
+					{#each recentFiles as fileId}
+						<button
+							type="button"
+							onclick={() => onSelectFile(fileId)}
+							class={`flex w-full items-center gap-2 px-4 py-1.5 text-left text-xs hover:bg-surface-elevated ${activeFileId === fileId ? 'bg-accent/10 text-accent font-medium' : 'text-text-muted'}`}
+						>
+							<FileText size={12} class="shrink-0 opacity-70" />
+							<span class="truncate">{fileId.split('/').pop()}</span>
+						</button>
+					{/each}
+					<button
+						type="button"
+						onclick={onClearRecent}
+						class="mt-1 w-full px-4 py-1 text-left text-[10px] text-text-soft hover:text-rose-400"
+					>
+						Clear Recent
+					</button>
+				</div>
+			{/if}
+		</div>
+	{/if}
 </aside>
