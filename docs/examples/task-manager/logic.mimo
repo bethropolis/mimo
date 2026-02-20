@@ -12,10 +12,11 @@ end
 export function toggle_task(tasks, id)
     return call array.map(tasks, function(t)
         if = t.id id
+            set new_completed not t.completed
             return {
                 id: t.id,
                 title: t.title,
-                completed: not t.completed
+                completed: new_completed
             }
         else
             return t
@@ -24,7 +25,8 @@ export function toggle_task(tasks, id)
 end
 
 export function get_pending(tasks)
-    return call array.filter(tasks, function(t) 
-        return not t.completed 
+    return call array.filter(tasks, function(t)
+        set is_done t.completed
+        return not is_done
     end)
 end

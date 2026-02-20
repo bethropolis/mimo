@@ -1,33 +1,35 @@
-import "./storage.mimo" as storage
 import "./logic.mimo" as logic
-
-const DB_FILE "examples/task-manager/tasks.json"
-
-// Initial load
-let tasks call storage.load_tasks(DB_FILE)
 
 show "--- Mimo Task Manager ---"
 
-// Add some tasks if empty
-if = call len(tasks) 0
-    show "Initializing demo tasks..."
-    set tasks call logic.add_task(tasks, "Learn Mimo")
-    set tasks call logic.add_task(tasks, "Write Examples")
-    set tasks call logic.add_task(tasks, "Take over the world")
-    call storage.save_tasks(DB_FILE, tasks)
-end
+// Initialize demo tasks
+let tasks []
+
+show "Adding demo tasks..."
+set tasks call logic.add_task(tasks, "Learn Mimo")
+set tasks call logic.add_task(tasks, "Write Examples")
+set tasks call logic.add_task(tasks, "Take over the world")
 
 show `Total tasks: ${call len(tasks)}`
 
-// Mark one as done (id 1)
+// Mark first as done
 set tasks call logic.toggle_task(tasks, 1)
-call storage.save_tasks(DB_FILE, tasks)
 
-// Show pending
-set pending call logic.get_pending(tasks)
-show "--- Pending Tasks ---"
-for t in pending
-    show `[ ] ${t.id}: ${t.title}`
+// Show all tasks
+show "--- All Tasks ---"
+for t in tasks
+    if t.completed
+        show `[x] ${t.id}: ${t.title}`
+    else
+        show `[ ] ${t.id}: ${t.title}`
+    end
 end
 
+// Show pending count
+set pending call logic.get_pending(tasks)
+set pending_count call len(pending)
+show ""
+show `Pending: ${pending_count} tasks`
+
+show ""
 show "Done!"

@@ -1,6 +1,6 @@
 <script>
 	import mascot from '$lib/assets/mascot.png';
-	import favicon from '$lib/assets/favicon.png';
+	import GradientText from '$lib/components/landing/gradientText.svelte';
 
 	let prefersDark = $state(false);
 
@@ -34,7 +34,7 @@
 				<img src={mascot} alt="Mimo mascot" class="h-32 w-32" />
 				
 				<div class="text-center">
-					<h1 class="text-3xl font-bold">Mimo</h1>
+					<h1 class="text-3xl font-bold"><GradientText>Mimo</GradientText></h1>
 					<p class="mt-2 text-text-muted">A minimal prefix-notation language</p>
 				</div>
 

@@ -57,6 +57,9 @@ export const KEYWORDS = [
   "import",
   "as",
   "export",
+  "not",
+  "and",
+  "or",
   ...END_KEYWORDS
 ];
 

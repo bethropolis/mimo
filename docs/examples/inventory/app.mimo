@@ -4,7 +4,7 @@ import "./pricing.mimo" as pricing
 show "--- Mimo Inventory Report ---"
 
 for p in catalog.PRODUCTS
-    set status if > p.stock 0 "In Stock" else "Out of Stock" end
+    set status call if_else(> p.stock 0, "In Stock", "Out of Stock")
     show `Product: ${p.name} | Price: $${p.price} | ${status}`
     
     if > p.stock 0
