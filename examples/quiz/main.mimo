@@ -1,0 +1,39 @@
+import "./data.mimo" as data
+import "./engine.mimo" as engine
+import "string" as string
+
+show "--- Mimo Programming Quiz ---"
+show `Starting quiz with ${call len(data.QUESTIONS)} questions.`
+
+let score 0
+
+for q in data.QUESTIONS
+    show ""
+    show `Question: ${q.q}`
+    show `Options: ${call string.join(q.options, ", ")}`
+    
+    // Simulate an answer
+    set simulated_choice q.a
+    show `Your answer: ${simulated_choice}`
+    
+    if call engine.check_answer(q, simulated_choice)
+        show "Correct!"
+        set score + score 1
+    else
+        show `Wrong! The correct answer was: ${q.a}`
+    end
+end
+
+show ""
+show "--- Quiz Results ---"
+show `Score: ${score} / ${call len(data.QUESTIONS)}`
+set percent call engine.get_score_percentage(score, call len(data.QUESTIONS))
+show `Grade: ${percent}%`
+
+if = percent 100
+    show "Perfect Score!"
+elif >= percent 70
+    show "Well done!"
+else
+    show "Keep practicing!"
+end

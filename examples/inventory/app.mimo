@@ -1,0 +1,16 @@
+import "./catalog.mimo" as catalog
+import "./pricing.mimo" as pricing
+
+show "--- Mimo Inventory Report ---"
+
+for p in catalog.PRODUCTS
+    set status if > p.stock 0 "In Stock" else "Out of Stock" end
+    show `Product: ${p.name} | Price: $${p.price} | ${status}`
+    
+    if > p.stock 0
+        set vip_price call pricing.get_final_price(p, "VIP")
+        show `  -> VIP Special Price: $${vip_price}`
+    end
+end
+
+show "--- End of Report ---"

@@ -1,120 +1,88 @@
+<p align="center">
+  <img src="playground/src/lib/assets/mascot.png" alt="Mimo mascot" width="120">
+</p>
 
-[![GitHub release](https://img.shields.io/github/release/bethropolis/mimo?include_prereleases=&sort=semver&color=blue)](https://github.com/bethropolis/mimo/releases/)
-[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
-[![Deploy to GitHub Pages](https://github.com/bethropolis/mimo/actions/workflows/deploy.yml/badge.svg)](https://github.com/bethropolis/mimo/actions/workflows/deploy.yml)
+<p align="center">
+  <a href="https://www.npmjs.com/package/mimo-lang">
+    <img src="https://img.shields.io/npm/v/mimo-lang?color=%23a855f7&label=npm&logo=npm" alt="npm version">
+  </a>
+  <a href="https://github.com/bethropolis/mimo/releases">
+    <img src="https://img.shields.io/github/v/release/bethropolis/mimo?color=%236366f1&label=github&logo=github" alt="GitHub release">
+  </a>
+  <a href="https://github.com/bethropolis/mimo/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/bethropolis/mimo?color=%2310b981" alt="License">
+  </a>
+  <a href="https://bethropolis.github.io/mimo/">
+    <img src="https://img.shields.io/badge/docs-online-%23f59e0b?logo=book" alt="Documentation">
+  </a>
+</p>
 
-a simple programming language written in js.
+<p align="center">
+  <strong>A minimal prefix-notation programming language</strong>
+</p>
 
-### Running Programs
+---
+
+## Installation
 
 ```bash
-# Execute a Mimo file
+bun install -g mimo-lang
+```
+
+## Usage
+
+### Run Programs
+
+```bash
 mimo path/to/program.mimo
-
-# Evaluate a string directly
 mimo -e "+ 1 2"
-
-# Read from STDIN
 echo "+ 1 2" | mimo
 ```
 
-### Interactive REPL
+### REPL
 
 ```bash
-# Start the REPL
 mimo repl
 ```
 
-## Instalation
-
-```sh
-# install globally
-npm install -g mimo-lang
-
-# install project scope
-npm install mimo-lang
-
-```
-
-### Global cli commands
-
-the following are available commands and flags for the cli tool.
+### CLI Commands
 
 ```bash
-$ mimo <command> [options]
-
-# run a file
-mimo path/to/program.mimo
-
-# repl
-mimo repl
-
-# format .mimo files in a path
-mimo fmt test/source --write
-
-# check formatting
-mimo fmt test/source --check
-
-# lint .mimo files
-mimo lint test/source
-
-# fail CI on lint warnings
-mimo lint test/source --fail-on-warning
-
-# run test files
-mimo test test/source
+mimo run <file>           # Run a file
+mimo repl                 # Start REPL
+mimo fmt <path> --write   # Format files
+mimo lint <path>          # Lint files
+mimo test <path>          # Run tests
 ```
 
-example `mimo exampleFile.mimo`
+## Syntax
 
-### Library usage
-
-example:
-
-```js
-import Mimo from "../index.js";
-
-let mimo = new Mimo();
-
-let code = /* your code here*/
-
-mimo.run(code);
-```
-
-## Language syntax:
-
-```
-function add(a,b)
+```mimo
+function add(a, b)
   return + a b
 end
 
-set x 5
-set y 2
-
-call add(x,y) -> result
+call add(4, 8) -> result
 show result
 ```
 
-more example in the `test/source/` directory.
+More examples in [`test/source/`](./test/source).
 
-
-## Developer workflows
+## Development
 
 ```bash
-# strict local checks
+bun install
 bun run check
-
-# individual tooling commands
-bun run lint:strict
-bun run format:check
-bun run test
 ```
 
-## About
-this is just a simple language i created to learn more about how programing languages work.
-contributions are welcome.
+## Links
+
+- [Documentation](https://bethropolis.github.io/mimo/)
+- [Playground](https://bethropolis.github.io/mimo/playground)
+- [GitHub](https://github.com/bethropolis/mimo)
 
 ## License
-Released under [MIT](./LICENSE)
 
-happy coding 💜
+[MIT](./LICENSE)
+
+<p align="center">happy coding 💜</p>

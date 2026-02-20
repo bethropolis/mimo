@@ -1,0 +1,9 @@
+import "array" as array
+
+export function check_answer(question, user_answer)
+    return = question.a user_answer
+end
+
+export function get_score_percentage(correct, total)
+    return * (/ correct total) 100
+end
