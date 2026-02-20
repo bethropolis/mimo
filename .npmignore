@@ -1,0 +1,41 @@
+# Development
+.github/
+.vscode/
+.idea/
+
+# Documentation
+docs/
+*.md
+!README.md
+!LICENSE
+
+# Playground and extensions
+playground/
+extensions/
+
+# Tests
+test/
+*.test.js
+*.spec.js
+
+# Build artifacts
+*.bundle.js
+*.min.js
+
+# Config files
+.eslintrc*
+.prettierrc*
+jsconfig.json
+tsconfig.json
+vite.config.*
+tailwind.config.*
+postcss.config.*
+svelte.config.*
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
