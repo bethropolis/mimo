@@ -217,12 +217,10 @@ self.onmessage = async (event) => {
 			};
 
 			const mimo = new Mimo(adapter);
-			const result = mimo.run(source, filePath);
+			mimo.run(source, filePath);
 
 			/** @type {string[]} */
-			const output = [...logs];
-			if (result !== undefined && result !== null) output.push(`Result: ${String(result)}`);
-			if (output.length === 0) output.push('Program finished with no output.');
+			const output = logs.length > 0 ? logs : ['Program finished with no output.'];
 
 			self.postMessage({
 				type: 'run:ok',

@@ -1,9 +1,12 @@
 {
   "name": "mimo-lang",
-  "version": "1.1.1",
-  "description": "A programming language made in javascript mostly for learning purposes.",
+  "version": "2.0.0",
+  "description": "A minimal prefix-notation programming language",
   "keywords": [
-    "programing language"
+    "programming-language",
+    "prefix-notation",
+    "language",
+    "interpreter"
   ],
   "author": "bethropolis",
   "license": "MIT",

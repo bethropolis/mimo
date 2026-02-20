@@ -1,0 +1,20 @@
+import "math" as math
+
+export function calculate_discount(product, user_type)
+    match [product.category, user_type]
+        case ["electronics", "VIP"]:
+            return 0.20  // 20% off
+        case ["electronics", "standard"]:
+            return 0.05  // 5% off electronics for everyone
+        case ["clothing", "VIP"]:
+            return 0.15  // 15% off clothing for VIP
+        default:
+            return 0.0
+    end
+end
+
+export function get_final_price(product, user_type)
+    set discount call calculate_discount(product, user_type)
+    set reduction * product.price discount
+    return - product.price reduction
+end

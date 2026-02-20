@@ -22,6 +22,7 @@
 	onMount(() => {
 		store.initialize();
 
+		/** @param {KeyboardEvent} e */
 		const handleKeydown = (e) => {
 			if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
 				e.preventDefault();

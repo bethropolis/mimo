@@ -1,0 +1,17 @@
+export const QUESTIONS [
+    {
+        q: "What is the result of '+ 2 3' in Mimo?",
+        a: "5",
+        options: ["1", "5", "6", "23"]
+    },
+    {
+        q: "Which keyword is used for block-scoped variables?",
+        a: "let",
+        options: ["set", "let", "const", "var"]
+    },
+    {
+        q: "Is Mimo dynamically typed?",
+        a: "yes",
+        options: ["yes", "no"]
+    }
+]

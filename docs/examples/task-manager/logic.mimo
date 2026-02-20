@@ -1,0 +1,32 @@
+import "array" as array
+
+export function add_task(tasks, title)
+    set new_task {
+        id: + call len(tasks) 1,
+        title: title,
+        completed: false
+    }
+    return [...tasks, new_task]
+end
+
+export function toggle_task(tasks, id)
+    return call array.map(tasks, function(t)
+        if = t.id id
+            set new_completed not t.completed
+            return {
+                id: t.id,
+                title: t.title,
+                completed: new_completed
+            }
+        else
+            return t
+        end
+    end)
+end
+
+export function get_pending(tasks)
+    return call array.filter(tasks, function(t)
+        set is_done t.completed
+        return not is_done
+    end)
+end
