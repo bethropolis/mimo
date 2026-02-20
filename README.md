@@ -75,6 +75,13 @@ bun install
 bun run check
 ```
 
+## Playground
+
+<p>
+  <img src="docs/assets/playground.jpg" alt="Mimo playground" width="600">
+</p>
+
+The playground is a web application that allows you to run Mimo code in your browser.
 
 ## About
 this is just a simple language i created to learn more about how programing languages work.
