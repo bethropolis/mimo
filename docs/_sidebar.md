@@ -19,6 +19,6 @@
   * [Array Operations](syntax/array-operations.md)
   * [Style Guide](syntax/style-guide.md)
 * Examples
-  * [Inventory](examples/inventory/app.mimo)
-  * [Quiz](examples/quiz/main.mimo)
-  * [Task Manager](examples/task-manager/main.mimo)
+  * [Inventory](examples/inventory/README.md)
+  * [Quiz](examples/quiz/README.md)
+  * [Task Manager](examples/task-manager/README.md)
