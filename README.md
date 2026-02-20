@@ -75,6 +75,11 @@ bun install
 bun run check
 ```
 
+
+## About
+this is just a simple language i created to learn more about how programing languages work.
+contributions are welcome.
+
 ## Links
 
 - [Documentation](https://bethropolis.github.io/mimo/)
@@ -83,6 +88,6 @@ bun run check
 
 ## License
 
-[MIT](./LICENSE)
+Released under [MIT](./LICENSE)
 
 <p align="center">happy coding 💜</p>

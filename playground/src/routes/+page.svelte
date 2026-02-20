@@ -16,11 +16,6 @@
 <svelte:head>
 	<title>Mimo | Prefix Language</title>
 	<meta name="description" content="A minimal prefix-notation programming language" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta name="theme-color" content="#03091e" />
-	<meta name="color-scheme" content="light dark" />
-	<link rel="icon" href={favicon} />
-	
 </svelte:head>
 
 <div class={prefersDark ? 'dark' : ''}>

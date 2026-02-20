@@ -16,7 +16,11 @@
 	});
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head>
+	<meta name="theme-color" content="#03091e" />
+	<meta name="color-scheme" content="light dark" />
+	<link rel="icon" href={favicon} />
+</svelte:head>
 <div class="contents">
 	{@render children()}
 </div>
