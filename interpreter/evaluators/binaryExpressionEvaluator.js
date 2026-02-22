@@ -5,9 +5,9 @@ export function evaluateBinaryExpression(interpreter, node) {
     const right = interpreter.visitNode(node.right);
 
     // Type checking for arithmetic operations
-    const isNumericOp = ['+', '-', '*', '/', '%', '<', '>', '<=', '>='].includes(node.operator);
+    const isNumericOp = ['+', '-', '*', '/', '%', '<', '>', '<=', '>=', '??'].includes(node.operator);
 
-    if (isNumericOp && (typeof left !== 'number' || typeof right !== 'number')) {
+    if (isNumericOp && node.operator !== '??' && (typeof left !== 'number' || typeof right !== 'number')) {
         // Special case: string concatenation with '+'
         if (node.operator === '+' && (typeof left === 'string' || typeof right === 'string')) {
             return String(left) + String(right);
@@ -21,6 +21,8 @@ export function evaluateBinaryExpression(interpreter, node) {
     }
 
     switch (node.operator) {
+        case '??':
+            return left !== null ? left : right;
         case '+':
             return left + right;
         case '-':

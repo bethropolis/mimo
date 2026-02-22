@@ -33,7 +33,7 @@ export const QUESTIONS [
 ## engine.mimo
 
 ```mimo
-import "array" as array
+import array from "array"
 
 export function check_answer(question, user_answer)
     return = question.a user_answer
@@ -47,8 +47,8 @@ end
 ## main.mimo
 
 ```mimo
-import "./data.mimo" as data
-import "./engine.mimo" as engine
+import data from "./data.mimo"
+import engine from "./engine.mimo"
 
 show "--- Mimo Programming Quiz ---"
 show `Starting quiz with ${call len(data.QUESTIONS)} questions.`

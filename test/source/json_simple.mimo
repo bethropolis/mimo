@@ -1,7 +1,7 @@
 show "=== Simple JSON Test ==="
 
 show "Testing json module import..."
-import "json" as json
+import json from "json"
 
 show "Module imported successfully"
 

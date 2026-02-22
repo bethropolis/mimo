@@ -1,5 +1,5 @@
 // Simple import test
 show "Testing import"
-import "simple_module" as mod
+import mod from "simple_module"
 show mod.MESSAGE
 show "Import test complete"

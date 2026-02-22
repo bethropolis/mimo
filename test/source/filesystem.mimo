@@ -1,4 +1,4 @@
-import "fs" as fs
+import fs from "fs"
 
 show "=== File System Operations Demo ==="
 

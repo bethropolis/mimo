@@ -1,4 +1,4 @@
-import "json" as json
+import json from "json"
 
 show "=== JSON Module Demo ==="
 

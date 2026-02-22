@@ -9,9 +9,9 @@ let parsePrimaryExpression;
 // This new Set contains all keywords that can ONLY start a new statement.
 // If the parser sees one of these after an operand, it knows the expression is over.
 const STATEMENT_START_KEYWORDS = new Set([
-    'set', 'let', 'const', 'global', 'if', 'while', 'for', 'loop',
-    'function', 'call', 'show', 'return', 'try', 'throw', 'match',
-    'import', 'export', 'break', 'continue'
+  'set', 'let', 'const', 'global', 'if', 'while', 'for', 'loop',
+  'function', 'call', 'show', 'return', 'try', 'throw', 'match',
+  'import', 'export', 'break', 'continue'
 ]);
 
 export function setParseExpression(parseExpressionFn) {
@@ -25,8 +25,8 @@ export function setParsePrimaryExpression(parsePrimaryExpressionFn) {
 export function parseBinaryOrUnary(parser) {
   const token = parser.peek();
 
-  const isOperator = (token?.type === TokenType.Operator && !['.', '?.'].includes(token.value)) || 
-                    (token?.type === TokenType.Keyword && ['not', 'and', 'or'].includes(token.value));
+  const isOperator = (token?.type === TokenType.Operator && !['.', '?.'].includes(token.value)) ||
+    (token?.type === TokenType.Keyword && ['not', 'and', 'or'].includes(token.value));
 
   if (!isOperator) {
     return parsePrimaryExpression(parser);
@@ -37,10 +37,10 @@ export function parseBinaryOrUnary(parser) {
 
   // The 'not' operator is always unary
   if (operator === 'not') {
-      const argument = parseExpression(parser);
-      return ASTNode.UnaryExpression(operator, argument, operatorToken);
+    const argument = parseExpression(parser);
+    return ASTNode.UnaryExpression(operator, argument, operatorToken);
   }
-  
+
   const left = parseExpression(parser);
 
   // ==========================================================
@@ -52,22 +52,23 @@ export function parseBinaryOrUnary(parser) {
   // or the next token is a structural terminator, or it's a keyword that
   // *must* start a new statement.
   const isEndOfExpression = parser.isAtEnd() ||
-        !nextToken ||
-        nextToken.type === TokenType.RParen ||
-        nextToken.type === TokenType.RBracket ||
-        nextToken.type === TokenType.RBrace ||
-        nextToken.type === TokenType.Comma ||
-        nextToken.type === TokenType.Colon ||
-        (nextToken.type === TokenType.Keyword && (
-            END_KEYWORDS.includes(nextToken.value) || // 'end', 'else', 'catch' etc.
-            STATEMENT_START_KEYWORDS.has(nextToken.value) // 'show', 'set', 'if', etc.
-        ));
+    !nextToken ||
+    nextToken.type === TokenType.RParen ||
+    nextToken.type === TokenType.RBracket ||
+    nextToken.type === TokenType.RBrace ||
+    nextToken.type === TokenType.Comma ||
+    nextToken.type === TokenType.Colon ||
+    (nextToken.type === TokenType.Operator && nextToken.value === "->") ||
+    (nextToken.type === TokenType.Keyword && (
+      END_KEYWORDS.includes(nextToken.value) || // 'end', 'else', 'catch' etc.
+      STATEMENT_START_KEYWORDS.has(nextToken.value) // 'show', 'set', 'if', etc.
+    ));
 
   if (isEndOfExpression) {
     // There is no second operand, so it must be a unary expression.
     // Mimo currently only supports '-' as a unary numeric operator.
     if (operator !== '-') {
-        parser.error(`Operator '${operator}' cannot be used as a unary operator.`, operatorToken, 'SYN039', `Did you mean to provide a second argument?`);
+      parser.error(`Operator '${operator}' cannot be used as a unary operator.`, operatorToken, 'SYN039', `Did you mean to provide a second argument?`);
     }
     return ASTNode.UnaryExpression(operator, left, operatorToken);
   } else {

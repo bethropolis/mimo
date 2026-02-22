@@ -1,4 +1,4 @@
-import "string" as string
+import string from "string"
 
 // String utility module for testing
 export const DEFAULT_SEPARATOR " "

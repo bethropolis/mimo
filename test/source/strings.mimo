@@ -1,7 +1,7 @@
 show "=== String Manipulation Functions Test ==="
 
 
-import "string" as string
+import string from "string"
 
 
 

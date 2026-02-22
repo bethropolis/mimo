@@ -29,6 +29,7 @@ export const SYMBOLS = {
   "&&": TokenType.Operator,
   "||": TokenType.Operator,
   "->": TokenType.Operator, // Arrow operator
+  "??": TokenType.Operator, // Null coalescing
 
   "...": TokenType.Spread, // Spread operator
   "..": TokenType.Range, // Range operator

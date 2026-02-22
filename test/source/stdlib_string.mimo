@@ -2,7 +2,7 @@
 
 show "=== Standard Library: String Module Demo ==="
 
-import "string" as str
+import str from "string"
 
 set test_string "  Hello, Mimo World!  "
 set search_term "Mimo"

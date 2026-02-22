@@ -1,4 +1,4 @@
-import "datetime" as dt
+import dt from "datetime"
 
 show "=== Datetime Module Demo ==="
 

@@ -1,5 +1,5 @@
-import "http" as http
-import "json" as json
+import http from "http"
+import json from "json"
 
 show "=== HTTP GET Test ==="
 

@@ -1,5 +1,5 @@
-import "regex" as r
-import "assert" as assert
+import r from "regex"
+import assert from "assert"
 
 show "=== Testing Regex Module ==="
 

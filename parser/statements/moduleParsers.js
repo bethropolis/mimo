@@ -5,16 +5,24 @@ import { parseFunctionDeclaration } from "./functionParsers.js";
 
 
 export function parseImportStatement(parser) {
-  const importToken = parser.expectKeyword("import", 'SYN073', 'Expected "import" keyword.');
-  const pathToken = parser.expect(TokenType.String, undefined, 'SYN074', 'Expected a string literal for the module path (e.g., "my_module").');
-  parser.expectKeyword("as", 'SYN075', 'Expected "as" keyword for module aliasing.');
-  const aliasToken = parser.expect(TokenType.Identifier, undefined, 'SYN076', 'Expected an identifier for the module alias.');
+    const importToken = parser.expectKeyword("import", 'SYN073', 'Expected "import" keyword.');
+    // now we expect: import <Identifier> from <String> [as <Identifier>]
+    const nameToken = parser.expect(TokenType.Identifier, undefined, 'SYN073a', 'Expected an identifier for the module to import.');
 
-  return ASTNode.ImportStatement(
-    pathToken.value,
-    aliasToken.value,
-    importToken
-  );
+    parser.expectKeyword("from", 'SYN074a', 'Expected "from" keyword after imported name.');
+
+    const pathToken = parser.expect(TokenType.String, undefined, 'SYN074', 'Expected a string literal for the module path (e.g., "my_module").');
+
+    let aliasToken = null;
+    if (parser.matchKeyword("as")) {
+        aliasToken = parser.expect(TokenType.Identifier, undefined, 'SYN076', 'Expected an identifier for the module alias.');
+    }
+
+    return ASTNode.ImportStatement(
+        pathToken.value,
+        aliasToken ? aliasToken.value : nameToken.value,
+        importToken
+    );
 }
 
 export function parseExportStatement(parser) {

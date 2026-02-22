@@ -1,0 +1,21 @@
+show "=== Test fn -> arrow syntax ==="
+
+// Test 1: Single parameter
+set double (fn x -> * 2 x)
+call double(5) -> r1
+show r1 // Expected: 10
+
+// Test 2: Multiple parameters
+set add (fn x y -> + x y)
+call add(6, 4) -> r2
+show r2 // Expected: 10
+
+// Test 3: No parameters
+set getHello (fn -> "Hello")
+call getHello() -> r3
+show r3 // Expected: "Hello"
+
+// Test 4: Backwards compatibility with comma
+set doubleOld (fn x, * 2 x)
+call doubleOld(7) -> r4
+show r4 // Expected: 14

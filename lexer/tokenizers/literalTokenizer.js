@@ -30,6 +30,11 @@ export function readIdentifier(lexer) {
   }
 
   // Check if the identifier is a keyword (using includes for arrays)
+  if (value === "fn") {
+    // Treat 'fn' identically to 'function' keyword for parser consistency
+    return lexer._createToken(TokenType.Keyword, "function", startLine, startColumn, startPosition, length);
+  }
+
   if (KEYWORDS.includes(value)) { // <--- FIXED: Use .includes() for array check
     return lexer._createToken(TokenType.Keyword, value, startLine, startColumn, startPosition, length);
   }
@@ -60,18 +65,18 @@ export function readNumber(lexer) {
         value += char; // Add 'e' or 'E'
         lexer.advance(); // Consume 'e' or 'E'
         if (nextChar === '+' || nextChar === '-') {
-            value += nextChar; // Add sign
-            lexer.advance(); // Consume sign
+          value += nextChar; // Add sign
+          lexer.advance(); // Consume sign
         }
         // Now read the exponent digits
-        while(!lexer.isAtEnd() && isDigit(lexer.peek())){
-            value += lexer.peek();
-            lexer.advance();
+        while (!lexer.isAtEnd() && isDigit(lexer.peek())) {
+          value += lexer.peek();
+          lexer.advance();
         }
         hasExponent = true;
         // Since we manually advanced for exponent parts, we break here
         // The main loop's advance() would skip characters otherwise.
-        break; 
+        break;
       } else {
         // Not a valid exponent (e.g., "123e" followed by non-digit/non-sign)
         break;

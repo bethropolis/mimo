@@ -49,9 +49,9 @@ export function parseAtomicExpression(parser) {
       return expr;
     }
     case TokenType.Keyword:
-      if (token.value === "function") {
-        parser.consume(); // CONSUME 'function'
-        return parseAnonymousFunction(parser);
+      if (token.value === "function" || token.value === "fn") {
+        parser.consume(); // CONSUME 'function' or 'fn'
+        return parseAnonymousFunction(parser, token.value === "fn");
       }
       if (token.value === "call") {
         parser.consume(); // CONSUME 'call' keyword
@@ -127,12 +127,12 @@ export function parseTemplateLiteral(parser) {
 
   while (!parser.isAtEnd() && parser.peek()?.type !== TokenType.Backtick) {
     const token = parser.peek();
-    
+
     if (token.type === TokenType.StringFragment) {
       // It's a plain string part, like "Hello, "
       parser.consume();
       if (token.value.length > 0) {
-          parts.push(ASTNode.Literal(token.value, token));
+        parts.push(ASTNode.Literal(token.value, token));
       }
     } else if (token.type === TokenType.InterpolationStart) {
       // It's an expression part, like ${name}
@@ -141,7 +141,7 @@ export function parseTemplateLiteral(parser) {
       parts.push(expr);
       parser.expect(TokenType.InterpolationEnd, '}', 'SYN105', 'Expected closing brace } after expression in template literal.');
     } else {
-        parser.error(`Unexpected token '${token.value}' inside a template literal.`, token, 'SYN106');
+      parser.error(`Unexpected token '${token.value}' inside a template literal.`, token, 'SYN106');
     }
   }
 

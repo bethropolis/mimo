@@ -1,6 +1,6 @@
 show "=== Standard Library: Math Module Demo ==="
 
-import "math" as m
+import m from "math"
 
 show "--- Constants ---"
 show + "PI: " m.PI

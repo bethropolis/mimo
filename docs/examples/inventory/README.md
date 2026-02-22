@@ -31,7 +31,7 @@ end
 ## pricing.mimo
 
 ```mimo
-import "math" as math
+import math from "math"
 
 export function calculate_discount(product, user_type)
     match [product.category, user_type]
@@ -56,8 +56,8 @@ end
 ## app.mimo
 
 ```mimo
-import "./catalog.mimo" as catalog
-import "./pricing.mimo" as pricing
+import catalog from "./catalog.mimo"
+import pricing from "./pricing.mimo"
 
 show "--- Mimo Inventory Report ---"
 

@@ -3,8 +3,8 @@
 show "=== Comprehensive Module System Test ==="
 
 // Import modules
-import "math_utils" as math
-import "string_utils" as str
+import math from "math_utils"
+import str from "string_utils"
 
 show "\n1. Testing module constants access:"
 show math.PI

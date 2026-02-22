@@ -32,12 +32,12 @@ export function parseFunctionDeclaration(parser, isExported = false, exportToken
         const spreadToken = parser.peek(-1);
         const paramNameToken = parser.expect(TokenType.Identifier, undefined, 'SYN056', 'Expected an identifier for rest parameter.');
 
-        restParam = ASTNode.Identifier(paramNameToken.value, spreadToken); 
+        restParam = ASTNode.Identifier(paramNameToken.value, spreadToken);
         hasEncounteredRest = true;
         if (parser.peek()?.type === TokenType.Comma) {
-            parser.error("Rest parameter must be the last parameter.", parser.peek(-1), 'SYN063');
+          parser.error("Rest parameter must be the last parameter.", parser.peek(-1), 'SYN063');
         }
-        break; 
+        break;
       } else {
         const paramNode = parser.parseIdentifier('SYN021', 'Expected a parameter name (identifier).');
         params.push(paramNode); // Push the entire node
@@ -71,10 +71,12 @@ export function parseFunctionDeclaration(parser, isExported = false, exportToken
 
 // In: parser/statements/functionParsers.js
 
-export function parseAnonymousFunction(parser) {
-  const funcToken = parser.peek(-1); // The `function` keyword was just consumed.
+export function parseAnonymousFunction(parser, isFn = false) {
+  const funcToken = parser.peek(-1); // The `function` or `fn` keyword was just consumed.
 
-  parser.expect(TokenType.LParen, undefined, 'SYN020', 'Expected an opening parenthesis for function parameters.');
+  if (!isFn) {
+    parser.expect(TokenType.LParen, undefined, 'SYN020', 'Expected an opening parenthesis for function parameters.');
+  }
 
   const params = [];
   const defaults = {};
@@ -108,15 +110,34 @@ export function parseAnonymousFunction(parser) {
           parser.error("Parameter without default value cannot follow parameter with default value.", paramNode, 'SYN_DEFAULT_ORDER');
         }
       }
-    } while (parser.match(TokenType.Comma));
+
+      // Support `,` or `->` between params
+      if (parser.match(TokenType.Comma) || parser.match(TokenType.Operator, "->")) {
+        // If it was -> we are done with parameters and should go to body.
+        const prevToken = parser.peek(-1);
+        if (prevToken.value === "->") {
+          break;
+        }
+      } else {
+        // If there's neither a comma nor an arrow, it's either the end of params or an error.
+        // We handle that check below or let the loop catch it.
+      }
+    } while (parser.peek()?.type !== TokenType.RParen && parser.peek()?.value !== "->");
+
+    // In case there were NO params but we still use the -> like `(fn -> body)`
+    if (parser.peek()?.value === "->") {
+      parser.consume(); // Consume the arrow
+    }
   }
 
-  parser.expect(TokenType.RParen, undefined, 'SYN026', 'Expected a closing parenthesis for function parameters.');
+  if (!isFn) {
+    parser.expect(TokenType.RParen, undefined, 'SYN026', 'Expected a closing parenthesis for function parameters.');
+  }
   const body = parseBlock(parser);
   const endToken = parser.expect(TokenType.Keyword, "end", 'SYN027', 'Expected "end" keyword to close function declaration.');
 
   return ASTNode.AnonymousFunction(
-    params, 
+    params,
     defaults,
     restParam,
     body,

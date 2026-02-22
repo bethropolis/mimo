@@ -1,6 +1,6 @@
 show "=== Standard Library: Array Module Demo (Initial) ==="
 
-import "array" as arr
+import arr from "array"
 
 set numbers [1, 2, 3, 4, 5]
 set mixed_types [1, "two", true, null, {val: 5}]

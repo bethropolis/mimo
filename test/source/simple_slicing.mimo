@@ -1,6 +1,6 @@
 show "=== Simple Array Slicing Test ==="
 
-import "array" as array
+import array from "array"
 
 
 show "1. Basic array creation:"

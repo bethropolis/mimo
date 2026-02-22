@@ -1,0 +1,33 @@
+show "=== Test ?? null coalescing syntax ==="
+
+set a null
+
+set result1 ?? a "fallback"
+
+show result1
+
+set b "actual"
+
+set result2 ?? b "fallback"
+
+show result2
+
+set nested1 null
+
+set nested2 null
+
+set result3 ?? nested1 ?? nested2 "final"
+
+show result3
+
+set num1 null
+
+set result4 ?? num1 42
+
+show result4
+
+set bool1 null
+
+set result5 ?? bool1 false
+
+show result5

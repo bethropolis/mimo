@@ -10,7 +10,7 @@ A simple task management application demonstrating array operations and higher-o
 ## logic.mimo
 
 ```mimo
-import "array" as array
+import array from "array"
 
 export function add_task(tasks, title)
     set new_task {
@@ -47,7 +47,7 @@ end
 ## main.mimo
 
 ```mimo
-import "./logic.mimo" as logic
+import logic from "./logic.mimo"
 
 show "--- Mimo Task Manager ---"
 

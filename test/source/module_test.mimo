@@ -3,7 +3,7 @@
 show "=== Module System Test ==="
 
 // Import module
-import "math_utils" as math
+import math from "math_utils"
 
 show "1. Testing basic constants:"
 show math.PI

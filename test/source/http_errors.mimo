@@ -1,4 +1,4 @@
-import "http" as http
+import http from "http"
 
 show "=== HTTP Error Handling Test ==="
 

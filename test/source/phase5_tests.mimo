@@ -1,6 +1,6 @@
-import "math" as math
-import "string" as string
-import "datetime" as dt
+import math from "math"
+import string from "string"
+import dt from "datetime"
 
 show "=== Phase 5 Standard Library Expansion Tests ==="
 
