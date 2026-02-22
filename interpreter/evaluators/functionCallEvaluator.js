@@ -62,3 +62,15 @@ export function evaluateCallExpression(interpreter, node) {
 
     return result;
 }
+
+export function evaluateSafeCallExpression(interpreter, node) {
+    const calleeValue = interpreter.visitNode(node.callee);
+
+    if (calleeValue === null || calleeValue === undefined) {
+        return null;
+    }
+
+    // Since we already evaluated the callee, we could refine this to avoid double evaluation.
+    // However, to keep it simple and consistent with other safe navigation implementations:
+    return evaluateCallExpression(interpreter, { ...node, type: 'CallExpression' });
+}

@@ -28,6 +28,7 @@ export const SYMBOLS = {
   "<=": TokenType.Operator,
   "&&": TokenType.Operator,
   "||": TokenType.Operator,
+  "|>": TokenType.Operator, // Pipe operator
   "->": TokenType.Operator, // Arrow operator
   "??": TokenType.Operator, // Null coalescing
 

@@ -122,8 +122,9 @@ export class Interpreter {
     const expressionTypes = [
       "BinaryExpression", "UnaryExpression", "Identifier", "Literal",
       "ArrayLiteral", "ArrayAccess", "ObjectLiteral", "PropertyAccess",
-      "SafePropertyAccess", "ModuleAccess", "AnonymousFunction", "TemplateLiteral",
-      "CallExpression", "InlineIfExpression"
+      "SafePropertyAccess", "SafeArrayAccess", "SafeCallExpression",
+      "ModuleAccess", "AnonymousFunction", "TemplateLiteral",
+      "CallExpression", "InlineIfExpression", "PipeExpression"
     ];
     return expressionTypes.includes(node.type);
   }

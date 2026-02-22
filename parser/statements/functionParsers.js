@@ -111,16 +111,20 @@ export function parseAnonymousFunction(parser, isFn = false) {
         }
       }
 
-      // Support `,` or `->` between params
-      if (parser.match(TokenType.Comma) || parser.match(TokenType.Operator, "->")) {
-        // If it was -> we are done with parameters and should go to body.
-        const prevToken = parser.peek(-1);
-        if (prevToken.value === "->") {
-          break;
+      // Separator handling: '->' is always allowed. Comma is only for standard 'function' syntax.
+      if (parser.match(TokenType.Operator, "->")) {
+        // Arrow found — done with params, move to body
+        break;
+      } else if (parser.match(TokenType.Comma)) {
+        if (isFn) {
+          parser.error(
+            "Comma-separated parameters are not supported in 'fn' syntax. Use '->' to separate parameters from the body.",
+            parser.peek(-1),
+            'SYN135',
+            "Write: fn x y -> expression end or use 'function' keyword for multi-param functions."
+          );
         }
-      } else {
-        // If there's neither a comma nor an arrow, it's either the end of params or an error.
-        // We handle that check below or let the loop catch it.
+        // If !isFn, we just consumed the comma normally, which is correct for standard syntax.
       }
     } while (parser.peek()?.type !== TokenType.RParen && parser.peek()?.value !== "->");
 

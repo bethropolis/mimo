@@ -74,6 +74,17 @@ export const ASTNode = {
     length: token.length,
     file: token.file,
   }),
+  PipeExpression: (left, callee, args, token) => ({
+    type: "PipeExpression",
+    left,   // The value being piped
+    callee, // The function to pipe into (Identifier, ModuleAccess, or InlineIfExpression)
+    args,   // Any extra arguments after the piped value
+    line: token.line,
+    column: token.column,
+    start: token.start,
+    length: token.length,
+    file: token.file,
+  }),
   WhileStatement: (condition, body, token) => ({
     type: "WhileStatement",
     condition,
@@ -171,6 +182,16 @@ export const ASTNode = {
     length: token.length,
     file: token.file,
   }),
+  SafeCallExpression: (callee, args, token) => ({
+    type: "SafeCallExpression",
+    callee,
+    arguments: args,
+    line: token.line,
+    column: token.column,
+    start: token.start,
+    length: token.length,
+    file: token.file,
+  }),
   ShowStatement: (expression, token) => ({
     type: "ShowStatement",
     expression,
@@ -227,6 +248,16 @@ export const ASTNode = {
   }),
   ArrayAccess: (object, index, token) => ({
     type: "ArrayAccess",
+    object,
+    index,
+    line: token.line,
+    column: token.column,
+    start: token.start,
+    length: token.length,
+    file: token.file,
+  }),
+  SafeArrayAccess: (object, index, token) => ({
+    type: "SafeArrayAccess",
     object,
     index,
     line: token.line,

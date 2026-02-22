@@ -126,3 +126,13 @@ export function evaluateSafePropertyAccess(interpreter, node) {
 
   return evaluatePropertyAccess(interpreter, { ...node, type: 'PropertyAccess' });
 }
+
+export function evaluateSafeArrayAccess(interpreter, node) {
+  const object = interpreter.visitNode(node.object);
+
+  if (object === null || object === undefined) {
+    return null;
+  }
+
+  return evaluateArrayAccess(interpreter, { ...node, type: 'ArrayAccess' });
+}

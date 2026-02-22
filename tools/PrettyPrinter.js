@@ -206,6 +206,31 @@ export class PrettyPrinter {
         this.visitNode(node.end);
     }
 
+    visitInlineIfExpression(node) {
+        this.write('if ');
+        this.visitNode(node.condition);
+        this.write(' then ');
+        this.visitNode(node.consequent);
+        this.write(' else ');
+        this.visitNode(node.alternate);
+    }
+
+    visitPipeExpression(node) {
+        this.visitNode(node.left);
+        this.write(' |> ');
+        if (node.callee.type === 'InlineIfExpression') {
+            this.visitNode(node.callee);
+        } else {
+            this.visitNode(node.callee);
+            this.write('(');
+            node.args.forEach((arg, i) => {
+                this.visitNode(arg);
+                if (i < node.args.length - 1) this.write(', ');
+            });
+            this.write(')');
+        }
+    }
+
     visitSpreadElement(node) {
         this.write('...');
         this.visitNode(node.argument);
@@ -276,7 +301,7 @@ export class PrettyPrinter {
     }
 
     visitImportStatement(node) {
-        this.writeLine(`import "${node.path}" as ${node.alias}`);
+        this.writeLine(`import ${node.alias} from "${node.path}"`);
     }
 
     visitMatchStatement(node) {
@@ -407,10 +432,27 @@ export class PrettyPrinter {
         this.write(`]`);
     }
 
+    visitSafeArrayAccess(node) {
+        this.visitNode(node.object);
+        this.write(`?.[`);
+        this.visitNode(node.index);
+        this.write(`]`);
+    }
+
     visitCallExpression(node) {
         this.write('call ');
         this.visitNode(node.callee);
         this.write('(');
+        node.arguments.forEach((arg, i) => {
+            this.visitNode(arg);
+            if (i < node.arguments.length - 1) this.write(', ');
+        });
+        this.write(')');
+    }
+
+    visitSafeCallExpression(node) {
+        this.visitNode(node.callee);
+        this.write('?.(');
         node.arguments.forEach((arg, i) => {
             this.visitNode(arg);
             if (i < node.arguments.length - 1) this.write(', ');

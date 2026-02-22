@@ -25,7 +25,7 @@ export function setParsePrimaryExpression(parsePrimaryExpressionFn) {
 export function parseBinaryOrUnary(parser) {
   const token = parser.peek();
 
-  const isOperator = (token?.type === TokenType.Operator && !['.', '?.'].includes(token.value)) ||
+  const isOperator = (token?.type === TokenType.Operator && !['.', '?.', '|>'].includes(token.value)) ||
     (token?.type === TokenType.Keyword && ['not', 'and', 'or'].includes(token.value));
 
   if (!isOperator) {

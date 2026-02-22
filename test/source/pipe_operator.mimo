@@ -1,0 +1,83 @@
+show "=== Phase 4 — Pipe Operator Tests ==="
+
+function double(n)
+    return * n 2
+end
+
+function addTen(n)
+    return + n 10
+end
+
+let r1 5 |> double()
+
+show r1
+
+show "Expected: 10"
+
+let r2 3 |> addTen()
+
+show r2
+
+show "Expected: 13"
+
+function add(a, b)
+    return + a b
+end
+
+function greet(name, greeting)
+    return + greeting name
+end
+
+let r3 5 |> add(3)
+
+show r3
+
+show "Expected: 8"
+
+let r4 "World" |> greet("Hello ")
+
+show r4
+
+show "Expected: Hello World"
+
+let r5 5 |> double() |> addTen()
+
+show r5
+
+show "Expected: 20"
+
+let debug true
+
+function formatDebug(x)
+    return + "[DEBUG] " x
+end
+
+function formatRelease(x)
+    return x
+end
+
+let message "Hello"
+
+let r6 message |> if debug then formatDebug else formatRelease
+
+show r6
+
+show "Expected: [DEBUG] Hello"
+
+set debug false
+
+let r7 message |> if debug then formatDebug else formatRelease
+
+show r7
+
+show "Expected: Hello"
+
+import string from "string"
+
+let r8 "hello world" |> string.to_upper()
+
+show r8
+
+show "Expected: HELLO WORLD"
+
+show "=== Done ==="

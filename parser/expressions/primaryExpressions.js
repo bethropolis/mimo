@@ -20,6 +20,34 @@ export function parsePrimaryExpression(parser) {
 
     if (nextToken.type === TokenType.Operator && (nextToken.value === "." || nextToken.value === "?.")) {
       const operatorToken = parser.consume(); // Consume '.' or '?.'
+
+      // Support Safe Index Access: obj?.[index]
+      if (operatorToken.value === "?." && parser.match(TokenType.LBracket)) {
+        const indexExpr = parseExpression(parser);
+        const endBracket = parser.expect(TokenType.RBracket, undefined, 'SYN041', 'Expected closing square bracket for safe array/object access.');
+        primaryExpr = ASTNode.SafeArrayAccess(primaryExpr, indexExpr, operatorToken);
+        continue;
+      }
+
+      // Support Safe Call: func?.()
+      if (operatorToken.value === "?." && parser.match(TokenType.LParen)) {
+        const args = [];
+        if (parser.peek()?.type !== TokenType.RParen) {
+          do {
+            if (parser.peek()?.type === TokenType.Spread) {
+              const spreadToken = parser.consume();
+              const argument = parseExpression(parser);
+              args.push(ASTNode.SpreadElement(argument, spreadToken));
+            } else {
+              args.push(parseExpression(parser));
+            }
+          } while (parser.match(TokenType.Comma));
+        }
+        parser.expect(TokenType.RParen, undefined, 'SYN067', 'Expected a closing parenthesis for safe function call.');
+        primaryExpr = ASTNode.SafeCallExpression(primaryExpr, args, operatorToken);
+        continue;
+      }
+
       const property = parser.expect(TokenType.Identifier, undefined, 'SYN042', 'Expected property name after dot operator.');
 
       if (operatorToken.value === '?.') {
