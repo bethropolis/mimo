@@ -62,8 +62,21 @@ export function evaluateArrayAccess(interpreter, node) {
 export function evaluateObjectLiteral(interpreter, node) {
   const obj = {};
   for (const prop of node.properties) {
-    const value = interpreter.visitNode(prop.value);
-    obj[prop.key] = value;
+    if (prop && prop.type === "SpreadElement") {
+      const spreadValue = interpreter.visitNode(prop.argument);
+      if (typeof spreadValue !== 'object' || spreadValue === null || Array.isArray(spreadValue)) {
+        throw interpreter.errorHandler.createRuntimeError(
+          `Cannot spread non-object value of type '${typeof spreadValue}'.`,
+          prop.argument,
+          "TYPE001",
+          'Object spread operator "..." can only be used with objects.'
+        );
+      }
+      Object.assign(obj, spreadValue);
+    } else {
+      const value = interpreter.visitNode(prop.value);
+      obj[prop.key] = value;
+    }
   }
   return obj;
 }
@@ -83,8 +96,7 @@ export function evaluatePropertyAccess(interpreter, node) {
   // Allow property access on strings (e.g., `my_string.length`)
   if (typeof object !== "object" && typeof object !== "string") {
     throw interpreter.errorHandler.createRuntimeError(
-      `Cannot access property '${
-        node.property
+      `Cannot access property '${node.property
       }' of non-object value of type '${typeof object}'.`,
       node.object,
       "TYPE002",

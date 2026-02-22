@@ -1,0 +1,15 @@
+show "=== Inline If Tests ==="
+
+let x 10
+let msg if > x 5 then "Greater" else "Smaller"
+show msg
+
+// Test with operators
+let y + 5 (if == x 10 then 100 else 0)
+show y
+
+// Nested
+let z if < x 0 then "neg" else if == x 0 then "zero" else "pos"
+show z
+
+show "=== Done ==="

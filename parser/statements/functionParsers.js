@@ -163,7 +163,13 @@ export function parseCallExpressionParts(parser, callToken) {
 
   if (parser.peek()?.type !== TokenType.RParen) {
     do {
-      args.push(parseExpression(parser));
+      if (parser.peek()?.type === TokenType.Spread) {
+        const spreadToken = parser.consume();
+        const argument = parseExpression(parser);
+        args.push(ASTNode.SpreadElement(argument, spreadToken));
+      } else {
+        args.push(parseExpression(parser));
+      }
     } while (parser.match(TokenType.Comma));
   }
 

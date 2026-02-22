@@ -1,0 +1,24 @@
+show "=== Let/Set Destructuring Tests ==="
+
+let arr [10, 20, 30]
+let [a, b, c] arr
+
+show a
+show b
+show c
+
+let obj {x: 100, y: 200}
+let {x, y} obj
+
+show x
+show y
+
+const [first, second] [5, 10]
+show first
+show second
+
+set [a, b] [99, 88]
+show a
+show b
+
+show "=== Done ==="

@@ -41,7 +41,7 @@ export class ExpressionEvaluator {
                 return evaluateObjectLiteral(this.interpreter, node);
             case "PropertyAccess":
                 return evaluatePropertyAccess(this.interpreter, node);
-            case "SafePropertyAccess": 
+            case "SafePropertyAccess":
                 return evaluateSafePropertyAccess(this.interpreter, node);
             case "ArrayAccess":
                 return evaluateArrayAccess(this.interpreter, node);
@@ -53,6 +53,10 @@ export class ExpressionEvaluator {
                 return evaluateTemplateLiteral(this.interpreter, node);
             case "CallExpression":
                 return evaluateCallExpression(this.interpreter, node);
+            case "InlineIfExpression":
+                return this.isTruthy(this.interpreter.visitNode(node.condition))
+                    ? this.interpreter.visitNode(node.consequent)
+                    : this.interpreter.visitNode(node.alternate);
             default:
                 throw new Error(`Unknown expression type: ${node.type}`);
         }

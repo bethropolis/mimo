@@ -53,6 +53,17 @@ export const ASTNode = {
     length: token.length,
     file: token.file,
   }),
+  InlineIfExpression: (condition, consequent, alternate, token) => ({
+    type: "InlineIfExpression",
+    condition,
+    consequent, // Single expression here, not a block
+    alternate,  // Single expression here, not a block
+    line: token.line,
+    column: token.column,
+    start: token.start,
+    length: token.length,
+    file: token.file,
+  }),
   WhileStatement: (condition, body, token) => ({
     type: "WhileStatement",
     condition,

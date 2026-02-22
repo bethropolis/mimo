@@ -43,7 +43,22 @@ export class FunctionExecutor extends BaseExecutor {
       );
     }
 
-    const args = node.arguments.map((arg) => this.interpreter.visitNode(arg));
+    const args = [];
+    for (const arg of node.arguments) {
+      if (arg.type === 'SpreadElement') {
+        const spreadValue = this.interpreter.visitNode(arg.argument);
+        if (!Array.isArray(spreadValue)) {
+          throw this.interpreter.errorHandler.createRuntimeError(
+            `Cannot spread non-array value in function call.`,
+            arg.argument,
+            'TYPE001'
+          );
+        }
+        args.push(...spreadValue);
+      } else {
+        args.push(this.interpreter.visitNode(arg));
+      }
+    }
     const result = func.call(this.interpreter, args, node); // Directly call, pass node for location
 
     if (node.destination) {

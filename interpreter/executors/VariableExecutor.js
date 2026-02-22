@@ -8,28 +8,48 @@ export class VariableExecutor extends BaseExecutor {
   executeVariableDeclaration(node) {
     const value = this.interpreter.visitNode(node.value);
 
-    switch (node.kind) {
-      case "global":
-        this.interpreter.globalEnv.define(node.identifier, value, 'global');
-        break;
+    const defineOrAssign = (varName, varValue) => {
+      switch (node.kind) {
+        case "global":
+          this.interpreter.globalEnv.define(varName, varValue, 'global');
+          break;
+        case "let":
+        case "const":
+          this.interpreter.currentEnv.define(varName, varValue, node.kind);
+          break;
+        default: // 'set'
+          const existingVarInfo = this.interpreter.currentEnv.getVariableInfo(varName);
+          if (existingVarInfo) {
+            existingVarInfo.env.assign(varName, varValue);
+          } else {
+            this.interpreter.currentEnv.define(varName, varValue, 'set');
+          }
+          break;
+      }
+    };
 
-      case "let":
-      case "const":
-        this.interpreter.currentEnv.define(node.identifier, value, node.kind);
-        break;
-
-      default: // This handles 'set'
-        const existingVarInfo = this.interpreter.currentEnv.getVariableInfo(node.identifier);
-        
-        if (existingVarInfo) {
-            // Variable exists, so assign to it in its own environment.
-            existingVarInfo.env.assign(node.identifier, value);
-        } else {
-            // Variable does not exist, so define it in the current scope.
-            this.interpreter.currentEnv.define(node.identifier, value, 'set');
+    if (typeof node.identifier === "object" && node.identifier !== null && node.identifier.type.endsWith("Pattern")) {
+      const pattern = node.identifier;
+      if (pattern.type === 'ArrayPattern') {
+        if (!Array.isArray(value)) {
+          throw this.interpreter.errorHandler.createRuntimeError(`Cannot destructure non-array value into an array pattern.`, node.value, 'TYPE002');
         }
-        return value;
+        pattern.elements.forEach((varNode, i) => {
+          defineOrAssign(varNode.name, value[i] ?? null);
+        });
+      } else if (pattern.type === 'ObjectPattern') {
+        if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+          throw this.interpreter.errorHandler.createRuntimeError(`Cannot destructure non-object value into an object pattern.`, node.value, 'TYPE002');
+        }
+        pattern.properties.forEach(propIdentifierNode => {
+          const propName = propIdentifierNode.name;
+          defineOrAssign(propName, value[propName] ?? null);
+        });
+      }
+      return value;
     }
+
+    defineOrAssign(node.identifier, value);
     return value;
   }
 
@@ -38,15 +58,15 @@ export class VariableExecutor extends BaseExecutor {
     const valueToAssign = this.interpreter.visitNode(node.value);
 
     if (targetObject === null || typeof targetObject !== 'object') {
-        throw this.interpreter.errorHandler.createRuntimeError(
-            `Cannot set property '${node.property}' on a non-object value (got ${typeof targetObject}).`,
-            node.object, "TYPE004", "Ensure the target is an object before setting its properties."
-        );
+      throw this.interpreter.errorHandler.createRuntimeError(
+        `Cannot set property '${node.property}' on a non-object value (got ${typeof targetObject}).`,
+        node.object, "TYPE004", "Ensure the target is an object before setting its properties."
+      );
     }
     targetObject[node.property] = valueToAssign;
     return valueToAssign;
   }
-  
+
   executeBracketAssignment(node) {
     const object = this.interpreter.visitNode(node.object);
     const index = this.interpreter.visitNode(node.index);
@@ -78,13 +98,13 @@ export class VariableExecutor extends BaseExecutor {
 
     // Helper function to assign a value to a variable using 'set' semantics
     const assignOrDefine = (varNode, varValue) => {
-        const varName = varNode.name;
-        const existingVarInfo = this.interpreter.currentEnv.getVariableInfo(varName);
-        if (existingVarInfo) {
-            existingVarInfo.env.assign(varName, varValue);
-        } else {
-            this.interpreter.currentEnv.define(varName, varValue, 'set');
-        }
+      const varName = varNode.name;
+      const existingVarInfo = this.interpreter.currentEnv.getVariableInfo(varName);
+      if (existingVarInfo) {
+        existingVarInfo.env.assign(varName, varValue);
+      } else {
+        this.interpreter.currentEnv.define(varName, varValue, 'set');
+      }
     };
 
     // --- Main Logic ---
@@ -106,8 +126,8 @@ export class VariableExecutor extends BaseExecutor {
         assignOrDefine(propIdentifierNode, value[propName] ?? null);
       });
     } else {
-        // This case should be unreachable if the parser is correct
-        throw this.interpreter.errorHandler.createRuntimeError(`Unsupported pattern type '${pattern.type}' for destructuring.`, pattern, 'INT003');
+      // This case should be unreachable if the parser is correct
+      throw this.interpreter.errorHandler.createRuntimeError(`Unsupported pattern type '${pattern.type}' for destructuring.`, pattern, 'INT003');
     }
 
     return value; // The destructuring statement itself returns the original value

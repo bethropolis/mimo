@@ -35,6 +35,7 @@ export const KEYWORDS = [
   "destructure",
   "from",
   "if",
+  "then",
   "while",
   "function",
   "call",

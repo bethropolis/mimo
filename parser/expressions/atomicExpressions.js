@@ -53,6 +53,15 @@ export function parseAtomicExpression(parser) {
         parser.consume(); // CONSUME 'function' or 'fn'
         return parseAnonymousFunction(parser, token.value === "fn");
       }
+      if (token.value === "if") {
+        const ifToken = parser.consume(); // CONSUME 'if'
+        const condition = parseExpression(parser);
+        parser.expectKeyword("then", "SYN120", "Expected 'then' after condition in inline if expression.");
+        const consequent = parseExpression(parser);
+        parser.expectKeyword("else", "SYN121", "Expected 'else' in inline if expression.");
+        const alternate = parseExpression(parser);
+        return ASTNode.InlineIfExpression(condition, consequent, alternate, ifToken);
+      }
       if (token.value === "call") {
         parser.consume(); // CONSUME 'call' keyword
         return parseCallExpressionParts(parser, token);
@@ -100,19 +109,25 @@ export function parseObjectLiteral(parser) {
   const properties = [];
 
   if (parser.peek()?.type !== TokenType.RBrace) {
-    let keyToken = parser.expect(TokenType.Identifier, undefined, 'SYN014', 'Expected a property name (identifier) in object literal.');
-    parser.expect(TokenType.Colon, undefined, 'SYN015', 'Expected a colon ":" after property name in object literal.');
-    const value = parseExpression(parser);
-    properties.push({ key: keyToken.value, value });
+    const parsePropertyOrSpread = () => {
+      if (parser.peek()?.type === TokenType.Spread) {
+        const spreadToken = parser.consume();
+        const argument = parseExpression(parser);
+        properties.push(ASTNode.SpreadElement(argument, spreadToken));
+      } else {
+        const keyToken = parser.expect(TokenType.Identifier, undefined, 'SYN016', 'Expected a property name (identifier) in object literal.');
+        parser.expect(TokenType.Colon, undefined, 'SYN017', 'Expected a colon ":" after property name in object literal.');
+        const value = parseExpression(parser);
+        properties.push({ key: keyToken.value, value });
+      }
+    };
+
+    parsePropertyOrSpread();
 
     while (parser.peek()?.type === TokenType.Comma) {
       parser.consume();
       if (parser.peek()?.type === TokenType.RBrace) break;
-
-      keyToken = parser.expect(TokenType.Identifier, undefined, 'SYN016', 'Expected another property name (identifier) after comma in object literal.');
-      parser.expect(TokenType.Colon, undefined, 'SYN017', 'Expected a colon ":" after property name in object literal.');
-      const value = parseExpression(parser);
-      properties.push({ key: keyToken.value, value });
+      parsePropertyOrSpread();
     }
   }
 

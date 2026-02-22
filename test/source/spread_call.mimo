@@ -1,0 +1,17 @@
+show "=== Function Call Spread Tests ==="
+
+function addThree(a, b, c)
+    return + + a b c
+end
+
+let nums [10, 20, 30]
+
+let result1 call addThree(...nums)
+
+show result1
+
+let result2 call addThree(5, ...[15, 25])
+
+show result2
+
+show "=== Done ==="

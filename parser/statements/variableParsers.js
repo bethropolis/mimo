@@ -32,27 +32,34 @@ export function parseVariableOrAssignment(parser, isExported = false, exportToke
     const kindToken = parser.expectKeyword(['set', 'let', 'const', 'global'], 'SYN092');
     const astNodeLocationToken = exportToken || kindToken;
 
+    const nextToken = parser.peek();
+    if (nextToken && (nextToken.type === TokenType.LBracket || nextToken.type === TokenType.LBrace)) {
+        const pattern = parseDestructuringPattern(parser);
+        const value = parseExpression(parser);
+        return ASTNode.VariableDeclaration(pattern, value, kindToken.value, isExported, astNodeLocationToken);
+    }
+
     // We need the raw token for its position, not just the AST node.
     const identifierToken = parser.expect(TokenType.Identifier, undefined, 'SYN097', "Expected an identifier for the variable name.");
 
     // -- WHITESPACE-SENSITIVE AMBIGUITY RESOLUTION --
-    const nextToken = parser.peek();
+    const followingToken = parser.peek();
     let isMemberAssignment = false;
 
-    if (nextToken) {
-        if (nextToken.type === TokenType.Operator && nextToken.value === '.') {
+    if (followingToken) {
+        if (followingToken.type === TokenType.Operator && followingToken.value === '.') {
             // `obj.` is unambiguously a member assignment.
             isMemberAssignment = true;
-        } else if (nextToken.type === TokenType.LBracket) {
+        } else if (followingToken.type === TokenType.LBracket) {
             // `arr[` vs `arr [`
             // Your brilliant idea: check if there's a space.
-            const hasNoSpace = (nextToken.start === identifierToken.start + identifierToken.length);
+            const hasNoSpace = (followingToken.start === identifierToken.start + identifierToken.length);
             if (hasNoSpace) {
                 isMemberAssignment = true;
             }
         }
     }
-    
+
     // --- DISPATCH TO THE CORRECT PARSING PATH ---
 
     if (isMemberAssignment) {
@@ -81,7 +88,7 @@ export function parseVariableOrAssignment(parser, isExported = false, exportToke
                 break; // No more accessors
             }
         }
-        
+
         const value = parseExpression(parser);
 
         if (lhs.type === 'PropertyAccess') {
@@ -101,48 +108,48 @@ export function parseVariableOrAssignment(parser, isExported = false, exportToke
 
 // NEW function to parse an object pattern like {a, b}
 function parseObjectPattern(parser) {
-  const startBrace = parser.expect(TokenType.LBrace, undefined, 'SYN115', 'Expected "{" to start object destructuring pattern.');
-  const properties = [];
+    const startBrace = parser.expect(TokenType.LBrace, undefined, 'SYN115', 'Expected "{" to start object destructuring pattern.');
+    const properties = [];
 
-  if (parser.peek()?.type !== TokenType.RBrace) {
-    do {
-      // Each property in the pattern must be an identifier.
-      properties.push(parser.parseIdentifier('SYN116', 'Expected an identifier for property in object destructuring.'));
-    } while (parser.match(TokenType.Comma));
-  }
+    if (parser.peek()?.type !== TokenType.RBrace) {
+        do {
+            // Each property in the pattern must be an identifier.
+            properties.push(parser.parseIdentifier('SYN116', 'Expected an identifier for property in object destructuring.'));
+        } while (parser.match(TokenType.Comma));
+    }
 
-  parser.expect(TokenType.RBrace, undefined, 'SYN117', 'Expected "}" to close object destructuring pattern.');
-  return ASTNode.ObjectPattern(properties, startBrace);
+    parser.expect(TokenType.RBrace, undefined, 'SYN117', 'Expected "}" to close object destructuring pattern.');
+    return ASTNode.ObjectPattern(properties, startBrace);
 }
 
 // (The destructuring parsers below remain unchanged and correct)
 function parseDestructuringPattern(parser) {
-  const token = parser.peek();
+    const token = parser.peek();
 
-  // Dispatch based on the opening token.
-  if (token.type === TokenType.LBracket) {
-    // Array Pattern: [a, b]
-    const startBracket = parser.consume();
-    const variables = [];
-    if (parser.peek()?.type !== TokenType.RBracket) {
-      do {
-        variables.push(parser.parseIdentifier("SYN110", "Expected an identifier in destructuring pattern."));
-      } while (parser.match(TokenType.Comma));
+    // Dispatch based on the opening token.
+    if (token.type === TokenType.LBracket) {
+        // Array Pattern: [a, b]
+        const startBracket = parser.consume();
+        const variables = [];
+        if (parser.peek()?.type !== TokenType.RBracket) {
+            do {
+                variables.push(parser.parseIdentifier("SYN110", "Expected an identifier in destructuring pattern."));
+            } while (parser.match(TokenType.Comma));
+        }
+        parser.expect(TokenType.RBracket, undefined, "SYN111", 'Expected a closing "]" for array destructuring pattern.');
+        return ASTNode.ArrayPattern(variables, startBracket);
+    } else if (token.type === TokenType.LBrace) {
+        // Object Pattern: {name, age}
+        return parseObjectPattern(parser); // Call our new helper
     }
-    parser.expect(TokenType.RBracket, undefined, "SYN111", 'Expected a closing "]" for array destructuring pattern.');
-    return ASTNode.ArrayPattern(variables, startBracket);
-  } else if (token.type === TokenType.LBrace) {
-    // Object Pattern: {name, age}
-    return parseObjectPattern(parser); // Call our new helper
-  }
-  
-  parser.error('Expected an array or object pattern (e.g., [a, b] or {a, b}) for destructuring.', token, 'SYN112');
+
+    parser.error('Expected an array or object pattern (e.g., [a, b] or {a, b}) for destructuring.', token, 'SYN112');
 }
 
 export function parseDestructuringStatement(parser) {
-  const destructureToken = parser.expectKeyword("destructure", "SYN113");
-  const pattern = parseDestructuringPattern(parser);
-  parser.expectKeyword("from", "SYN114", 'Expected "from" keyword after destructuring pattern.');
-  const expression = parseExpression(parser);
-  return ASTNode.DestructuringAssignment(pattern, expression, destructureToken);
+    const destructureToken = parser.expectKeyword("destructure", "SYN113");
+    const pattern = parseDestructuringPattern(parser);
+    parser.expectKeyword("from", "SYN114", 'Expected "from" keyword after destructuring pattern.');
+    const expression = parseExpression(parser);
+    return ASTNode.DestructuringAssignment(pattern, expression, destructureToken);
 }

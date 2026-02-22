@@ -1,0 +1,19 @@
+show "=== Object Spread Tests ==="
+
+let base { x: 1, y: 2 }
+
+let extended { ...base, z: 3, x: 100 }
+
+show extended.x
+
+show extended.y
+
+show extended.z
+
+let empty {}
+
+let merged { ...empty, a: "hello" }
+
+show merged.a
+
+show "=== Done ==="

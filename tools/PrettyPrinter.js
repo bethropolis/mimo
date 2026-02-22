@@ -40,7 +40,7 @@ export class PrettyPrinter {
             this.writeLine(`// UNKNOWN NODE: ${node.type}`);
         }
     }
-    
+
     visitBlock(statements) {
         this.indent();
         for (const stmt of statements) {
@@ -67,7 +67,7 @@ export class PrettyPrinter {
         this.visitNode(node.value);
         this.write('\n');
     }
-    
+
     visitDestructuringAssignment(node) {
         this.write(this.currentIndent + 'destructure ');
         // THIS IS THE FIX: The pattern is a single node now.
@@ -84,7 +84,7 @@ export class PrettyPrinter {
         this.visitNode(node.value);
         this.write('\n');
     }
-    
+
     visitBracketAssignment(node) {
         this.write(this.currentIndent + 'set ');
         this.visitNode(node.object);
@@ -118,7 +118,7 @@ export class PrettyPrinter {
         this.visitBlock(node.body);
         this.writeLine('end');
     }
-    
+
     visitIfStatement(node) {
         this.write(this.currentIndent + 'if ');
         this.visitNode(node.condition);
@@ -134,10 +134,10 @@ export class PrettyPrinter {
                 this.writeLine('end');
             }
         } else {
-             this.writeLine('end');
+            this.writeLine('end');
         }
     }
-    
+
     visitWhileStatement(node) {
         this.write(this.currentIndent + 'while ');
         this.visitNode(node.condition);
@@ -220,7 +220,7 @@ export class PrettyPrinter {
         this.visitBlock(node.tryBlock);
         if (node.catchBlock.length > 0) {
             this.write(this.currentIndent + 'catch');
-            if(node.catchVar) {
+            if (node.catchVar) {
                 this.write(' ');
                 this.visitNode(node.catchVar);
             }
@@ -235,7 +235,7 @@ export class PrettyPrinter {
         this.visitNode(node.argument);
         this.write('\n');
     }
-    
+
     visitCallStatement(node) {
         this.write(this.currentIndent + 'call ');
         this.visitNode(node.callee);
@@ -251,13 +251,13 @@ export class PrettyPrinter {
         }
         this.write('\n');
     }
-    
+
     visitShowStatement(node) {
         this.write(this.currentIndent + 'show ');
         this.visitNode(node.expression);
         this.write('\n');
     }
-    
+
     visitReturnStatement(node) {
         this.write(this.currentIndent + 'return');
         if (node.argument) {
@@ -266,7 +266,7 @@ export class PrettyPrinter {
         }
         this.write('\n');
     }
-    
+
     visitImportStatement(node) {
         this.writeLine(`import "${node.path}" as ${node.alias}`);
     }
@@ -276,7 +276,7 @@ export class PrettyPrinter {
         this.visitNode(node.discriminant);
         this.write('\n');
         // Cases are already indented within their own blocks
-        for(const caseClause of node.cases) {
+        for (const caseClause of node.cases) {
             this.visitNode(caseClause);
         }
         this.writeLine('end');
@@ -304,7 +304,7 @@ export class PrettyPrinter {
         this.write(' ');
         this.visitNode(node.right);
     }
-    
+
     visitUnaryExpression(node) {
         this.write(`${node.operator} `);
         this.visitNode(node.argument);
@@ -313,7 +313,7 @@ export class PrettyPrinter {
     visitIdentifier(node) {
         this.write(node.name);
     }
-    
+
     visitLiteral(node) {
         if (typeof node.value === 'string') {
             this.write(`"${node.value.replace(/"/g, '\\"')}"`);
@@ -343,8 +343,13 @@ export class PrettyPrinter {
         }
         this.write('{ ');
         node.properties.forEach((prop, i) => {
-            this.write(`${prop.key}: `);
-            this.visitNode(prop.value);
+            if (prop && prop.type === 'SpreadElement') {
+                this.write('...');
+                this.visitNode(prop.argument);
+            } else {
+                this.write(`${prop.key}: `);
+                this.visitNode(prop.value);
+            }
             if (i < node.properties.length - 1) this.write(', ');
         });
         this.write(' }');
@@ -359,7 +364,7 @@ export class PrettyPrinter {
         });
         this.write(']');
     }
-    
+
     visitObjectPattern(node) {
         this.write('{ ');
         node.properties.forEach((p, i) => {

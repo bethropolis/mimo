@@ -123,7 +123,7 @@ export class Interpreter {
       "BinaryExpression", "UnaryExpression", "Identifier", "Literal",
       "ArrayLiteral", "ArrayAccess", "ObjectLiteral", "PropertyAccess",
       "SafePropertyAccess", "ModuleAccess", "AnonymousFunction", "TemplateLiteral",
-      "CallExpression",
+      "CallExpression", "InlineIfExpression"
     ];
     return expressionTypes.includes(node.type);
   }

@@ -13,7 +13,7 @@ export function evaluateCallExpression(interpreter, node) {
     // Evaluate the callee (could be identifier or module access)
     let func;
     let functionName;
-    
+
     if (typeof node.callee === 'string') {
         // Legacy support for string callee
         func = interpreter.currentEnv.lookup(node.callee);
@@ -29,7 +29,7 @@ export function evaluateCallExpression(interpreter, node) {
             functionName = '<anonymous function>';
         }
     }
-    
+
     if (
         !(func instanceof FunctionValue) &&
         !(func instanceof BuiltinFunction)
@@ -42,7 +42,22 @@ export function evaluateCallExpression(interpreter, node) {
         );
     }
 
-    const args = node.arguments.map((arg) => interpreter.visitNode(arg));
+    const args = [];
+    for (const arg of node.arguments) {
+        if (arg.type === 'SpreadElement') {
+            const spreadValue = interpreter.visitNode(arg.argument);
+            if (!Array.isArray(spreadValue)) {
+                throw interpreter.errorHandler.createRuntimeError(
+                    `Cannot spread non-array value in function call.`,
+                    arg.argument,
+                    'TYPE001'
+                );
+            }
+            args.push(...spreadValue);
+        } else {
+            args.push(interpreter.visitNode(arg));
+        }
+    }
     const result = func.call(interpreter, args, node); // Pass the CallExpression node
 
     return result;
