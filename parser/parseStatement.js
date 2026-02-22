@@ -8,6 +8,7 @@ import {
   parseContinueStatement,
   parseForStatement,
   parseIfStatement,
+  parseGuardStatement,
   parseLoopStatement,
   parseTryStatement,
   parseWhileStatement,
@@ -80,6 +81,8 @@ export function parseStatement(parser) {
         return parseVariableOrAssignment(parser, false, token); // Correctly calls existing function
       case "if":
         return parseIfStatement(parser);
+      case "guard":
+        return parseGuardStatement(parser);
       case "for":
         return parseForStatement(parser);
       case "while":
@@ -121,6 +124,27 @@ export function parseStatement(parser) {
           "Expected a statement keyword (like 'set', 'if', 'function', 'call', 'show', etc.)."
         );
       // This default case should always throw if it's a keyword.
+    }
+  }
+
+  // Check for LabeledStatement
+  if (token.type === TokenType.Identifier) {
+    const nextToken = parser.peek(1);
+    if (nextToken && nextToken.type === TokenType.Colon) {
+      const labelToken = parser.consume(); // Consume identifier
+      parser.consume(); // Consume colon
+      const statement = parseStatement(parser);
+      // Wait, ASTNode is not imported! I'll just use inline object or import it. Let me import ASTNode at the top.
+      return {
+        type: "LabeledStatement",
+        label: labelToken.value,
+        statement: statement,
+        line: labelToken.line,
+        column: labelToken.column,
+        start: labelToken.start,
+        length: labelToken.length,
+        file: labelToken.file,
+      };
     }
   }
 

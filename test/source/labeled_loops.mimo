@@ -1,0 +1,44 @@
+show "=== Labeled Loops Test ==="
+
+function testOuterLabel()
+    let msg ""
+    outer:
+    while true
+        let i 0
+        while < i 5
+            set i + i 1
+            if == i 3
+                break outer
+            end
+        end
+        set msg "Failed"
+    end
+    return "Passed outer break"
+end
+
+function testOuterContinue()
+    let count 0
+    let runs 0
+    outer:
+    while < count 3
+        set runs + runs 1
+        set count + count 1
+        let i 0
+        while < i 3
+            set i + i 1
+            if == i 2
+                continue outer
+            end
+        end
+        show "Should not print"
+    end
+    show "Runs: "
+    show runs
+    return "Passed outer continue"
+end
+
+show call testOuterLabel()
+
+show call testOuterContinue()
+
+show "=== Done ==="

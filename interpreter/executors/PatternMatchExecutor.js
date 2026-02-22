@@ -21,7 +21,20 @@ export class PatternMatchExecutor extends BaseExecutor {
           caseEnv.define(name, value, "let"); // Assume 'let' kind for pattern bindings
         }
 
-        return this.interpreter.executeBlock(caseClause.consequent, caseEnv);
+        let guardPassed = true;
+        if (caseClause.guard) {
+          const previousEnv = this.interpreter.currentEnv;
+          this.interpreter.currentEnv = caseEnv;
+          try {
+            guardPassed = isTruthy(this.interpreter.visitNode(caseClause.guard));
+          } finally {
+            this.interpreter.currentEnv = previousEnv;
+          }
+        }
+
+        if (guardPassed) {
+          return this.interpreter.executeBlock(caseClause.consequent, caseEnv);
+        }
       }
     }
 

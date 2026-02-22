@@ -1,0 +1,50 @@
+show "=== Guard Tests ==="
+
+function checkPositive(n)
+    guard > n 0     else
+        return "Not positive"
+    end
+    return "Is positive"
+end
+
+function checkName(user)
+    guard != null user     else
+        return "No user"
+    end
+    guard != null user?.name     else
+        return "No name"
+    end
+    return user.name
+end
+
+let res1 call checkPositive(5)
+
+let res2 call checkPositive(- 2)
+
+show res1
+
+show res2
+
+let u1 null
+
+let u2 { age: 30 }
+
+let u3 { name: "Alice" }
+
+show call checkName(u1)
+
+show call checkName(u2)
+
+show call checkName(u3)
+
+show "=== Guard Exception Test ==="
+
+try
+    guard == 1 2     else
+        throw "Failed guard exception"
+    end
+catch e
+    show e
+end
+
+show "=== Done ==="

@@ -1,0 +1,45 @@
+show "=== Pattern Match When Guards ==="
+
+function evaluateScore(score)
+    let result null
+    match score
+        case n when >= n 90:
+            set result "A"
+        case n when >= n 80:
+            set result "B"
+        case n when >= n 70:
+            set result "C"
+        default:
+            set result "F"
+    end
+    return result
+end
+
+show call evaluateScore(95)
+
+show call evaluateScore(85)
+
+show call evaluateScore(75)
+
+show call evaluateScore(60)
+
+function handleUser(user)
+    let msg null
+    match user
+        case ["admin", active] when == active true:
+            set msg "Active admin"
+        case ["admin", active]:
+            set msg "Inactive admin"
+        default:
+            set msg "Regular user"
+    end
+    return msg
+end
+
+show call handleUser(["admin", true])
+
+show call handleUser(["admin", false])
+
+show call handleUser(["user", true])
+
+show "=== Done ==="

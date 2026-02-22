@@ -10,7 +10,7 @@ import { MimoError } from "./MimoError.js";
 export class StatementExecutor {
   constructor(interpreter) {
     this.interpreter = interpreter;
-    
+
     // Initialize specialized executors
     this.baseExecutor = new BaseExecutor(interpreter);
     this.variableExecutor = new VariableExecutor(interpreter);
@@ -23,7 +23,7 @@ export class StatementExecutor {
     switch (node.type) {
       case "Program":
         return this.baseExecutor.executeProgram(node);
-      
+
       // Variable and assignment operations
       case "VariableDeclaration":
         return this.variableExecutor.executeVariableDeclaration(node);
@@ -33,10 +33,12 @@ export class StatementExecutor {
         return this.variableExecutor.executePropertyAssignment(node);
       case "BracketAssignment":
         return this.variableExecutor.executeBracketAssignment(node);
-      
+
       // Control flow operations
       case "IfStatement":
         return this.controlFlowExecutor.executeIfStatement(node);
+      case "GuardStatement":
+        return this.controlFlowExecutor.executeGuardStatement(node);
       case "WhileStatement":
         return this.controlFlowExecutor.executeWhileStatement(node);
       case "ForStatement":
@@ -49,7 +51,9 @@ export class StatementExecutor {
         return this.controlFlowExecutor.executeContinueStatement(node);
       case "TryStatement":
         return this.controlFlowExecutor.executeTryStatement(node);
-      
+      case "LabeledStatement":
+        return this.controlFlowExecutor.executeLabeledStatement(node);
+
       // Function operations
       case "FunctionDeclaration":
         return this.functionExecutor.executeFunctionDeclaration(node);
@@ -61,15 +65,15 @@ export class StatementExecutor {
         return this.functionExecutor.executeShowStatement(node);
       case "ThrowStatement":
         return this.functionExecutor.executeThrowStatement(node);
-      
+
       // Pattern matching operations
       case "MatchStatement":
         return this.patternMatchExecutor.executeMatchStatement(node);
-      
+
       // Module system operations
       case "ImportStatement":
         return this.executeImportStatement(node);
-      
+
       default:
         throw this.interpreter.errorHandler.createRuntimeError(
           `Unknown statement type: ${node.type}`,
@@ -90,14 +94,14 @@ export class StatementExecutor {
       if (error instanceof MimoError) {
         throw error;
       }
-      
+
       throw this.interpreter.errorHandler.createRuntimeError(
-        error.message, 
+        error.message,
         node,
         'MOD001',
         'Check if the module path is correct and the module exists.'
       );
     }
-    return null; 
+    return null;
   }
 }

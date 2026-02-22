@@ -22,6 +22,15 @@ export function parseIfStatement(parser) {
   return ASTNode.IfStatement(condition, consequent, alternate, ifToken);
 }
 
+export function parseGuardStatement(parser) {
+  const guardToken = parser.expectKeyword("guard", "SYN120", 'Expected "guard" keyword to start an guard statement.');
+  const condition = parseExpression(parser);
+  parser.expectKeyword("else", "SYN121", 'Expected "else" keyword after guard condition.');
+  const alternate = parseBlock(parser, ["end"]);
+  parser.expectKeyword("end", "SYN122", 'Expected "end" keyword to close guard statement.');
+  return ASTNode.GuardStatement(condition, alternate, guardToken);
+}
+
 export function parseWhileStatement(parser) {
   const whileToken = parser.expect(TokenType.Keyword);
   const condition = parseExpression(parser);
@@ -49,31 +58,31 @@ export function parseLoopStatement(parser) {
   const loopToken = parser.expect(TokenType.Keyword);
   const body = parseBlock(parser);
   parser.expect(TokenType.Keyword, "end");
-  
+
   return ASTNode.LoopStatement(body, null, loopToken);
 }
 
 export function parseBreakStatement(parser) {
   const breakToken = parser.expect(TokenType.Keyword);
-  
+
   // Check for optional label
   let label = null;
   if (parser.peek()?.type === TokenType.Identifier) {
     label = parser.expect(TokenType.Identifier).value;
   }
-  
+
   return ASTNode.BreakStatement(label, breakToken);
 }
 
 export function parseContinueStatement(parser) {
   const continueToken = parser.expect(TokenType.Keyword);
-  
+
   // Check for optional label
   let label = null;
   if (parser.peek()?.type === TokenType.Identifier) {
     label = parser.expect(TokenType.Identifier).value;
   }
-  
+
   return ASTNode.ContinueStatement(label, continueToken);
 }
 
@@ -86,7 +95,7 @@ export function parseTryStatement(parser) {
   if (parser.matchKeyword("catch")) {
     // Optional: allow specifying a variable for the caught error
     if (parser.peek()?.type === TokenType.Identifier) {
-        catchVar = parser.parseIdentifier('SYN051A', 'Expected an identifier for the catch variable.');
+      catchVar = parser.parseIdentifier('SYN051A', 'Expected an identifier for the catch variable.');
     }
     catchBlock = parseBlock(parser, ["end"]);
   }

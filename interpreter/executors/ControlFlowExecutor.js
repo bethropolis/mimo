@@ -27,6 +27,33 @@ export class ControlFlowExecutor extends BaseExecutor {
     return null;
   }
 
+  executeGuardStatement(node) {
+    const condition = this.interpreter.visitNode(node.condition);
+
+    // If the condition is met, do nothing (continue execution sequentially)
+    if (isTruthy(condition)) {
+      return null;
+    }
+
+    // Execute the alternate (else) block
+    const blockEnv = new Environment(this.interpreter.currentEnv);
+    const result = this.interpreter.executeBlock(node.alternate, blockEnv);
+
+    // Check if the else block terminated execution correctly
+    // It should either return a ReturnValue, or throw a BreakException/ContinueException/MimoError.
+    // If it reaches this point without doing so, it means the guard block didn't properly exit or the result wasn't a return.
+    if (!(result instanceof ReturnValue)) {
+      throw this.interpreter.errorHandler.createRuntimeError(
+        `A guard statement's 'else' block must terminate execution (e.g., via return, throw, break, or continue).`,
+        node.alternate[node.alternate.length - 1] || node, // point to last statement or guard itself
+        "CTRL001",
+        "Add a return, throw, break, or continue statement to the end of the guard's else block."
+      );
+    }
+
+    return result; // returning the ReturnValue effectively terminates the current block
+  }
+
   executeWhileStatement(node) {
     let result = null;
     while (isTruthy(this.interpreter.visitNode(node.condition))) {
@@ -39,9 +66,11 @@ export class ControlFlowExecutor extends BaseExecutor {
         }
       } catch (exception) {
         if (exception instanceof BreakException) {
+          if (exception.label && exception.label !== node.label) throw exception;
           break;
         }
         if (exception instanceof ContinueException) {
+          if (exception.label && exception.label !== node.label) throw exception;
           continue;
         }
         throw exception;
@@ -78,9 +107,11 @@ export class ControlFlowExecutor extends BaseExecutor {
           }
         } catch (exception) {
           if (exception instanceof BreakException) {
+            if (exception.label && exception.label !== node.label) throw exception;
             break;
           }
           if (exception instanceof ContinueException) {
+            if (exception.label && exception.label !== node.label) throw exception;
             continue;
           }
           throw exception;
@@ -104,9 +135,11 @@ export class ControlFlowExecutor extends BaseExecutor {
         }
       } catch (exception) {
         if (exception instanceof BreakException) {
+          if (exception.label && exception.label !== node.label) throw exception;
           break;
         }
         if (exception instanceof ContinueException) {
+          if (exception.label && exception.label !== node.label) throw exception;
           continue;
         }
         throw exception;
@@ -142,16 +175,24 @@ export class ControlFlowExecutor extends BaseExecutor {
           error instanceof MimoError
             ? error
             : this.interpreter.errorHandler.createRuntimeError(
-                `Unhandled JavaScript error: ${error.message}`,
-                node, // Use the try statement node for location if a raw JS error occurs
-                "INT005",
-                "An unexpected error occurred during execution. This indicates a bug in the Mimo interpreter, or an unhandled case. Please report this error."
-              );
+              `Unhandled JavaScript error: ${error.message}`,
+              node, // Use the try statement node for location if a raw JS error occurs
+              "INT005",
+              "An unexpected error occurred during execution. This indicates a bug in the Mimo interpreter, or an unhandled case. Please report this error."
+            );
         catchEnv.define(node.catchVar.name, errorValue);
         return this.interpreter.executeBlock(node.catchBlock, catchEnv);
       }
       // If no catch block, re-throw the error
       throw error;
     }
+  }
+
+  executeLabeledStatement(node) {
+    if (node.statement) {
+      node.statement.label = node.label;
+      return this.interpreter.statementExecutor.executeStatement(node.statement);
+    }
+    return null;
   }
 }

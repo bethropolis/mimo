@@ -17,16 +17,22 @@ export function parseMatchStatement(parser) {
     if (parser.peek()?.value === "case") {
       const caseToken = parser.expectKeyword("case", 'SYN082', 'Expected "case" keyword for a match clause.');
       const pattern = parsePattern(parser);
+
+      let guard = null;
+      if (parser.matchKeyword("when")) {
+        guard = parseExpression(parser);
+      }
+
       parser.expect(TokenType.Colon, undefined, 'SYN083', 'Expected a colon (:) after the pattern in a match clause.');
       const consequent = parseBlock(parser, ["case", "default", "end"]);
 
-      cases.push(ASTNode.CaseClause(pattern, consequent, caseToken));
+      cases.push(ASTNode.CaseClause(pattern, guard, consequent, caseToken));
     } else if (parser.peek()?.value === "default") {
       const defaultToken = parser.expectKeyword("default", 'SYN084', 'Expected "default" keyword for the fallback match clause.');
       parser.expect(TokenType.Colon, undefined, 'SYN085', 'Expected a colon (:) after "default" in a match clause.');
       const consequent = parseBlock(parser, ["case", "default", "end"]);
 
-      cases.push(ASTNode.CaseClause(null, consequent, defaultToken)); // null pattern for default
+      cases.push(ASTNode.CaseClause(null, null, consequent, defaultToken)); // null pattern and guard for default
     }
   }
   if (cases.length === 0) {

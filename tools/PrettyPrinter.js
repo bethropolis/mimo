@@ -138,6 +138,14 @@ export class PrettyPrinter {
         }
     }
 
+    visitGuardStatement(node) {
+        this.write(this.currentIndent + 'guard ');
+        this.visitNode(node.condition);
+        this.writeLine(' else');
+        this.visitBlock(node.alternate);
+        this.writeLine('end');
+    }
+
     visitWhileStatement(node) {
         this.write(this.currentIndent + 'while ');
         this.visitNode(node.condition);
@@ -288,6 +296,10 @@ export class PrettyPrinter {
         if (node.pattern) {
             this.write('case ');
             this.visitNode(node.pattern);
+            if (node.guard) {
+                this.write(' when ');
+                this.visitNode(node.guard);
+            }
         } else {
             this.write('default');
         }

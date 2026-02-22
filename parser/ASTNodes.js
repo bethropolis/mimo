@@ -53,6 +53,16 @@ export const ASTNode = {
     length: token.length,
     file: token.file,
   }),
+  GuardStatement: (condition, alternate, token) => ({
+    type: "GuardStatement",
+    condition,
+    alternate, // The else block that must exit
+    line: token.line,
+    column: token.column,
+    start: token.start,
+    length: token.length,
+    file: token.file,
+  }),
   InlineIfExpression: (condition, consequent, alternate, token) => ({
     type: "InlineIfExpression",
     condition,
@@ -334,9 +344,10 @@ export const ASTNode = {
     length: token.length,
     file: token.file,
   }),
-  CaseClause: (pattern, consequent, token) => ({
+  CaseClause: (pattern, guard, consequent, token) => ({
     type: "CaseClause",
     pattern,
+    guard,
     consequent,
     line: token.line,
     column: token.column,
