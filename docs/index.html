@@ -6,39 +6,230 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="A minimal prefix-notation programming language">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <meta name="theme-color" content="#0ea5e9" />
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
   <style>
     :root {
-      --theme-color: #a855f7;
-      --theme-color-dark: #7c3aed;
+      --theme-color: #0ea5e9;
+      --theme-color-dark: #0284c7;
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --surface-strong: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+      --border: #e2e8f0;
     }
+
+    body[data-theme='dark'] {
+      --bg: #020617;
+      --surface: #0f172a;
+      --surface-strong: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --code-bg: #020617;
+      --code-text: #cbd5e1;
+      --border: #334155;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app-nav a,
+    .sidebar ul li a,
+    .markdown-section a {
+      color: var(--theme-color);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .sidebar ul li.active > a {
+      border-right-color: var(--theme-color);
+      font-weight: 700;
+    }
+
+    .search {
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search input {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.5rem 0.75rem;
+    }
+
+    .content {
+      background: var(--bg);
+    }
+
+    .markdown-section {
+      max-width: 920px;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .markdown-section p,
+    .markdown-section li {
+      color: var(--text);
+    }
+
+    .markdown-section blockquote {
+      border-left: 4px solid var(--theme-color);
+      background: var(--surface);
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .markdown-section table,
+    .markdown-section th,
+    .markdown-section td {
+      border-color: var(--border);
+    }
+
     .markdown-section pre {
-      background: #1e1e2e;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem;
     }
+
+    .markdown-section pre code,
     .markdown-section code {
-      background: #1e1e2e;
-      color: #cdd6f4;
+      background: var(--code-bg);
+      color: var(--code-text);
+    }
+
+    .docsify-copy-code-button {
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      color: var(--text);
+      border-radius: 6px;
+    }
+
+    .pagination-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 30;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 9999px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .theme-toggle {
+        right: 0.75rem;
+        bottom: 0.75rem;
+      }
     }
   </style>
 </head>
 <body>
   <div id="app">Loading...</div>
+
   <script>
+    (function () {
+      const key = 'mimo-docs-theme';
+      const stored = localStorage.getItem(key);
+      const defaultTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      let theme = stored || defaultTheme;
+
+      const applyTheme = () => {
+        document.body.setAttribute('data-theme', theme);
+      };
+
+      const toggleTheme = () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(key, theme);
+        applyTheme();
+        const button = document.querySelector('.theme-toggle');
+        if (button) button.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+      };
+
+      const ensureToggleButton = () => {
+        let button = document.querySelector('.theme-toggle');
+        if (!button) {
+          button = document.createElement('button');
+          button.className = 'theme-toggle';
+          button.type = 'button';
+          button.addEventListener('click', toggleTheme);
+          document.body.appendChild(button);
+        }
+        button.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+      };
+
+      applyTheme();
+      window.addEventListener('DOMContentLoaded', ensureToggleButton);
+      window.addEventListener('hashchange', ensureToggleButton);
+    })();
+
     window.$docsify = {
       name: 'Mimo',
       nameLink: '#/README',
       repo: 'https://github.com/bethropolis/mimo',
+      homepage: 'README.md',
       loadSidebar: '_sidebar.md',
       auto2top: true,
       subMaxLevel: 3,
-      search: 'auto',
+      themeColor: '#0ea5e9',
       alias: {
-        '/.*/_sidebar.md': '_sidebar.md'
-      }
-    }
+        '/.*/_sidebar.md': '/_sidebar.md'
+      },
+      search: {
+        paths: 'auto',
+        placeholder: 'Search docs...',
+        noData: 'No results found',
+        depth: 4
+      },
+      copyCode: {
+        buttonText: 'Copy',
+        errorText: 'Error',
+        successText: 'Copied'
+      },
+      pagination: {
+        previousText: 'Previous',
+        nextText: 'Next',
+        crossChapter: true,
+        crossChapterText: true
+      },
+      plugins: [
+        function (hook) {
+          hook.doneEach(function () {
+            document.querySelectorAll('.markdown-section a[href^="http"]').forEach(function (link) {
+              link.setAttribute('target', '_blank');
+              link.setAttribute('rel', 'noreferrer noopener');
+            });
+          });
+        }
+      ]
+    };
   </script>
+
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/plugins/autoloader/prism-autoloader.min.js"></script>
 </body>

@@ -122,26 +122,34 @@
 </script>
 
 <section class="flex h-full flex-col border border-border/40 bg-surface">
-	<div class="flex items-center justify-between border-b border-border/50 px-2 pt-2">
+	<div class="flex items-center justify-between border-b border-border/60 bg-panel-alt/35 px-2 pt-2">
 		<div 
 			bind:this={tabScrollEl}
-			class="flex min-w-0 flex-1 gap-0 overflow-x-auto no-scrollbar scroll-smooth"
+			class="flex min-w-0 flex-1 gap-1 overflow-x-auto no-scrollbar scroll-smooth"
 			style="mask-image: linear-gradient(to right, black calc(100% - 20px), transparent 100%);"
 		>
 			{#each tabs as tab (tab.id)}
 				<div
 					data-tab-id={tab.id}
-					class={`group -mb-px inline-flex shrink-0 items-center border-b-2 px-3 py-1.5 text-xs transition-colors ${
+					class={`group -mb-px inline-flex shrink-0 items-center rounded-t-md border px-3 py-1.5 text-xs transition-colors ${
 						tab.id === activeTabId
-							? 'border-accent bg-surface text-app-fg'
-							: 'border-transparent bg-transparent text-text-muted hover:bg-surface-muted'
+							? 'border-border-strong border-b-surface bg-surface text-app-fg shadow-[0_-1px_0_0_var(--border)]'
+							: 'border-border/40 bg-surface-muted/55 text-text-muted hover:border-border/70 hover:bg-surface hover:text-app-fg'
 					}`}
 				>
-					<button type="button" onclick={() => onSelectTab(tab.id)} class="max-w-[10rem] truncate">{tab.name}</button>
+					<button
+						type="button"
+						onclick={() => onSelectTab(tab.id)}
+						class={`max-w-[11rem] truncate ${tab.id === activeTabId ? 'font-semibold' : 'font-medium'}`}
+					>
+						{tab.name}
+					</button>
 					<button
 						type="button"
 						onclick={() => onCloseTab(tab.id)}
-						class="ml-2 rounded px-1 text-text-soft hover:bg-surface-elevated hover:text-app-fg opacity-0 group-hover:opacity-100 transition-opacity"
+						class={`ml-2 rounded px-1 text-text-soft hover:bg-surface-elevated hover:text-app-fg transition-opacity ${
+							tab.id === activeTabId ? 'opacity-80 hover:opacity-100' : 'opacity-35 group-hover:opacity-100'
+						}`}
 						aria-label={`Close ${tab.name}`}
 					>
 						<X size={12} />
