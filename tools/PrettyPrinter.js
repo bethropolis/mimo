@@ -166,7 +166,8 @@ export class PrettyPrinter {
     visitGuardStatement(node) {
         this.write(this.currentIndent + 'guard ');
         this.visitNode(node.condition);
-        this.writeLine(' else');
+        this.write('\n');
+        this.writeLine('else');
         this.visitBlock(node.alternate);
         this.writeLine('end');
     }
@@ -241,18 +242,37 @@ export class PrettyPrinter {
     }
 
     visitPipeExpression(node) {
-        this.visitNode(node.left);
-        this.write(' |> ');
-        if (node.callee.type === 'InlineIfExpression') {
-            this.visitNode(node.callee);
-        } else {
-            this.visitNode(node.callee);
-            this.write('(');
-            node.args.forEach((arg, i) => {
-                this.visitNode(arg);
-                if (i < node.args.length - 1) this.write(', ');
-            });
-            this.write(')');
+        const flattenPipe = (expr) => {
+            const stages = [];
+            let current = expr;
+            while (current?.type === 'PipeExpression') {
+                stages.unshift(current);
+                current = current.left;
+            }
+            return { initial: current, stages };
+        };
+
+        const { initial, stages } = flattenPipe(node);
+        this.visitNode(initial);
+        this.write('\n');
+
+        const stageIndent = this.currentIndent + this.indentation;
+        for (let i = 0; i < stages.length; i++) {
+            const stage = stages[i];
+            this.write(stageIndent + '|> ');
+            if (stage.callee.type === 'InlineIfExpression') {
+                this.visitNode(stage.callee);
+            } else {
+                this.visitNode(stage.callee);
+                if (stage.args.length > 0) {
+                    this.write(' ');
+                    stage.args.forEach((arg, idx) => {
+                        this.visitNode(arg);
+                        if (idx < stage.args.length - 1) this.write(' ');
+                    });
+                }
+            }
+            if (i < stages.length - 1) this.write('\n');
         }
     }
 

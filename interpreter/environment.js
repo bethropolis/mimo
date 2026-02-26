@@ -84,4 +84,16 @@ export class Environment {
     // If no parent and not found, return null.
     return null;
   }
+
+  getVisibleNames() {
+    const names = new Set();
+    let current = this;
+    while (current) {
+      for (const name of current.vars.keys()) {
+        names.add(name);
+      }
+      current = current.parent;
+    }
+    return [...names];
+  }
 }

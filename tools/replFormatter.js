@@ -37,29 +37,42 @@ export function formatValue(value, useColors = true, indent = 0) {
         return `${colors.green}datetime(${value.toISOString()})${colors.reset}`;
     }
 
+    const MAX_ITEMS = 20;
+    const MAX_KEYS = 20;
+
     if (Array.isArray(value)) {
-        if (value.length === 0) return `${colors.grey}[]${colors.reset}`;
+        if (value.length === 0) return `${colors.grey}Array(0) []${colors.reset}`;
 
-        const items = value.map(v => formatValue(v, useColors, indent + 1));
-        const flatItems = items.join(`${colors.grey}, ${colors.reset}`);
+        const shownItems = value.slice(0, MAX_ITEMS).map(v => formatValue(v, useColors, indent + 1));
+        const hiddenCount = Math.max(0, value.length - shownItems.length);
+        const flatItems = shownItems.join(`${colors.grey}, ${colors.reset}`);
 
-        // Use single-line if short enough
-        if (flatItems.length < 50) {
-            return `${colors.grey}[${colors.reset}${flatItems}${colors.grey}]${colors.reset}`;
+        if (flatItems.length < 60 && hiddenCount === 0) {
+            return `${colors.grey}Array(${value.length}) [${colors.reset}${flatItems}${colors.grey}]${colors.reset}`;
         }
 
-        // Multi-line for large arrays
-        return `${colors.grey}[${colors.reset}\n${spacing}  ${items.join(`${colors.grey},${colors.reset}\n` + spacing + "  ")}\n${spacing}${colors.grey}]${colors.reset}`;
+        const multilineItems = [...shownItems];
+        if (hiddenCount > 0) {
+            multilineItems.push(`${colors.grey}... ${hiddenCount} more${colors.reset}`);
+        }
+
+        return `${colors.grey}Array(${value.length}) [${colors.reset}\n${spacing}  ${multilineItems.join(`${colors.grey},${colors.reset}\n` + spacing + "  ")}\n${spacing}${colors.grey}]${colors.reset}`;
     }
 
     if (typeof value === "object") {
         const keys = Object.keys(value);
         if (keys.length === 0) return `${colors.grey}{}${colors.reset}`;
 
-        const pairs = keys.map(k => {
+        const shownKeys = keys.slice(0, MAX_KEYS);
+        const hiddenCount = Math.max(0, keys.length - shownKeys.length);
+
+        const pairs = shownKeys.map(k => {
             const val = formatValue(value[k], useColors, indent + 1);
             return `${colors.blue}${k}${colors.reset}${colors.grey}:${colors.reset} ${val}`;
         });
+        if (hiddenCount > 0) {
+            pairs.push(`${colors.grey}... ${hiddenCount} more${colors.reset}`);
+        }
 
         const flatPairs = pairs.join(`${colors.grey}, ${colors.reset}`);
 

@@ -11,6 +11,7 @@ import { fsModule } from "./stdlib/fs.js";
 import { httpModule } from "./stdlib/http.js";
 import { jsonModule } from "./stdlib/json.js";
 import { mathModuleExports } from "./stdlib/math.js";
+import { objectModule } from "./stdlib/object.js";
 import { regexModule } from "./stdlib/regex.js";
 import { stringModuleExports } from "./stdlib/string.js";
 
@@ -21,6 +22,7 @@ const internalStdLibModules = {
   http: httpModule,
   json: jsonModule,
   math: mathModuleExports,
+  object: objectModule,
   regex: regexModule,
   string: stringModuleExports,
   assert: assertModule,

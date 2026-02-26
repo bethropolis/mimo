@@ -72,5 +72,5 @@ export function exported(name)
     return + "Hi " name
 end
 
-show call exported("Agent")
+show call exported("World")
 show "=== Done ==="

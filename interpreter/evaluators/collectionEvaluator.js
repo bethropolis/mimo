@@ -1,4 +1,6 @@
 // In interpreter/evaluators/collectionEvaluator.js
+import { suggestNearestName } from "../suggestions.js";
+
 export function evaluateArrayLiteral(interpreter, node) {
   const result = [];
   for (const element of node.elements) {
@@ -104,15 +106,21 @@ export function evaluatePropertyAccess(interpreter, node) {
     );
   }
 
-  // NOTE: still thinking about it
-  // if (!(node.property in object)) {
-  //     throw interpreter.errorHandler.createRuntimeError(
-  //         `Property '${node.property}' not found on object.`,
-  //         node.object, 
-  //         'PROP001',
-  //         'Check for typos or ensure the property exists on the object.'
-  //     );
-  // }
+  if (!(node.property in object)) {
+    const candidates = typeof object === "object" && object !== null
+      ? Object.keys(object)
+      : Object.getOwnPropertyNames(object);
+    const nearest = suggestNearestName(node.property, candidates);
+    const suggestion = nearest
+      ? `Did you mean '${nearest}'?`
+      : "Check for typos or ensure the property exists.";
+    throw interpreter.errorHandler.createRuntimeError(
+      `Property '${node.property}' does not exist on ${Array.isArray(object) ? "array" : typeof object}.`,
+      node,
+      "PROP001",
+      suggestion
+    );
+  }
 
   return object[node.property];
 }

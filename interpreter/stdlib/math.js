@@ -142,7 +142,63 @@ const mathAbs = new BuiltinFunction("abs", (args, interpreter, callNode) => {
     return Math.abs(args[0]);
 }, 1);
 
-// Variadic min/max
+const mathClamp = new BuiltinFunction("clamp", (args, interpreter, callNode) => {
+    expectNumbers(args, "clamp", 3, interpreter, callNode);
+    const [value, min, max] = args;
+    if (min > max) {
+        throw interpreter.errorHandler.createRuntimeError(
+            "clamp() expects min <= max.",
+            callNode,
+            "ARG001",
+            "Ensure the second argument is less than or equal to the third."
+        );
+    }
+    return Math.min(Math.max(value, min), max);
+}, 3);
+
+const mathLerp = new BuiltinFunction("lerp", (args, interpreter, callNode) => {
+    expectNumbers(args, "lerp", 3, interpreter, callNode);
+    const [a, b, t] = args;
+    return a + (b - a) * t;
+}, 3);
+
+const mathSum = new BuiltinFunction("sum", (args, interpreter, callNode) => {
+    const [arr] = args;
+    if (!Array.isArray(arr)) {
+        throw interpreter.errorHandler.createRuntimeError(
+            "sum() expects an array of numbers.",
+            callNode,
+            "TYPE001",
+            "Provide an array as the first argument to sum()."
+        );
+    }
+    arr.forEach((n, i) => expectNumber(n, "sum", interpreter, callNode, i + 1));
+    return arr.reduce((acc, value) => acc + value, 0);
+}, 1);
+
+const mathMean = new BuiltinFunction("mean", (args, interpreter, callNode) => {
+    const [arr] = args;
+    if (!Array.isArray(arr)) {
+        throw interpreter.errorHandler.createRuntimeError(
+            "mean() expects an array of numbers.",
+            callNode,
+            "TYPE001",
+            "Provide an array as the first argument to mean()."
+        );
+    }
+    if (arr.length === 0) {
+        throw interpreter.errorHandler.createRuntimeError(
+            "mean() cannot be called on an empty array.",
+            callNode,
+            "ARG001",
+            "Provide a non-empty array to mean()."
+        );
+    }
+    arr.forEach((n, i) => expectNumber(n, "mean", interpreter, callNode, i + 1));
+    return arr.reduce((acc, value) => acc + value, 0) / arr.length;
+}, 1);
+
+// min/max support array argument and variadic numbers
 const mathMax = new BuiltinFunction("max", (args, interpreter, callNode) => {
     if (args.length === 0) {
         throw interpreter.errorHandler.createRuntimeError(
@@ -151,6 +207,19 @@ const mathMax = new BuiltinFunction("max", (args, interpreter, callNode) => {
             'BUILTIN001',
             "Provide at least one number to max()."
         );
+    }
+    if (args.length === 1 && Array.isArray(args[0])) {
+        const arr = args[0];
+        if (arr.length === 0) {
+            throw interpreter.errorHandler.createRuntimeError(
+                "max() cannot be called on an empty array.",
+                callNode,
+                "ARG001",
+                "Provide a non-empty array to max()."
+            );
+        }
+        arr.forEach((arg, i) => expectNumber(arg, "max", interpreter, callNode, i + 1));
+        return Math.max(...arr);
     }
     args.forEach((arg, i) => expectNumber(arg, "max", interpreter, callNode, i + 1));
     return Math.max(...args);
@@ -166,6 +235,19 @@ const mathMin = new BuiltinFunction("min", (args, interpreter, callNode) => {
             'BUILTIN001',
             "Provide at least one number to min()."
         );
+    }
+    if (args.length === 1 && Array.isArray(args[0])) {
+        const arr = args[0];
+        if (arr.length === 0) {
+            throw interpreter.errorHandler.createRuntimeError(
+                "min() cannot be called on an empty array.",
+                callNode,
+                "ARG001",
+                "Provide a non-empty array to min()."
+            );
+        }
+        arr.forEach((arg, i) => expectNumber(arg, "min", interpreter, callNode, i + 1));
+        return Math.min(...arr);
     }
     args.forEach((arg, i) => expectNumber(arg, "min", interpreter, callNode, i + 1));
     return Math.min(...args);
@@ -215,10 +297,13 @@ export const mathModuleExports = {
     ceil: mathCeil,
     round: mathRound,
     abs: mathAbs,
+    clamp: mathClamp,
+    lerp: mathLerp,
+    sum: mathSum,
+    mean: mathMean,
     max: mathMax,
     min: mathMin,
     random: mathRandom,
     seed: mathSeed,
     randint: mathRandInt,
 };
-

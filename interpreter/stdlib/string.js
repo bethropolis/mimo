@@ -220,6 +220,16 @@ const strCharAt = new BuiltinFunction("char_at", (args, interpreter, callNode) =
     return args[0].charAt(args[1]);
 }, 2); // string, index
 
+const strIsEmpty = new BuiltinFunction("is_empty", (args, interpreter, callNode) => {
+    expectString(args[0], "is_empty", interpreter, callNode, 1);
+    return args[0].length === 0;
+}, 1);
+
+const strIsBlank = new BuiltinFunction("is_blank", (args, interpreter, callNode) => {
+    expectString(args[0], "is_blank", interpreter, callNode, 1);
+    return args[0].trim().length === 0;
+}, 1);
+
 // `len` is already a global built-in.
 
 // --- Export the module's contents ---
@@ -243,7 +253,8 @@ export const stringModuleExports = {
     replace_all: strReplaceAll,
     repeat: strRepeat,
     char_at: strCharAt,
+    is_empty: strIsEmpty,
+    is_blank: strIsBlank,
     to_title_case: strToTitleCase,
     capitalize: strCapitalize,
 };
-

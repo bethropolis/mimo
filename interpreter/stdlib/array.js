@@ -7,7 +7,13 @@ import {
     arrayReduce,
     arrayForEach,
     arrayFind,
-    arrayFindIndex
+    arrayFindIndex,
+    arrayFlat,
+    arrayFlatMap,
+    arrayGroupBy,
+    arrayZip,
+    arrayChunk,
+    arrayCount
 } from './array/higherOrderFunctions.js';
 
 import {
@@ -42,6 +48,12 @@ export const arrayModule = {
     map: arrayMap,
     filter: arrayFilter,
     reduce: arrayReduce,
+    flat: arrayFlat,
+    flat_map: arrayFlatMap,
+    group_by: arrayGroupBy,
+    zip: arrayZip,
+    chunk: arrayChunk,
+    count: arrayCount,
     for_each: arrayForEach,
     find: arrayFind,
     find_index: arrayFindIndex,

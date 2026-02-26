@@ -1,4 +1,5 @@
 import { isTruthy } from '../Utils.js';
+import { getMimoType } from '../suggestions.js';
 
 export function evaluateBinaryExpression(interpreter, node) {
     const left = interpreter.visitNode(node.left);
@@ -13,7 +14,7 @@ export function evaluateBinaryExpression(interpreter, node) {
             return String(left) + String(right);
         }
         throw interpreter.errorHandler.createRuntimeError(
-            `Operator '${node.operator}' expects numbers. Got '${typeof left}' and '${typeof right}'.`,
+            `Type error for '${node.operator}': expected number operands, received ${getMimoType(left)} and ${getMimoType(right)}.`,
             node,
             'TYPE001',
             `Ensure both operands for '${node.operator}' are numbers.`
@@ -32,7 +33,7 @@ export function evaluateBinaryExpression(interpreter, node) {
         case '/':
             if (right === 0) {
                 throw interpreter.errorHandler.createRuntimeError(
-                    "Division by zero is not allowed.",
+                    "Type error for '/': expected non-zero divisor, received 0.",
                     node,
                     'MATH001',
                     "Ensure the divisor is not zero."
@@ -42,7 +43,7 @@ export function evaluateBinaryExpression(interpreter, node) {
         case '%':
             if (right === 0) {
                 throw interpreter.errorHandler.createRuntimeError(
-                    "Modulo by zero is not allowed.",
+                    "Type error for '%': expected non-zero divisor, received 0.",
                     node,
                     'MATH001',
                     "Ensure the divisor is not zero."
@@ -90,7 +91,7 @@ export function evaluateUnaryExpression(interpreter, node) {
         case '-':
             if (typeof argument !== 'number') {
                 throw interpreter.errorHandler.createRuntimeError(
-                    `Unary minus expects a number. Got '${typeof argument}'.`,
+                    `Type error for unary '-': expected number, received ${getMimoType(argument)}.`,
                     node,
                     'TYPE001',
                     'Provide a number for unary minus operation.'

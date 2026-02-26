@@ -20,7 +20,16 @@ export class VariableExecutor extends BaseExecutor {
         default: // 'set'
           const existingVarInfo = this.interpreter.currentEnv.getVariableInfo(varName);
           if (existingVarInfo) {
-            existingVarInfo.env.assign(varName, varValue);
+            try {
+              existingVarInfo.env.assign(varName, varValue);
+            } catch (error) {
+              throw this.interpreter.errorHandler.createRuntimeError(
+                error.message,
+                node,
+                "TYPE002",
+                "Verify variable mutability and declaration scope."
+              );
+            }
           } else {
             this.interpreter.currentEnv.define(varName, varValue, 'set');
           }

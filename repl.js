@@ -9,6 +9,7 @@ import { stringify, highlightMimoCode } from "./interpreter/Utils.js";
 import { formatValue } from "./tools/replFormatter.js";
 import fs from "node:fs";
 import path from "node:path";
+import { getMimoType } from "./interpreter/suggestions.js";
 
 const HISTORY_FILE = path.join(process.cwd(), ".mimo_history");
 
@@ -65,7 +66,7 @@ export function runRepl() {
 
     if (isInteractive) {
         console.log("\x1b[1;35mWelcome to Mimo REPL!\x1b[0m");
-        console.log("Type \x1b[36m.help\x1b[0m for commands or \x1b[36mexit\x1b[0m to leave.");
+        console.log("Type \x1b[36m:help\x1b[0m for commands or \x1b[36mexit\x1b[0m to leave.");
     }
 
     const promptString = isInteractive ? "\x1b[36m(mimo)\x1b[0m " : "";
@@ -86,7 +87,7 @@ export function runRepl() {
         history: isInteractive ? history.reverse() : [],
     });
 
-    const interpreter = new Interpreter(adapter);
+    let interpreter = new Interpreter(adapter);
     const nesting = new NestingTracker();
 
     function processInput(input) {
@@ -113,6 +114,7 @@ export function runRepl() {
             const ast = parser.parse();
 
             const result = interpreter.interpret(ast, replFilePath);
+            setLastResult(result);
 
             const lastStatement = ast.body[ast.body.length - 1];
             if (lastStatement && lastStatement.type !== "ShowStatement" && lastStatement.type !== "FunctionDeclaration") {
@@ -126,26 +128,64 @@ export function runRepl() {
         }
     }
 
+    function setLastResult(value) {
+        if (value === undefined) return;
+        const existing = interpreter.globalEnv.getVariableInfo("_");
+        if (existing) {
+            existing.env.assign("_", value);
+        } else {
+            interpreter.globalEnv.define("_", value, "set");
+        }
+    }
+
+    function resetEnvironment() {
+        interpreter = new Interpreter(adapter);
+    }
+
     function handleCommand(cmd) {
         if (!isInteractive) return;
-        const parts = cmd.trim().split(/\s+/);
+        const trimmed = cmd.trim();
+        const parts = trimmed.split(/\s+/);
         const action = parts[0].toLowerCase();
 
         switch (action) {
             case ".help":
+            case ":help":
                 console.log("\x1b[1mREPL Commands:\x1b[0m");
-                console.log("  \x1b[36m.help\x1b[0m     Show this help");
-                console.log("  \x1b[36m.clear\x1b[0m    Clear the screen");
-                console.log("  \x1b[36m.history\x1b[0m  Show recently used commands");
-                console.log("  \x1b[36m.exit\x1b[0m     Exit the REPL");
+                console.log("  \x1b[36m:help\x1b[0m     Show this help");
+                console.log("  \x1b[36m:clear\x1b[0m    Reset REPL environment");
+                console.log("  \x1b[36m:history\x1b[0m  Show recently used commands");
+                console.log("  \x1b[36m:type x\x1b[0m   Show Mimo type of variable x");
+                console.log("  \x1b[36m:exit\x1b[0m     Exit the REPL");
                 break;
             case ".clear":
+            case ":clear":
+                resetEnvironment();
                 process.stdout.write("\u001b[2J\u001b[0;0H");
                 break;
             case ".history":
-                console.log(rl.history.slice(0, 20).reverse().join("\n"));
+            case ":history":
+                rl.history
+                    .slice(0, 20)
+                    .reverse()
+                    .forEach((entry, idx) => console.log(`${idx + 1}. ${entry}`));
                 break;
+            case ":type": {
+                const targetName = parts[1];
+                if (!targetName) {
+                    console.log("Usage: :type <variable>");
+                    break;
+                }
+                try {
+                    const value = interpreter.currentEnv.lookup(targetName);
+                    console.log(getMimoType(value));
+                } catch {
+                    console.log(`Undefined variable: ${targetName}`);
+                }
+                break;
+            }
             case ".exit":
+            case ":exit":
                 rl.close();
                 break;
             default:
@@ -163,7 +203,7 @@ export function runRepl() {
             return;
         }
 
-        if (trimmed.startsWith(".") && isInteractive) {
+        if ((trimmed.startsWith(".") || trimmed.startsWith(":")) && isInteractive) {
             handleCommand(trimmed);
             rl.prompt();
             return;

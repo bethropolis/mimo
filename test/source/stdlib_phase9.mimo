@@ -1,0 +1,83 @@
+show "=== Phase 9 Stdlib Expansion ==="
+
+import string from "string"
+
+import array from "array"
+
+import math from "math"
+
+import object from "object"
+
+show "--- string additions ---"
+
+show call string.pad_start("7", 3, "0")
+
+show call string.pad_end("mimo", 6, "!")
+
+show call string.repeat("ha", 3)
+
+show call string.replace_all("a-b-a", "a", "x")
+
+show call string.is_empty("")
+
+show call string.is_blank("   ")
+
+show "--- array additions ---"
+
+set nested [1, [2, [3]], 4]
+
+show call array.flat(nested)
+
+show call array.flat(nested, 2)
+
+show call array.flat_map([1, 2, 3], (function(x)
+    return [x, * x 10]
+end))
+
+show call array.group_by([1, 2, 3, 4], (function(x)
+    return if = % x 2 0 then "even" else "odd"
+end))
+
+show call array.zip([1, 2, 3], ["a", "b", "c"], [true, false, true])
+
+show call array.chunk([1, 2, 3, 4, 5], 2)
+
+show call array.count([1, 2, 3, 4])
+
+show call array.count([1, 2, 3, 4], (function(x)
+    return > x 2
+end))
+
+show "--- object module ---"
+
+set user { name: "Ada", age: 30, role: "admin" }
+
+show call object.merge({ name: "Ada" }, { role: "admin" }, { active: true })
+
+show call object.pick(user, ["name", "role"])
+
+show call object.omit(user, ["age"])
+
+show call object.map_values({ a: 1, b: 2 }, (function(v)
+    return * v 10
+end))
+
+show call object.from_entries([["x", 1], ["y", 2]])
+
+show call object.is_empty({})
+
+show "--- math additions ---"
+
+show call math.clamp(15, 0, 10)
+
+show call math.lerp(10, 20, 0.25)
+
+show call math.sum([1, 2, 3, 4])
+
+show call math.mean([2, 4, 6, 8])
+
+show call math.min([5, 2, 9, 1])
+
+show call math.max([5, 2, 9, 1])
+
+show "=== Phase 9 complete ==="
