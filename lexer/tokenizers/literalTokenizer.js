@@ -30,11 +30,6 @@ export function readIdentifier(lexer) {
   }
 
   // Check if the identifier is a keyword (using includes for arrays)
-  if (value === "fn") {
-    // Treat 'fn' identically to 'function' keyword for parser consistency
-    return lexer._createToken(TokenType.Keyword, "function", startLine, startColumn, startPosition, length);
-  }
-
   if (KEYWORDS.includes(value)) { // <--- FIXED: Use .includes() for array check
     return lexer._createToken(TokenType.Keyword, value, startLine, startColumn, startPosition, length);
   }

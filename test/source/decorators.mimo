@@ -1,87 +1,76 @@
-show "=== Phase 6 — Decorators Tests ==="
+show "=== Decorators ==="
 
-const log (function(target)
-    return (function(...args)
-        show "LOG: Calling function"
-        let result call target(...args)
-        show "LOG: Done"
-        return result
-    end)
-end)
-
-@log
-function greet(name)
-    show + "Hello " name
+@logged
+function compute(x)
+    return * x x
 end
 
-call greet("Alice")
+function logged(fn)
+    return function(...args)
+        show + "Calling with " (call len(args))
+        return call fn(...args)
+    end
+end
 
-const retry (function(times)
-    return (function(target)
-        return (function(...args)
-            let count 0
-            let result null
-            while < count times
+call compute(4) -> square
+show square
+
+function retry(times)
+    return function(fn)
+        return function(...args)
+            let attempts 0
+            while < attempts times
                 try
-                    set result call target(...args)
-                    break
+                    return call fn(...args)
                 catch e
-                    set count + count 1
-                    if == count times
+                    set attempts + attempts 1
+                    if >= attempts times
                         throw e
                     end
-                    show "RETRY: Failed, retrying..."
                 end
             end
-            return result
-        end)
-    end)
-end)
-
-let failCount 0
-
-const unstable (function()
-    set failCount + failCount 1
-    if < failCount 3
-        throw "Temporary Error"
+            return null
+        end
     end
-    return "Success"
-end)
-
-@retry(3)
-function safeUnstable()
-    return call unstable()
 end
 
-show call safeUnstable()
+set unstable_attempts 0
 
-const bold (function(target)
-    return (function(...args)
-        return + "**" + call target(...args) "**"
-    end)
-end)
+@retry(3)
+function unstable()
+    set unstable_attempts + unstable_attempts 1
+    if < unstable_attempts 3
+        throw "temporary"
+    end
+    return "ok"
+end
 
-const italic (function(target)
-    return (function(...args)
-        return + "_" + call target(...args) "_"
-    end)
-end)
+show call unstable()
+
+function bold(fn)
+    return function(...args)
+        return + "**" + call fn(...args) "**"
+    end
+end
+
+function italic(fn)
+    return function(...args)
+        return + "_" + call fn(...args) "_"
+    end
+end
 
 @bold
 @italic
-function formatMsg(msg)
-    return msg
+function label(name)
+    return name
 end
 
-show call formatMsg("Formatted")
+show call label("Mimo")
 
-show "Expected: **_Formatted_**"
-
-@log
-export function secret()
-    show "Top Secret"
+@logged
+export function exported(name)
+    return + "Hi " name
 end
 
-call secret()
-
+show call exported("Agent")
 show "=== Done ==="

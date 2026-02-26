@@ -24,6 +24,7 @@ export class BaseExecutor {
   }
 
   executeProgram(node) {
+    this.interpreter.hoistFunctionDeclarations(node.body);
     let result = null;
     for (const statement of node.body) {
       result = this.interpreter.visitNode(statement);

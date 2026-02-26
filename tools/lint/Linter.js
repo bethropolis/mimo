@@ -33,6 +33,10 @@ class LinterScope {
         if (this.variables.has(name)) this.variables.get(name).reassigned = true;
         else if (this.parent) this.parent.markAsReassigned(name);
     }
+    resolveVariable(name) {
+        if (this.variables.has(name)) return this.variables.get(name);
+        return this.parent ? this.parent.resolveVariable(name) : null;
+    }
     getUnusedVariables() {
         let unused = [];
         for (const [name, info] of this.variables.entries()) {
@@ -76,7 +80,19 @@ class LinterScopeTracker {
 
         // --- Declaration Registration ---
         if (node.type === 'VariableDeclaration') {
-            this.currentScope.declare(node.identifier, { kind: node.kind, node, isExported: node.isExported });
+            if (typeof node.identifier === 'string') {
+                if (node.kind === 'set') {
+                    const existing = this.currentScope.resolveVariable(node.identifier);
+                    if (existing) {
+                        // Runtime semantics: `set` reassigns if variable already exists in scope chain.
+                        this.currentScope.markAsReassigned(node.identifier);
+                    } else {
+                        this.currentScope.declare(node.identifier, { kind: node.kind, node, isExported: node.isExported });
+                    }
+                } else {
+                    this.currentScope.declare(node.identifier, { kind: node.kind, node, isExported: node.isExported });
+                }
+            }
         }
         if (node.type === 'FunctionDeclaration') {
             this.currentScope.parent.declare(node.name, { kind: 'function', node, isExported: node.isExported });
@@ -101,8 +117,12 @@ class LinterScopeTracker {
             }
         }
 
-        if (node.type === 'VariableDeclaration' && node.kind === 'set') {
-            this.currentScope.markAsReassigned(node.identifier);
+        if (node.type === 'VariableDeclaration' && node.kind === 'set' && typeof node.identifier === 'string') {
+            // If this `set` introduced a brand-new variable in this same scope, don't mark it as reassigned.
+            const local = this.currentScope.variables.get(node.identifier);
+            if (!local || local.node !== node) {
+                this.currentScope.markAsReassigned(node.identifier);
+            }
         }
     }
     exitNode(node) {

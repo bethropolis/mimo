@@ -13,7 +13,7 @@ import { MimoError } from "./MimoError.js";
 import { ExpressionEvaluator } from "./ExpressionEvaluator.js";
 import { ModuleLoader } from "./ModuleLoader.js";
 import { StatementExecutor } from "./StatementExecutor.js";
-import { ReturnValue } from "./Values.js";
+import { FunctionValue, ReturnValue } from "./Values.js";
 import { Environment } from "./environment.js";
 
 /**
@@ -142,6 +142,7 @@ export class Interpreter {
     }
 
     try {
+      this.hoistFunctionDeclarations(statements);
       let result = null;
       for (const statement of statements) {
         result = this.visitNode(statement);
@@ -153,6 +154,16 @@ export class Interpreter {
     } finally {
       if (env) {
         this.currentEnv = previousEnv;
+      }
+    }
+  }
+
+  hoistFunctionDeclarations(statements) {
+    for (const statement of statements) {
+      if (statement?.type === "FunctionDeclaration") {
+        if (!this.currentEnv.hasInCurrentScope(statement.name)) {
+          this.currentEnv.define(statement.name, new FunctionValue(statement, this.currentEnv));
+        }
       }
     }
   }

@@ -4,6 +4,15 @@ import { ASTNode } from "../ASTNodes.js";
 import { parseExpression } from "../parserExpressions.js";
 import { isBlockEnd, parseBlock } from "../parserUtils.js";
 
+function parseParameterIdentifier(parser) {
+  const token = parser.peek();
+  if (token?.type === TokenType.Identifier || (token?.type === TokenType.Keyword && token.value === "fn")) {
+    parser.consume();
+    return ASTNode.Identifier(token.value, token);
+  }
+  parser.error('Expected a parameter name (identifier).', token, 'SYN021');
+}
+
 export function parseDecorator(parser) {
   const atToken = parser.expect(TokenType.At, undefined, 'SYN140', 'Expected "@" at the start of a decorator.');
   const nameToken = parser.expect(TokenType.Identifier, undefined, 'SYN141', 'Expected decorator name after "@".');
@@ -66,7 +75,7 @@ export function parseFunctionDeclaration(parser, isExported = false, exportToken
         }
         break;
       } else {
-        const paramNode = parser.parseIdentifier('SYN021', 'Expected a parameter name (identifier).');
+        const paramNode = parseParameterIdentifier(parser);
         params.push(paramNode); // Push the entire node
 
         if (parser.match(TokenType.Colon)) {
@@ -128,7 +137,7 @@ export function parseAnonymousFunction(parser, isFn = false) {
         }
         break;
       } else {
-        const paramNode = parser.parseIdentifier('SYN021', 'Expected a parameter name (identifier).');
+        const paramNode = parseParameterIdentifier(parser);
         params.push(paramNode); // Push the entire Identifier node
 
         if (parser.match(TokenType.Colon)) {
