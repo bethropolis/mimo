@@ -6,12 +6,12 @@ import { keymap } from '@codemirror/view';
 const numberPattern = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b/;
 const booleanPattern = /^(?:true|false)\b/;
 const nullPattern = /^null\b/;
-const keywordPattern = /^(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|call|end|import|export|from|as|show)\b/;
+const keywordPattern = /^(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|call|end|import|export|from|as|show|destructure)\b/;
 const variableKeywordPattern = /^(?:set|let|const|global)\b/;
 const modulePattern = /^(?:array|string|math|json|fs|http|datetime|regex)\b/;
 const builtinPattern = /^(?:len|get|update|type|push|pop|slice|range|join|has_property|keys|values|entries|get_arguments|get_env|exit_code|coalesce|get_property_safe|if_else)\b/;
 const wordOperatorPattern = /^(?:and|or|not)\b/;
-const symbolOperatorPattern = /^(?:===|!==|==|!=|>=|<=|->|\?\.|\?:|\?\?|\+|\-|\*|\/|%|=|>|<|&&|\|\||!|\?|:)/;
+const symbolOperatorPattern = /^(?:\.\.\.|===|!==|==|!=|>=|<=|->|\?\.|\?:|\?\?|\+|\-|\*|\/|%|=|>|<|&&|\|\||!|\?|:)/;
 const punctuationPattern = /^[()\[\]{},.]/;
 const identifierPattern = /^[A-Za-z_][A-Za-z0-9_]*/;
 
@@ -93,7 +93,7 @@ export const mimoLanguage = new LanguageSupport(StreamLanguage.define(mimoStream
 const completionKeywords = [
 	'if', 'elif', 'else', 'while', 'for', 'in', 'match', 'case', 'default',
 	'break', 'continue', 'try', 'catch', 'throw', 'return', 'function',
-	'end', 'import', 'export', 'from', 'as', 'call', 'show'
+	'end', 'import', 'export', 'from', 'as', 'call', 'show', 'destructure'
 ];
 
 const completionVariableKeywords = ['set', 'let', 'const', 'global'];

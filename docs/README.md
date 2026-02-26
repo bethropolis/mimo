@@ -1,3 +1,12 @@
+
+![Mimo mascot](assets/mascot.png ':size=180')
+
+<p align="center">
+  <strong>Official docs for the Mimo language.</strong><br />
+  Prefix notation, standard library, and practical examples.
+</p>
+
+
 # Mimo Documentation
 
 A minimal prefix-notation programming language.

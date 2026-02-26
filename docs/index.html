@@ -4,9 +4,36 @@
   <meta charset="UTF-8">
   <title>Mimo Documentation</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="description" content="A minimal prefix-notation programming language">
+  <meta name="description" content="Official Mimo documentation: syntax guide, standard library, advanced language features, examples, and testing guides.">
+  <meta name="keywords" content="mimo, mimo language, prefix notation, docsify, programming language, interpreter, syntax, standard library">
+  <meta name="author" content="Mimo Project">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="application-name" content="Mimo Documentation">
+  <meta name="apple-mobile-web-app-title" content="Mimo Docs">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="canonical" href="https://bethropolis.github.io/mimo/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Mimo Documentation">
+  <meta property="og:title" content="Mimo Documentation">
+  <meta property="og:description" content="Learn Mimo with complete syntax references, advanced guides, and practical examples.">
+  <meta property="og:url" content="https://bethropolis.github.io/mimo/">
+  <meta property="og:image" content="https://bethropolis.github.io/mimo/assets/mimo-banner.png">
+  <meta property="og:image:alt" content="Mimo banner">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mimo Documentation">
+  <meta name="twitter:description" content="Learn Mimo with complete syntax references, advanced guides, and practical examples.">
+  <meta name="twitter:image" content="https://bethropolis.github.io/mimo/assets/mimo-banner.png">
+
   <meta name="theme-color" content="#0ea5e9" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/android-chrome-512x512.png">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
   <style>
     :root {
@@ -17,9 +44,14 @@
       --surface-strong: #e2e8f0;
       --text: #0f172a;
       --text-muted: #475569;
-      --code-bg: #0f172a;
-      --code-text: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --code-text: #0f172a;
+      --inline-code-bg: #e2e8f0;
+      --inline-code-text: #0f172a;
       --border: #e2e8f0;
+      --row-stripe: #f8fafc;
+      --tip-bg: #ecfeff;
+      --tip-border: #0ea5e9;
     }
 
     body[data-theme='dark'] {
@@ -30,7 +62,12 @@
       --text-muted: #94a3b8;
       --code-bg: #020617;
       --code-text: #cbd5e1;
+      --inline-code-bg: #0b1220;
+      --inline-code-text: #dbeafe;
       --border: #334155;
+      --row-stripe: #111c30;
+      --tip-bg: #082f49;
+      --tip-border: #38bdf8;
     }
 
     body {
@@ -56,7 +93,7 @@
 
     .search {
       margin-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 78%, transparent) !important;
     }
 
     .search input {
@@ -82,6 +119,13 @@
       color: var(--text);
     }
 
+    .markdown-section img[alt='Mimo mascot'] {
+      width: 180px;
+      max-width: 100%;
+      display: block;
+      margin: 0.5rem auto 1rem;
+    }
+
     .markdown-section blockquote {
       border-left: 4px solid var(--theme-color);
       background: var(--surface);
@@ -96,6 +140,15 @@
       border-color: var(--border);
     }
 
+    .markdown-section tr:nth-child(2n) {
+      background: var(--row-stripe);
+    }
+
+    .markdown-section p.tip {
+      border-left: 4px solid var(--tip-border);
+      background: var(--tip-bg);
+    }
+
     .markdown-section pre {
       background: var(--code-bg);
       border: 1px solid var(--border);
@@ -103,10 +156,62 @@
       padding: 0.9rem;
     }
 
-    .markdown-section pre code,
-    .markdown-section code {
-      background: var(--code-bg);
-      color: var(--code-text);
+    .markdown-section :not(pre) > code {
+      background: var(--inline-code-bg);
+      color: var(--inline-code-text);
+    }
+
+    .markdown-section pre code {
+      background: transparent;
+      color: inherit;
+      text-shadow: none;
+    }
+
+    .token.comment { color: #64748b; }
+    .token.string, .token.template-string { color: #15803d; }
+    .token.number, .token.boolean, .token.null { color: #b45309; }
+    .token.keyword { color: #0369a1; }
+    .token.operator { color: #334155; }
+    .token.builtin, .token.module, .token.function { color: #7e22ce; }
+    .token.property, .token.object-key { color: #be123c; }
+    .token.punctuation { color: #475569; }
+
+    body[data-theme='dark'] .token.comment {
+      color: #64748b;
+    }
+
+    body[data-theme='dark'] .token.string,
+    body[data-theme='dark'] .token.template-string {
+      color: #4ade80;
+    }
+
+    body[data-theme='dark'] .token.number,
+    body[data-theme='dark'] .token.boolean,
+    body[data-theme='dark'] .token.null {
+      color: #fbbf24;
+    }
+
+    body[data-theme='dark'] .token.keyword {
+      color: #7dd3fc;
+    }
+
+    body[data-theme='dark'] .token.operator {
+      color: #e2e8f0;
+    }
+
+    body[data-theme='dark'] .token.builtin,
+    body[data-theme='dark'] .token.module,
+    body[data-theme='dark'] .token.function {
+      color: #d8b4fe;
+    }
+
+    body[data-theme='dark'] .token.property,
+    body[data-theme='dark'] .token.object-key {
+      color: #fda4af;
+    }
+
+    body[data-theme='dark'] .token.punctuation {
+      color: #94a3b8;
     }
 
     .docsify-copy-code-button {
@@ -120,6 +225,49 @@
       border: 1px solid var(--border);
       border-radius: 10px;
       background: var(--surface);
+    }
+
+    .docsify-pagination-container {
+      gap: 0.75rem;
+    }
+
+    .docsify-pagination-container .pagination-item a {
+      background: var(--surface);
+      border-radius: 10px;
+      color: var(--text);
+    }
+
+    .docsify-pagination-container .pagination-item-label,
+    .docsify-pagination-container .pagination-item-title,
+    .docsify-pagination-container .pagination-item-subtitle {
+      color: var(--text);
+    }
+
+    .docsify-pagination-container .pagination-item-label svg polyline {
+      stroke: var(--text-muted);
+    }
+
+    body[data-theme='dark'] .docsify-pagination-container .pagination-item {
+      border-color: var(--border);
+      background: color-mix(in oklab, var(--surface) 85%, black 15%);
+    }
+
+    body[data-theme='dark'] .docsify-pagination-container .pagination-item a {
+      background: transparent;
+    }
+
+    .sidebar-toggle {
+      background: color-mix(in oklab, var(--surface) 88%, transparent);
+      border-top: 1px solid var(--border);
+      color: var(--text);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    body[data-theme='dark'] .sidebar-toggle {
+      background: color-mix(in oklab, var(--surface) 78%, transparent);
+      border-top-color: var(--border);
+      color: var(--text);
     }
 
     .theme-toggle {
@@ -220,6 +368,15 @@
               link.setAttribute('target', '_blank');
               link.setAttribute('rel', 'noreferrer noopener');
             });
+
+            if (window.Prism && window.Prism.languages && window.Prism.languages.mimo) {
+              document
+                .querySelectorAll('pre code.lang-mimo, pre code.language-mimo, pre[data-lang=\"mimo\"] code')
+                .forEach(function (code) {
+                  code.classList.add('language-mimo');
+                  window.Prism.highlightElement(code);
+                });
+            }
           });
         }
       ]
@@ -231,6 +388,6 @@
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="assets/prism-mimo.js"></script>
 </body>
 </html>

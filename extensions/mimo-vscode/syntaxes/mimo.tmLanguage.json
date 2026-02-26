@@ -53,7 +53,7 @@
     },
     {
       "name": "keyword.control.mimo",
-      "match": "\\b(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|call|end|import|export|from|as|show)\\b"
+      "match": "\\b(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|fn|call|end|import|export|from|as|show|destructure)\\b"
     },
     {
       "name": "storage.type.variable.mimo",
@@ -61,7 +61,7 @@
     },
     {
       "name": "keyword.operator.mimo",
-      "match": "\\+|\\-|\\*|\\/|%|===|==|!==|!=|>=|<=|>|<|=|\\&\\&|\\|\\||\\!|\\?\\.|\\?:|\\?|\\:"
+      "match": "\\.\\.\\.|\\+|\\-|\\*|\\/|%|===|==|!==|!=|>=|<=|>|<|=|\\&\\&|\\|\\||\\!|\\?\\.|\\?:|\\?\\?|\\?|\\:"
     },
     {
       "name": "support.module.mimo",
@@ -245,7 +245,7 @@
         },
         {
           "name": "keyword.control.mimo",
-          "match": "\\b(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|call|end|import|export|from|as|show)\\b"
+          "match": "\\b(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|fn|call|end|import|export|from|as|show|destructure)\\b"
         },
         {
           "name": "storage.type.variable.mimo",
