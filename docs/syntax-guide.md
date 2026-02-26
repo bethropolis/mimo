@@ -20,6 +20,7 @@ show "Hello, World!"
 - **Dynamic Typing**: Types are checked at runtime
 - **First-class Functions**: Functions are values that can be passed around
 - **Pattern Matching**: Powerful structural matching
+- **Modern Flow Tools**: `|>` pipes, `guard`, optional chaining `?.`, and `??`
 - **Module System**: Import and export functionality
 - **Embedded-first**: Designed to be embedded in host applications
 
@@ -183,6 +184,9 @@ function name(x)
 end
 
 call name(arg) -> result
+set value if > n 0 then "pos" else "neg"
+set [x, y] [10, 20]
+set safe_name user?.profile?.name
 
 set fn function(x)
     return x

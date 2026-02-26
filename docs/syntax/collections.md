@@ -22,8 +22,8 @@ set last (array.last numbers)
 set rest (array.rest numbers)  // All except first
 
 // Higher-order array functions
-set doubled (array.map numbers (fn x, * 2 x))
-set evens (array.filter numbers (fn x, = (% x 2) 0))
+set doubled (array.map numbers (fn x -> * 2 x))
+set evens (array.filter numbers (fn x -> = (% x 2) 0))
 
 // Slicing
 set slice (array.slice numbers 1 4)  // [2, 3, 4]
@@ -34,12 +34,12 @@ set slice (array.slice numbers 1 4)  // [2, 3, 4]
 ```mimo
 // Extract values into variables
 set coords [10, 20, 30]
-destructure [x, y, z] from coords
+let [x, y, z] coords
 show x  // 10
 show y  // 20
 
 // Partial destructuring
-destructure [first, second] from [1, 2, 3, 4]
+let [first, second] [1, 2, 3, 4]
 show first  // 1
 ```
 
@@ -102,13 +102,13 @@ set entries (entries person)
 ```mimo
 // Extract properties into variables
 set user { name: "Bob", age: 25 }
-destructure {name, age} from user
+let {name, age} user
 show name  // "Bob"
 show age   // 25
 
 // Missing properties become null
 set config { timeout: 5000 }
-destructure {timeout, retries} from config
+let {timeout, retries} config
 show timeout  // 5000
 show retries  // null
 ```

@@ -21,10 +21,10 @@ end
 match status
     case "pending":
         show "Processing..."
-        call process_pending
+        call process_pending()
     case "complete":
         show "Done!"
-        call cleanup
+        call cleanup()
     default:
         show "Unknown status"
 end

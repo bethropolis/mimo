@@ -5,7 +5,10 @@ Language support for `.mimo` files.
 ## Features
 
 - Language registration for `.mimo` files
-- Basic TextMate syntax highlighting
+- TextMate syntax highlighting for modern Mimo syntax:
+  - Decorators: `@name`, `@name(args)`
+  - Operators: `??`, `?.`, `|>`, `...`, `->`
+  - Keywords: `guard`, `when`, `with`, `then`
 - Comment/bracket/autoclose configuration
 - Run command: `Mimo: Run Current File`
 

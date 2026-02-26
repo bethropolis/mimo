@@ -50,7 +50,7 @@ function increment()
     set counter + counter 1
 end
 
-call increment
+call increment()
 show counter  // 1
 ```
 
@@ -72,6 +72,6 @@ function example()
     show y     // 20
 end
 
-call example
+call example()
 show x  // 30 (modified by function)
 ```

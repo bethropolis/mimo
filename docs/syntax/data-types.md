@@ -111,7 +111,7 @@ set numbers (update numbers 0 10)  // [10, 2, 3, 4, 5]
 
 // Array operations
 set length (len numbers)
-set doubled (array.map numbers (fn x, * 2 x))
+set doubled (array.map numbers (fn x -> * 2 x))
 ```
 
 ## Objects (Maps/Dictionaries)

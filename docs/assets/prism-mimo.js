@@ -31,10 +31,14 @@
 		number: /\b-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?\b/,
 		boolean: /\b(?:true|false)\b/,
 		null: /\bnull\b/,
-		keyword: /\b(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|fn|call|end|import|export|from|as|show|set|let|const|global|destructure)\b/,
-		module: /\b(?:array|string|math|json|fs|http|datetime|regex)\b/,
+		decorator: {
+			pattern: /@[A-Za-z_][A-Za-z0-9_]*/,
+			alias: 'function'
+		},
+		keyword: /\b(?:if|then|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|fn|call|end|import|export|from|as|show|set|let|const|global|destructure|guard|when|with)\b/,
+		module: /\b(?:array|string|math|json|fs|http|datetime|regex|object)\b/,
 		'namespace-function': {
-			pattern: /\b(?:array|string|math|json|fs|http|datetime|regex)\.[A-Za-z_][A-Za-z0-9_]*/,
+			pattern: /\b(?:array|string|math|json|fs|http|datetime|regex|object)\.[A-Za-z_][A-Za-z0-9_]*/,
 			alias: 'builtin'
 		},
 		builtin: /\b(?:len|get|update|type|push|pop|slice|range|join|has_property|keys|values|entries|get_arguments|get_env|exit_code|coalesce|get_property_safe|if_else)\b/,

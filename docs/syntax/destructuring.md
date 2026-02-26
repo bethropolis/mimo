@@ -9,7 +9,7 @@ Destructuring allows you to extract values from arrays and objects into individu
 ```mimo
 // Destructure array elements into variables
 set coords [10, 20, 30]
-destructure [x, y, z] from coords
+let [x, y, z] coords
 show x  // 10
 show y  // 20
 show z  // 30
@@ -19,7 +19,7 @@ show z  // 30
 
 ```mimo
 // Extract only the first few elements
-destructure [first, second] from [1, 2, 3, 4, 5]
+let [first, second] [1, 2, 3, 4, 5]
 show first   // 1
 show second  // 2
 ```
@@ -28,7 +28,7 @@ show second  // 2
 
 ```mimo
 // Extra variables are set to null
-destructure [a, b, c] from [1, 2]
+let [a, b, c] [1, 2]
 show a  // 1
 show b  // 2
 show c  // null
@@ -41,7 +41,7 @@ function get_point()
     return [100, 200]
 end
 
-destructure [x, y] from call get_point()
+let [x, y] call get_point()
 show x  // 100
 show y  // 200
 ```
@@ -53,7 +53,7 @@ show y  // 200
 ```mimo
 // Destructure object properties into variables
 set person { name: "Alice", age: 30, city: "NYC" }
-destructure {name, age} from person
+let {name, age} person
 show name  // "Alice"
 show age   // 30
 ```
@@ -63,7 +63,7 @@ show age   // 30
 ```mimo
 // Missing properties are set to null
 set config { timeout: 5000 }
-destructure {timeout, retries} from config
+let {timeout, retries} config
 show timeout  // 5000
 show retries  // null
 ```
@@ -75,7 +75,7 @@ function get_settings()
     return { enabled: true, mode: "production" }
 end
 
-destructure {enabled, mode} from call get_settings()
+let {enabled, mode} call get_settings()
 show enabled  // true
 show mode     // "production"
 ```
@@ -89,9 +89,9 @@ set api_response {
     meta: { count: 2 }
 }
 
-destructure {data, meta} from api_response
-destructure {users} from data
-destructure {count} from meta
+let {data, meta} api_response
+let {users} data
+let {count} meta
 
 show users  // ["Alice", "Bob"]
 show count  // 2
@@ -105,12 +105,12 @@ set x 0
 set y 0
 
 set point { x: 100, y: 200 }
-destructure {x, y} from point
+set {x, y} point
 show x  // 100
 show y  // 200
 
 set coords [300, 400]
-destructure [x, y] from coords
+set [x, y] coords
 show x  // 300
 show y  // 400
 ```
@@ -120,13 +120,13 @@ show y  // 400
 ```mimo
 // Destructuring from incompatible type throws error
 try
-    destructure [a, b] from 42
+    let [a, b] 42
 catch err
     show "Cannot destructure from non-array"
 end
 
 try
-    destructure {x, y} from "string"
+    let {x, y} "string"
 catch err
     show "Cannot destructure from non-object"
 end
@@ -138,7 +138,7 @@ end
 
 ```mimo
 function process_user(data)
-    destructure {name, email} from data
+    let {name, email} data
     show + "Processing user: " name
     return + name "@example.com"
 end
@@ -152,7 +152,7 @@ show result  // "Bob@example.com"
 
 ```mimo
 function setup(options)
-    destructure {host, port} from options
+    let {host, port} options
     // Use defaults for missing values
     set actual_host call coalesce(host, "localhost")
     set actual_port call coalesce(port, 8080)

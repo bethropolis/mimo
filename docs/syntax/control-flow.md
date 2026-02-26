@@ -35,6 +35,9 @@ end
 if and (>= x 0) (<= x 100)
     show "x is in range [0, 100]"
 end
+
+// Inline if expression
+set label if > score 59 then "pass" else "fail"
 ```
 
 ## `while` Loop
@@ -109,6 +112,32 @@ for i in range 1 10
     show i
 end
 // Prints: 1 3 5 7 9
+```
+
+## `guard` Statement
+
+```mimo
+function process_user(user)
+    guard != user null else
+        throw "user is null"
+    end
+    guard != user?.name null else
+        throw "missing user name"
+    end
+
+    show + "Processing " user.name
+end
+```
+
+## Match Guards with `when`
+
+```mimo
+match score
+    case n when >= n 90: show "A"
+    case n when >= n 80: show "B"
+    case n when >= n 70: show "C"
+    default: show "F"
+end
 ```
 
 ## `loop` - Infinite Loop

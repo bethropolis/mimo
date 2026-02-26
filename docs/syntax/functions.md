@@ -9,14 +9,14 @@ function greet()
 end
 
 // Call function
-call greet
+call greet()
 
-// Function with parameters (comma-separated)
+// Function with parameters
 function greet(name)
     show + "Hello, " name
 end
 
-call greet "Alice"  // "Hello, Alice"
+call greet("Alice")  // "Hello, Alice"
 
 // Multiple parameters
 function add(a, b)
@@ -27,8 +27,8 @@ end
 call add(5, 3) -> result
 show result  // 8
 
-// Alternative call syntax
-set result call add 5 3
+// Expression form
+set result call add(5, 3)
 ```
 
 ## Return Values
@@ -80,8 +80,24 @@ show result  // 7
 
 // Anonymous functions in expressions
 set numbers [1, 2, 3, 4, 5]
-set doubled call array.map numbers (fn x, * 2 x)
+set doubled call array.map(numbers, (fn x -> * 2 x))
 show doubled  // [2, 4, 6, 8, 10]
+```
+
+## Decorators
+
+```mimo
+@logged
+function compute(x)
+    return * x x
+end
+
+function logged(fn)
+    return function(...args)
+        show "Calling with" args
+        return call fn(...args)
+    end
+end
 ```
 
 ## Default Parameters

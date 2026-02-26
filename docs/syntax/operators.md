@@ -64,6 +64,24 @@ and (> x 0) (< x 100)  // x is between 0 and 100
 or (= x 0) (= x null)  // x is 0 or null
 ```
 
+## Null-Safety and Flow Operators
+
+```mimo
+// Null coalescing
+?? null "fallback"            // "fallback"
+?? "value" "fallback"         // "value"
+
+// Optional chaining
+user?.profile?.name           // null-safe property access
+items?.[0]                    // null-safe index access
+format?.("x")                 // null-safe call
+
+// Pipe operator
+"  hello  "
+    |> string.trim()
+    |> string.to_upper()
+```
+
 ## String Operators
 
 ```mimo

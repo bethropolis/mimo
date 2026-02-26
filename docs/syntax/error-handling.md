@@ -12,7 +12,7 @@ end
 
 // Try-catch with specific error handling
 try
-    set data call json.parse invalid_string
+    set data call json.parse(invalid_string)
 catch error
     show "Failed to parse JSON"
     set data null

@@ -54,11 +54,11 @@ set y (*2(+3 4))      // Avoid
 
 // Blank lines between logical sections
 function process_data(data)
-    let cleaned call clean_data data
+    let cleaned call clean_data(data)
     
-    let validated call validate_data cleaned
+    let validated call validate_data(cleaned)
     
-    let result call transform_data validated
+    let result call transform_data(validated)
     return result
 end
 ```
@@ -83,11 +83,11 @@ set result + part1 part2
 // Use comments to explain WHY, not WHAT
 // Good:
 // Calculate checksum to verify data integrity
-set checksum call calculate_checksum data
+set checksum call calculate_checksum(data)
 
 // Avoid:
 // Call calculate_checksum with data
-set checksum call calculate_checksum data
+set checksum call calculate_checksum(data)
 ```
 
 ## Function Organization
@@ -104,7 +104,7 @@ end
 
 // 3. Main functions
 function process(x)
-    if not call _validate_input x
+    if not call _validate_input(x)
         throw "Invalid input"
     end
     return * x 2

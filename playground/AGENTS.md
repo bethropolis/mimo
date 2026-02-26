@@ -135,6 +135,11 @@ Edit `src/lib/editor/mimo-language.js`:
 - Add keywords to `completionKeywords`
 - Add operators to `completionOperators`
 - Add snippets using `snippetCompletion()`
+- Keep syntax support aligned with language phases:
+  - decorators (`@name`, `@name(args)`)
+  - pipe (`|>`), null coalescing (`??`), optional chaining (`?.`)
+  - guard/match guards (`guard`, `when`) and inline `if ... then ... else ...`
+  - `fn ... -> ...` shorthand
 
 ### Modifying Theme
 

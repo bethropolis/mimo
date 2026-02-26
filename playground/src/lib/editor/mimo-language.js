@@ -6,12 +6,13 @@ import { keymap } from '@codemirror/view';
 const numberPattern = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b/;
 const booleanPattern = /^(?:true|false)\b/;
 const nullPattern = /^null\b/;
-const keywordPattern = /^(?:if|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|call|end|import|export|from|as|show|destructure)\b/;
+const keywordPattern = /^(?:if|then|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|fn|call|end|import|export|from|as|show|destructure|guard|when|with)\b/;
 const variableKeywordPattern = /^(?:set|let|const|global)\b/;
-const modulePattern = /^(?:array|string|math|json|fs|http|datetime|regex)\b/;
+const modulePattern = /^(?:array|string|math|json|fs|http|datetime|regex|object)\b/;
 const builtinPattern = /^(?:len|get|update|type|push|pop|slice|range|join|has_property|keys|values|entries|get_arguments|get_env|exit_code|coalesce|get_property_safe|if_else)\b/;
 const wordOperatorPattern = /^(?:and|or|not)\b/;
-const symbolOperatorPattern = /^(?:\.\.\.|===|!==|==|!=|>=|<=|->|\?\.|\?:|\?\?|\+|\-|\*|\/|%|=|>|<|&&|\|\||!|\?|:)/;
+const symbolOperatorPattern = /^(?:\.\.\.|\|>|===|!==|==|!=|>=|<=|->|\?\.|\?:|\?\?|\+|\-|\*|\/|%|=|>|<|&&|\|\||!|\?|:)/;
+const decoratorPattern = /^@[A-Za-z_][A-Za-z0-9_]*/;
 const punctuationPattern = /^[()\[\]{},.]/;
 const identifierPattern = /^[A-Za-z_][A-Za-z0-9_]*/;
 
@@ -71,6 +72,7 @@ const mimoStreamParser = {
 		if (stream.match(numberPattern)) return 'number';
 		if (stream.match(booleanPattern)) return 'atom';
 		if (stream.match(nullPattern)) return 'atom';
+		if (stream.match(decoratorPattern)) return 'attributeName';
 		if (stream.match(keywordPattern)) return 'keyword';
 		if (stream.match(variableKeywordPattern)) return 'keyword';
 		if (stream.match(modulePattern)) return 'className';
@@ -91,14 +93,14 @@ const mimoStreamParser = {
 export const mimoLanguage = new LanguageSupport(StreamLanguage.define(mimoStreamParser));
 
 const completionKeywords = [
-	'if', 'elif', 'else', 'while', 'for', 'in', 'match', 'case', 'default',
-	'break', 'continue', 'try', 'catch', 'throw', 'return', 'function',
-	'end', 'import', 'export', 'from', 'as', 'call', 'show', 'destructure'
+	'if', 'then', 'elif', 'else', 'while', 'for', 'in', 'match', 'case', 'default',
+	'break', 'continue', 'try', 'catch', 'throw', 'return', 'function', 'fn',
+	'end', 'import', 'export', 'from', 'as', 'call', 'show', 'destructure', 'guard', 'when', 'with'
 ];
 
 const completionVariableKeywords = ['set', 'let', 'const', 'global'];
 
-const completionOperators = ['+', '-', '*', '/', '%', '=', '>', '<', '>=', '<=', '!=', '==', 'and', 'or', 'not'];
+const completionOperators = ['+', '-', '*', '/', '%', '=', '>', '<', '>=', '<=', '!=', '==', 'and', 'or', 'not', '??', '?.', '|>'];
 
 const completionBuiltins = [
 	'len', 'get', 'update', 'type', 'push', 'pop', 'slice', 'range', 'join',
@@ -106,13 +108,15 @@ const completionBuiltins = [
 	'exit_code', 'coalesce', 'get_property_safe', 'if_else'
 ];
 
-const completionModules = ['array', 'string', 'math', 'json', 'fs', 'http', 'datetime', 'regex'];
+const completionModules = ['array', 'string', 'math', 'json', 'fs', 'http', 'datetime', 'regex', 'object'];
 
-const arrayMethods = ['map', 'filter', 'reduce', 'for_each', 'find', 'find_index', 'includes', 'index_of', 'last_index_of', 'slice', 'first', 'last', 'is_empty', 'sort', 'reverse', 'shuffle', 'concat', 'unique', 'intersection', 'union', 'difference'];
+const arrayMethods = ['map', 'filter', 'reduce', 'for_each', 'find', 'find_index', 'includes', 'index_of', 'last_index_of', 'slice', 'first', 'last', 'is_empty', 'sort', 'reverse', 'shuffle', 'concat', 'unique', 'intersection', 'union', 'difference', 'flat', 'flat_map', 'group_by', 'zip', 'chunk', 'count'];
 
-const stringMethods = ['length', 'to_upper', 'to_lower', 'to_title_case', 'capitalize', 'trim', 'substring', 'slice', 'contains', 'starts_with', 'ends_with', 'index_of', 'replace', 'split', 'join'];
+const stringMethods = ['to_upper', 'to_lower', 'to_title_case', 'capitalize', 'trim', 'trim_start', 'trim_end', 'substring', 'slice', 'contains', 'starts_with', 'ends_with', 'index_of', 'last_index_of', 'replace', 'replace_all', 'split', 'repeat', 'pad_start', 'pad_end', 'char_at', 'is_empty', 'is_blank'];
 
-const mathMethods = ['abs', 'sqrt', 'pow', 'floor', 'ceil', 'round', 'sin', 'cos', 'tan', 'random', 'seed', 'randint'];
+const mathMethods = ['abs', 'sqrt', 'pow', 'floor', 'ceil', 'round', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'log', 'log10', 'log2', 'exp', 'cbrt', 'clamp', 'lerp', 'sum', 'mean', 'min', 'max', 'random', 'seed', 'randint'];
+
+const objectMethods = ['merge', 'pick', 'omit', 'map_values', 'from_entries', 'is_empty'];
 
 const mathConstants = ['PI', 'E'];
 
@@ -125,6 +129,7 @@ const mimoCompletionEntries = [
 	...arrayMethods.map((label) => ({ label: `array.${label}`, type: 'function' })),
 	...stringMethods.map((label) => ({ label: `string.${label}`, type: 'function' })),
 	...mathMethods.map((label) => ({ label: `math.${label}`, type: 'function' })),
+	...objectMethods.map((label) => ({ label: `object.${label}`, type: 'function' })),
 	...mathConstants.map((label) => ({ label: `math.${label}`, type: 'constant' })),
 
 	snippetCompletion('function ${1:name}(${2:args})\n\t${3:body}\nend', {
@@ -222,12 +227,12 @@ const mimoCompletionEntries = [
 		type: 'keyword',
 		detail: 'snippet'
 	}),
-	snippetCompletion('array.map ${1:arr} (fn ${2:x}, ${3:body})', {
+	snippetCompletion('array.map ${1:arr} (fn ${2:x} -> ${3:body})', {
 		label: 'array.map …',
 		type: 'function',
 		detail: 'snippet'
 	}),
-	snippetCompletion('array.filter ${1:arr} (fn ${2:x}, ${3:condition})', {
+	snippetCompletion('array.filter ${1:arr} (fn ${2:x} -> ${3:condition})', {
 		label: 'array.filter …',
 		type: 'function',
 		detail: 'snippet'

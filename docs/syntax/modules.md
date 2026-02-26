@@ -7,12 +7,12 @@
 import math from "math"
 
 // Use module
-set result call math.sqrt 16
+set result call math.sqrt(16)
 show result  // 4
 
 // Import with alias
 import math from "math" as m
-set result call m.sqrt 9
+set result call m.sqrt(9)
 show result  // 3
 
 // Import module file

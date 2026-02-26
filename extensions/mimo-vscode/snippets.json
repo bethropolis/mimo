@@ -176,14 +176,14 @@
     "Array Map": {
         "prefix": "map",
         "body": [
-            "array.map ${1:arr} (fn ${2:x}, $0)"
+            "array.map ${1:arr} (fn ${2:x} -> $0)"
         ],
         "description": "Map over array"
     },
     "Array Filter": {
         "prefix": "filter",
         "body": [
-            "array.filter ${1:arr} (fn ${2:x}, $0)"
+            "array.filter ${1:arr} (fn ${2:x} -> $0)"
         ],
         "description": "Filter array"
     },
