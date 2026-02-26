@@ -35,6 +35,7 @@ export const SYMBOLS = {
   "...": TokenType.Spread, // Spread operator
   "..": TokenType.Range, // Range operator
   ":": TokenType.Colon,
+  "@": TokenType.At,
 };
 
 

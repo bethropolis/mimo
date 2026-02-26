@@ -5,7 +5,36 @@ import { BaseExecutor } from "./BaseExecutor.js";
 
 export class FunctionExecutor extends BaseExecutor {
   executeFunctionDeclaration(node) {
-    const func = new FunctionValue(node, this.interpreter.currentEnv);
+    let func = new FunctionValue(node, this.interpreter.currentEnv);
+
+    // Apply decorators in reverse order (bottom-up)
+    if (node.decorators && node.decorators.length > 0) {
+      for (let i = node.decorators.length - 1; i >= 0; i--) {
+        const decoratorNode = node.decorators[i];
+        const decorator = this.interpreter.visitNode(decoratorNode.name);
+
+        // Arity/Type check for decorator should ideally be here or inside FunctionValue.call
+        // For simplicity, we just call it.
+
+        if (decoratorNode.arguments) {
+          // Factory decorator: @retry(3)
+          const factoryArgs = decoratorNode.arguments.map(arg => this.interpreter.visitNode(arg));
+          const actualDecorator = decorator.call(this.interpreter, factoryArgs, decoratorNode);
+
+          if (typeof actualDecorator?.call !== 'function') {
+            throw this.interpreter.errorHandler.createRuntimeError(
+              `Decorator factory '${decoratorNode.name.name}' must return a callable function.`,
+              decoratorNode, 'DEC001'
+            );
+          }
+          func = actualDecorator.call(this.interpreter, [func], decoratorNode);
+        } else {
+          // Simple decorator: @log
+          func = decorator.call(this.interpreter, [func], decoratorNode);
+        }
+      }
+    }
+
     this.interpreter.currentEnv.define(node.name, func);
     return null;
   }

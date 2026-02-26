@@ -21,6 +21,7 @@ export const TokenType = {
   InterpolationStart: "interpolation_start",
   InterpolationEnd: "interpolation_end",
   Colon: "colon",
+  At: "at",
 };
 
 export const END_KEYWORDS = [

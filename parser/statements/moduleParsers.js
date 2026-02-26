@@ -25,7 +25,7 @@ export function parseImportStatement(parser) {
     );
 }
 
-export function parseExportStatement(parser) {
+export function parseExportStatement(parser, decorators = []) {
     const exportToken = parser.expectKeyword("export", 'SYN077', 'Expected "export" keyword.');
 
     const nextToken = parser.peek();
@@ -42,7 +42,7 @@ export function parseExportStatement(parser) {
                 return parseVariableOrAssignment(parser, true, exportToken);
             case "function":
                 // Pass exportToken as the location token for the AST node
-                return parseFunctionDeclaration(parser, true, exportToken);
+                return parseFunctionDeclaration(parser, true, exportToken, decorators);
             default:
                 parser.error(
                     `Cannot export statement of type '${nextToken.value}'. Expected a declaration.`,

@@ -16,6 +16,7 @@ import {
 import {
   parseCallStatement,
   parseFunctionDeclaration,
+  parseDecorators,
   parseReturnStatement,
   parseShowStatement,
   parseThrowStatement,
@@ -125,6 +126,20 @@ export function parseStatement(parser) {
         );
       // This default case should always throw if it's a keyword.
     }
+  }
+
+  // Handle Decorators: @decorator
+  if (token.type === TokenType.At) {
+    const decorators = parseDecorators(parser);
+    const nextToken = parser.peek();
+    if (nextToken?.type === TokenType.Keyword) {
+      if (nextToken.value === "function") {
+        return parseFunctionDeclaration(parser, false, null, decorators);
+      } else if (nextToken.value === "export") {
+        return parseExportStatement(parser, decorators);
+      }
+    }
+    parser.error("Decorators can only be applied to 'function' or 'export function' declarations.", token, 'SYN143');
   }
 
   // Check for LabeledStatement

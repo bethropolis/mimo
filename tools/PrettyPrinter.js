@@ -96,16 +96,22 @@ export class PrettyPrinter {
     }
 
     visitFunctionDeclaration(node) {
-        this.write(this.currentIndent);
-        if (node.isExported) this.write('export ');
+        if (node.decorators && node.decorators.length > 0) {
+            for (const decorator of node.decorators) {
+                this.visitNode(decorator);
+            }
+        }
+        if (node.isExported) {
+            this.write(this.currentIndent + 'export ');
+        } else {
+            this.write(this.currentIndent);
+        }
         this.write(`function ${node.name}(`);
-        const params = node.params.map((p) => {
-            const name = typeof p === 'string' ? p : p.name;
-            const defaultNode = node.defaults[name];
-            if (defaultNode) {
-                const tempPrinter = new PrettyPrinter();
-                tempPrinter.visitNode(defaultNode);
-                return `${name}: ${tempPrinter.output}`;
+        const params = node.params.map(pNode => {
+            let name = typeof pNode === 'string' ? pNode : pNode.name;
+            if (node.defaults[name]) {
+                const defaultValue = this.format(node.defaults[name]).trim();
+                return `${name}: ${defaultValue}`;
             }
             return name;
         });
@@ -117,6 +123,25 @@ export class PrettyPrinter {
         this.write(')\n');
         this.visitBlock(node.body);
         this.writeLine('end');
+    }
+
+    visitDecorator(node) {
+        this.write(this.currentIndent + '@');
+        // Disable indent for decorator name as we already wrote currentIndent
+        const oldIndent = this.currentIndent;
+        this.currentIndent = '';
+        this.visitNode(node.name);
+        this.currentIndent = oldIndent;
+
+        if (node.arguments) {
+            this.write('(');
+            node.arguments.forEach((arg, i) => {
+                this.visitNode(arg); // This might add indent if visitNode adds it...
+                if (i < node.arguments.length - 1) this.write(', ');
+            });
+            this.write(')');
+        }
+        this.write('\n');
     }
 
     visitIfStatement(node) {

@@ -1,69 +1,77 @@
-// Test Phase 5 — Optional Chaining
-
 show "=== Phase 5 — Optional Chaining Tests ==="
 
-// 5a. Safe Property Access
-let user { profile: { name: "Alice" } }
-let nullUser null
+const user { name: "Alice", settings: { theme: "dark" } }
+
+const nullUser null
 
 show user?.profile?.name
+
 show "Expected: Alice"
 
 show nullUser?.profile?.name
+
 show "Expected: null"
 
-// 5b. Safe Index Access
-let items [10, 20, 30]
-let nullItems null
+const items ["apple", "banana"]
+
+const nullItems null
 
 show items?.[0]
+
 show "Expected: 10"
 
-show items?.[5] // Should be null or out of bounds behavior (Mimo usually returns null for out of bounds?)
-// Actually let's check null items
+show items?.[5]
+
 show nullItems?.[0]
+
 show "Expected: null"
 
-// 5c. Safe Call syntax
-let greet function(name) return + "Hello " name end
-let nullGreet null
+const greet (function()
+    return "Hello"
+end)
+
+const nullGreet null
 
 show greet?.("Bob")
+
 show "Expected: Hello Bob"
 
 show nullGreet?.("Bob")
+
 show "Expected: null"
 
-// Combined cases
-let data {
-    get_list: function() return [1, 2, 3] end
-}
+const complex { a: { b: { c: (function()
+    return { d: 42 }
+end) } } }
+
 let nullData null
 
-show data?.get_list()?. [0]
+show data?.get_list?.()?.[0]
+
 show "Expected: 1"
 
-show nullData?.get_list()?. [0]
+show nullData?.get_list?.()?.[0]
+
 show "Expected: null"
 
-// Nested mixed access
-let complex {
-    users: [
-        { name: "Alice", get_id: function() return 101 end },
-        null
-    ]
-}
+let complex { users: [{ name: "Alice", get_id: (function()
+    return 101
+end) }, null] }
 
 show complex?.users?.[0]?.name
+
 show "Expected: Alice"
 
-show complex?.users?.[0]?.get_id()
+show complex?.users?.[0]?.get_id?.()
+
 show "Expected: 101"
 
 show complex?.users?.[1]?.name
+
 show "Expected: null"
 
 show complex?.users?.[5]?.name
+
 show "Expected: null"
 
 show "=== Done ==="

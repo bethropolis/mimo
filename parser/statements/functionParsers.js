@@ -4,7 +4,34 @@ import { ASTNode } from "../ASTNodes.js";
 import { parseExpression } from "../parserExpressions.js";
 import { isBlockEnd, parseBlock } from "../parserUtils.js";
 
-export function parseFunctionDeclaration(parser, isExported = false, exportToken = null) {
+export function parseDecorator(parser) {
+  const atToken = parser.expect(TokenType.At, undefined, 'SYN140', 'Expected "@" at the start of a decorator.');
+  const nameToken = parser.expect(TokenType.Identifier, undefined, 'SYN141', 'Expected decorator name after "@".');
+  const name = ASTNode.Identifier(nameToken.value, nameToken);
+
+  let args = null;
+  if (parser.match(TokenType.LParen)) {
+    args = [];
+    if (parser.peek()?.type !== TokenType.RParen) {
+      do {
+        args.push(parseExpression(parser));
+      } while (parser.match(TokenType.Comma));
+    }
+    parser.expect(TokenType.RParen, undefined, 'SYN142', 'Expected closing parenthesis after decorator arguments.');
+  }
+
+  return ASTNode.Decorator(name, args, atToken);
+}
+
+export function parseDecorators(parser) {
+  const decorators = [];
+  while (parser.peek()?.type === TokenType.At) {
+    decorators.push(parseDecorator(parser));
+  }
+  return decorators;
+}
+
+export function parseFunctionDeclaration(parser, isExported = false, exportToken = null, decorators = []) {
   // THIS IS THE FIX: This function now consumes the 'function' keyword itself.
   const funcToken = parser.expectKeyword("function", 'SYNXXX', 'Expected "function" keyword.');
 
@@ -64,6 +91,7 @@ export function parseFunctionDeclaration(parser, isExported = false, exportToken
     restParam,
     body,
     isExported, // Pass isExported flag
+    decorators, // Pass practitioners decorators
     astNodeLocationToken, // Pass the correct location token
     endToken
   );

@@ -1,0 +1,87 @@
+show "=== Phase 6 — Decorators Tests ==="
+
+const log (function(target)
+    return (function(...args)
+        show "LOG: Calling function"
+        let result call target(...args)
+        show "LOG: Done"
+        return result
+    end)
+end)
+
+@log
+function greet(name)
+    show + "Hello " name
+end
+
+call greet("Alice")
+
+const retry (function(times)
+    return (function(target)
+        return (function(...args)
+            let count 0
+            let result null
+            while < count times
+                try
+                    set result call target(...args)
+                    break
+                catch e
+                    set count + count 1
+                    if == count times
+                        throw e
+                    end
+                    show "RETRY: Failed, retrying..."
+                end
+            end
+            return result
+        end)
+    end)
+end)
+
+let failCount 0
+
+const unstable (function()
+    set failCount + failCount 1
+    if < failCount 3
+        throw "Temporary Error"
+    end
+    return "Success"
+end)
+
+@retry(3)
+function safeUnstable()
+    return call unstable()
+end
+
+show call safeUnstable()
+
+const bold (function(target)
+    return (function(...args)
+        return + "**" + call target(...args) "**"
+    end)
+end)
+
+const italic (function(target)
+    return (function(...args)
+        return + "_" + call target(...args) "_"
+    end)
+end)
+
+@bold
+@italic
+function formatMsg(msg)
+    return msg
+end
+
+show call formatMsg("Formatted")
+
+show "Expected: **_Formatted_**"
+
+@log
+export function secret()
+    show "Top Secret"
+end
+
+call secret()
+
+show "=== Done ==="

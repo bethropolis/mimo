@@ -135,7 +135,7 @@ export const ASTNode = {
     length: token.length,
     file: token.file,
   }),
-  FunctionDeclaration: (name, params, defaults, restParam, body, isExported, token) => ({
+  FunctionDeclaration: (name, params, defaults, restParam, body, isExported, decorators, token) => ({
     type: "FunctionDeclaration",
     name,
     params, // This should be an array of strings (parameter names)
@@ -143,6 +143,17 @@ export const ASTNode = {
     restParam, // This should be a string (rest parameter name) or null
     body,
     isExported,
+    decorators, // Array of Decorator nodes
+    line: token.line,
+    column: token.column,
+    start: token.start,
+    length: token.length,
+    file: token.file,
+  }),
+  Decorator: (name, args, token) => ({
+    type: "Decorator",
+    name, // Identifier node
+    arguments: args, // Array of expressions or null
     line: token.line,
     column: token.column,
     start: token.start,

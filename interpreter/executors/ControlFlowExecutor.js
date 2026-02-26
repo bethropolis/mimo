@@ -162,7 +162,15 @@ export class ControlFlowExecutor extends BaseExecutor {
       const tryEnv = new Environment(this.interpreter.currentEnv);
       return this.interpreter.executeBlock(node.tryBlock, tryEnv);
     } catch (error) {
-      // Catch the actual MimoError or JS Error
+      // Don't catch control flow exceptions or return values
+      if (
+        error instanceof BreakException ||
+        error instanceof ContinueException ||
+        error instanceof ReturnValue
+      ) {
+        throw error;
+      }
+
       if (node.catchVar && node.catchBlock) {
         // Create new block scope for catch block
         const catchEnv = new Environment(this.interpreter.currentEnv);
