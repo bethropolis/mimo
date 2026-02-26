@@ -89,12 +89,14 @@ export function runRepl() {
 
     let interpreter = new Interpreter(adapter);
     const nesting = new NestingTracker();
+    const sessionHistory = [];
 
     function processInput(input) {
         // Save to history file if interactive
         if (isInteractive) {
             fs.appendFileSync(HISTORY_FILE, input.trim() + "\n");
         }
+        sessionHistory.push(input);
 
         interpreter.currentFile = replFilePath;
         interpreter.errorHandler.addSourceFile(replFilePath, input);
@@ -128,6 +130,19 @@ export function runRepl() {
         }
     }
 
+    function parseToAst(source, filePath = replFilePath) {
+        const lexer = new Lexer(source, filePath);
+        const tokens = [];
+        let token;
+        while ((token = lexer.nextToken()) !== null) {
+            tokens.push(token);
+        }
+
+        const parser = new Parser(tokens, filePath);
+        parser.setErrorHandler(interpreter.errorHandler);
+        return parser.parse();
+    }
+
     function setLastResult(value) {
         if (value === undefined) return;
         const existing = interpreter.globalEnv.getVariableInfo("_");
@@ -147,6 +162,7 @@ export function runRepl() {
         const trimmed = cmd.trim();
         const parts = trimmed.split(/\s+/);
         const action = parts[0].toLowerCase();
+        const payload = trimmed.slice(action.length).trim();
 
         switch (action) {
             case ".help":
@@ -156,6 +172,10 @@ export function runRepl() {
                 console.log("  \x1b[36m:clear\x1b[0m    Reset REPL environment");
                 console.log("  \x1b[36m:history\x1b[0m  Show recently used commands");
                 console.log("  \x1b[36m:type x\x1b[0m   Show Mimo type of variable x");
+                console.log("  \x1b[36m:load f\x1b[0m   Execute a .mimo file into current REPL env");
+                console.log("  \x1b[36m:save f\x1b[0m   Save REPL history to file");
+                console.log("  \x1b[36m:time expr\x1b[0m Measure expression/program execution time");
+                console.log("  \x1b[36m:ast expr\x1b[0m  Parse input and print AST JSON");
                 console.log("  \x1b[36m:exit\x1b[0m     Exit the REPL");
                 break;
             case ".clear":
@@ -181,6 +201,66 @@ export function runRepl() {
                     console.log(getMimoType(value));
                 } catch {
                     console.log(`Undefined variable: ${targetName}`);
+                }
+                break;
+            }
+            case ":load": {
+                if (!payload) {
+                    console.log("Usage: :load <file>");
+                    break;
+                }
+                const target = path.resolve(process.cwd(), payload);
+                if (!fs.existsSync(target)) {
+                    console.log(`File not found: ${target}`);
+                    break;
+                }
+                try {
+                    const source = fs.readFileSync(target, "utf-8");
+                    processInput(source);
+                } catch (err) {
+                    console.log(`Failed to load '${target}': ${err.message}`);
+                }
+                break;
+            }
+            case ":save": {
+                if (!payload) {
+                    console.log("Usage: :save <file>");
+                    break;
+                }
+                const target = path.resolve(process.cwd(), payload);
+                try {
+                    const sessionLines = sessionHistory
+                        .slice()
+                        .filter((entry) => entry && !entry.trim().startsWith(":") && !entry.trim().startsWith("."));
+                    fs.writeFileSync(target, `${sessionLines.join("\n")}\n`, "utf-8");
+                    console.log(`Saved ${sessionLines.length} entries to ${target}`);
+                } catch (err) {
+                    console.log(`Failed to save '${target}': ${err.message}`);
+                }
+                break;
+            }
+            case ":time": {
+                if (!payload) {
+                    console.log("Usage: :time <expr|statement>");
+                    break;
+                }
+                const start = process.hrtime.bigint();
+                processInput(payload);
+                const end = process.hrtime.bigint();
+                const elapsedMs = Number(end - start) / 1_000_000;
+                console.log(`\x1b[90mExecuted in ${elapsedMs.toFixed(3)} ms\x1b[0m`);
+                break;
+            }
+            case ":ast": {
+                if (!payload) {
+                    console.log("Usage: :ast <expr|statement>");
+                    break;
+                }
+                try {
+                    const ast = parseToAst(payload, "/repl_ast");
+                    console.log(JSON.stringify(ast, null, 2));
+                } catch (err) {
+                    interpreter.errorHandler.printError(err);
                 }
                 break;
             }

@@ -8,7 +8,7 @@ const booleanPattern = /^(?:true|false)\b/;
 const nullPattern = /^null\b/;
 const keywordPattern = /^(?:if|then|elif|else|while|for|in|match|case|default|break|continue|try|catch|throw|return|function|fn|call|end|import|export|from|as|show|destructure|guard|when|with)\b/;
 const variableKeywordPattern = /^(?:set|let|const|global)\b/;
-const modulePattern = /^(?:array|string|math|json|fs|http|datetime|regex|object)\b/;
+const modulePattern = /^(?:array|string|math|json|fs|http|datetime|regex|object|path|env)\b/;
 const builtinPattern = /^(?:len|get|update|type|push|pop|slice|range|join|has_property|keys|values|entries|get_arguments|get_env|exit_code|coalesce|get_property_safe|if_else)\b/;
 const wordOperatorPattern = /^(?:and|or|not)\b/;
 const symbolOperatorPattern = /^(?:\.\.\.|\|>|===|!==|==|!=|>=|<=|->|\?\.|\?:|\?\?|\+|\-|\*|\/|%|=|>|<|&&|\|\||!|\?|:)/;
@@ -108,7 +108,7 @@ const completionBuiltins = [
 	'exit_code', 'coalesce', 'get_property_safe', 'if_else'
 ];
 
-const completionModules = ['array', 'string', 'math', 'json', 'fs', 'http', 'datetime', 'regex', 'object'];
+const completionModules = ['array', 'string', 'math', 'json', 'fs', 'http', 'datetime', 'regex', 'object', 'path', 'env'];
 
 const arrayMethods = ['map', 'filter', 'reduce', 'for_each', 'find', 'find_index', 'includes', 'index_of', 'last_index_of', 'slice', 'first', 'last', 'is_empty', 'sort', 'reverse', 'shuffle', 'concat', 'unique', 'intersection', 'union', 'difference', 'flat', 'flat_map', 'group_by', 'zip', 'chunk', 'count'];
 
@@ -117,6 +117,8 @@ const stringMethods = ['to_upper', 'to_lower', 'to_title_case', 'capitalize', 't
 const mathMethods = ['abs', 'sqrt', 'pow', 'floor', 'ceil', 'round', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'log', 'log10', 'log2', 'exp', 'cbrt', 'clamp', 'lerp', 'sum', 'mean', 'min', 'max', 'random', 'seed', 'randint'];
 
 const objectMethods = ['merge', 'pick', 'omit', 'map_values', 'from_entries', 'is_empty'];
+const pathMethods = ['join', 'dirname', 'basename', 'extname'];
+const envMethods = ['get', 'has', 'all'];
 
 const mathConstants = ['PI', 'E'];
 
@@ -130,6 +132,8 @@ const mimoCompletionEntries = [
 	...stringMethods.map((label) => ({ label: `string.${label}`, type: 'function' })),
 	...mathMethods.map((label) => ({ label: `math.${label}`, type: 'function' })),
 	...objectMethods.map((label) => ({ label: `object.${label}`, type: 'function' })),
+	...pathMethods.map((label) => ({ label: `path.${label}`, type: 'function' })),
+	...envMethods.map((label) => ({ label: `env.${label}`, type: 'function' })),
 	...mathConstants.map((label) => ({ label: `math.${label}`, type: 'constant' })),
 
 	snippetCompletion('function ${1:name}(${2:args})\n\t${3:body}\nend', {

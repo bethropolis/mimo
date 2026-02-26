@@ -66,4 +66,10 @@ import regex from "regex"
 
 // Date and time
 import datetime from "datetime"
+
+// Path utilities
+import path from "path"
+
+// Environment variables
+import env from "env"
 ```

@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { nodeAdapter } from "../adapters/nodeAdapter.js";
 import { Mimo } from "../index.js";
 import { runRepl } from "../repl.js";
@@ -33,6 +34,7 @@ Commands:
                     Flags: --fail-on-warning, --quiet, --json
                     Rules: --rule:<name>=true|false
   test [path]       Run test files. Defaults to current directory.
+  doctor            Validate runtime/tooling environment and stdlib availability.
 
 Options:
   --version, -v     Show the version number.
@@ -90,6 +92,129 @@ function collectMimoFiles(targets) {
   }
 
   return files;
+}
+
+function runDoctor() {
+  const checks = [];
+  const pass = (name, detail) => checks.push({ status: "PASS", name, detail });
+  const warn = (name, detail) => checks.push({ status: "WARN", name, detail });
+  const fail = (name, detail) => checks.push({ status: "FAIL", name, detail });
+
+  const requiredAdapterMethods = [
+    "readFileSync",
+    "writeFileSync",
+    "existsSync",
+    "dirname",
+    "resolvePath",
+    "joinPath",
+    "basename",
+    "extname",
+    "getEnvVariable",
+    "getEnvAll",
+    "fetchSync",
+  ];
+
+  const missing = requiredAdapterMethods.filter(
+    (method) => typeof nodeAdapter[method] !== "function",
+  );
+  if (missing.length === 0) {
+    pass("Adapter API", "All required adapter methods are present.");
+  } else {
+    fail(
+      "Adapter API",
+      `Missing adapter methods: ${missing.join(", ")}. Add them to adapters/nodeAdapter.js.`,
+    );
+  }
+
+  if (process.versions?.bun) {
+    pass("Bun runtime", `Detected Bun ${process.versions.bun}.`);
+  } else {
+    warn("Bun runtime", "Bun version could not be detected.");
+  }
+
+  try {
+    const probe = path.join(process.cwd(), ".mimo_doctor_tmp");
+    fs.writeFileSync(probe, "ok", "utf-8");
+    fs.unlinkSync(probe);
+    pass("Filesystem access", "Read/write operations in current directory work.");
+  } catch (err) {
+    fail("Filesystem access", `Failed RW check in cwd: ${err.message}`);
+  }
+
+  {
+    const curl = spawnSync("curl", ["--version"], { encoding: "utf-8" });
+    if (curl.status === 0) {
+      pass("HTTP dependency", "curl is installed (required by http module).");
+    } else {
+      warn(
+        "HTTP dependency",
+        "curl not found. `http.get/post` will fail until curl is installed.",
+      );
+    }
+  }
+
+  {
+    const mimo = new Mimo(nodeAdapter);
+    try {
+      const smokeResult = mimo.run("+ 1 2", "/doctor_smoke.mimo");
+      pass("Interpreter smoke test", `Basic evaluation works (result: ${smokeResult}).`);
+    } catch (err) {
+      fail("Interpreter smoke test", String(err));
+    }
+  }
+
+  {
+    const mimo = new Mimo(nodeAdapter);
+    const stdlibModules = [
+      "array",
+      "assert",
+      "datetime",
+      "env",
+      "fs",
+      "http",
+      "json",
+      "math",
+      "object",
+      "path",
+      "regex",
+      "string",
+    ];
+
+    const missingModules = [];
+    for (const mod of stdlibModules) {
+      try {
+        mimo.interpreter.moduleLoader.loadModule(mod, process.cwd());
+      } catch {
+        missingModules.push(mod);
+      }
+    }
+
+    if (missingModules.length === 0) {
+      pass("Stdlib module registry", "All built-in stdlib modules resolved.");
+    } else {
+      fail(
+        "Stdlib module registry",
+        `Failed to resolve: ${missingModules.join(", ")}.`,
+      );
+    }
+  }
+
+  console.log(`\nMimo Doctor Report (${new Date().toISOString()})\n`);
+  for (const item of checks) {
+    console.log(`[${item.status}] ${item.name}: ${item.detail}`);
+  }
+
+  const hasFail = checks.some((c) => c.status === "FAIL");
+  const hasWarn = checks.some((c) => c.status === "WARN");
+  if (hasFail) {
+    console.log("\nDoctor result: FAILED");
+    process.exit(1);
+  }
+  if (hasWarn) {
+    console.log("\nDoctor result: PASS WITH WARNINGS");
+    return;
+  }
+  console.log("\nDoctor result: PASS");
 }
 
 // --- New Test Runner Logic ---
@@ -200,6 +325,9 @@ async function main() {
       break;
     case "repl":
       runRepl();
+      break;
+    case "doctor":
+      runDoctor();
       break;
     case "fmt": {
       const shouldWrite = commandArgs.includes("--write");

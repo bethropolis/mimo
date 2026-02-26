@@ -253,3 +253,26 @@ show iso
 set formatted call datetime.format(now, "YYYY-MM-DD")
 show formatted  // "2024-01-15"
 ```
+
+## Path Module
+
+```mimo
+import path from "path"
+
+show call path.join("src", "lib", "main.mimo")
+show call path.dirname("/tmp/file.txt")
+show call path.basename("/tmp/file.txt")
+show call path.extname("/tmp/file.txt")
+```
+
+## Env Module
+
+```mimo
+import env from "env"
+
+show call env.has("HOME")
+show call env.get("HOME")
+show call env.get("NOT_SET", "fallback")
+set vars call env.all()
+show type vars // "object"
+```

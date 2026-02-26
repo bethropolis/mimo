@@ -73,7 +73,7 @@
     },
     {
       "name": "support.module.mimo",
-      "match": "\\b(?:array|string|math|json|fs|http|datetime|regex|object)\\b"
+      "match": "\\b(?:array|string|math|json|fs|http|datetime|regex|object|path|env)\\b"
     },
     {
       "name": "support.function.builtin.mimo",

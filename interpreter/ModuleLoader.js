@@ -7,22 +7,26 @@ import { MimoError } from "./MimoError.js";
 import { arrayModule } from "./stdlib/array.js";
 import { assertModule } from "./stdlib/assert.js";
 import { datetimeModule } from "./stdlib/datetime.js";
+import { envModule } from "./stdlib/env.js";
 import { fsModule } from "./stdlib/fs.js";
 import { httpModule } from "./stdlib/http.js";
 import { jsonModule } from "./stdlib/json.js";
 import { mathModuleExports } from "./stdlib/math.js";
 import { objectModule } from "./stdlib/object.js";
+import { pathModule } from "./stdlib/path.js";
 import { regexModule } from "./stdlib/regex.js";
 import { stringModuleExports } from "./stdlib/string.js";
 
 const internalStdLibModules = {
   array: arrayModule,
   datetime: datetimeModule,
+  env: envModule,
   fs: fsModule,
   http: httpModule,
   json: jsonModule,
   math: mathModuleExports,
   object: objectModule,
+  path: pathModule,
   regex: regexModule,
   string: stringModuleExports,
   assert: assertModule,

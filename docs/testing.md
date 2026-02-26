@@ -42,6 +42,12 @@ bun repl.js
 > function double(n) return * 2 n end
 > show call double 5
 10
+
+# New REPL utilities
+> :load test/source/stdlib_path_env.mimo
+> :ast call path.join("a", "b")
+> :time call path.join("a", "b")
+> :save repl-session.mimo
 ```
 
 ### 4. Testing Error Handling
@@ -54,6 +60,12 @@ bun bin/cli.js -e "set x"
 
 # Should show runtime error
 bun bin/cli.js -e "/ 10 0"
+```
+
+### 5. Environment Diagnostics
+```bash
+# Validate runtime/tooling setup
+bun bin/cli.js doctor
 ```
 
 ---

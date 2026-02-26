@@ -27,14 +27,16 @@ export class Interpreter {
    */
   constructor(adapter) {
     this.adapter = adapter;
+    this.callStack = [];
     this.globalEnv = new Environment(null, true);
     this.currentEnv = this.globalEnv;
     this.expressionEvaluator = new ExpressionEvaluator(this);
     this.statementExecutor = new StatementExecutor(this);
+    this.errorHandler = new ErrorHandler({}, {
+      stackFramesProvider: () => [...this.callStack],
+    });
     this.moduleLoader = new ModuleLoader(this);
     this.currentFile = "/repl";
-    this.errorHandler = new ErrorHandler();
-    this.callStack = [];
 
     initializeBuiltins(this.globalEnv);
     initializeArrayModule(this.globalEnv);

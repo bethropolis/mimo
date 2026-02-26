@@ -33,6 +33,11 @@ const baseBrowserAdapter = {
     const lastSlash = filePath.lastIndexOf("/");
     return filePath.substring(lastSlash + 1);
   },
+  extname: (filePath) => {
+    const base = filePath.substring(filePath.lastIndexOf("/") + 1);
+    const dot = base.lastIndexOf(".");
+    return dot > 0 ? base.substring(dot) : "";
+  },
 
   // http
   fetchSync: (url, options = {}) => {
@@ -61,6 +66,7 @@ const baseBrowserAdapter = {
   // --- Process (Mocked) ---
   getArguments: () => [], // No command-line arguments in the browser
   getEnvVariable: () => null, // No environment variables
+  getEnvAll: () => ({}),
   exit: (code) => {
     console.warn(
       `Mimo script called exit(${code}), but exit is disabled in the browser.`,

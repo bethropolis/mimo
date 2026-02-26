@@ -96,6 +96,15 @@ export class MimoError extends Error {
             output += "Mimo Stack:\n";
             this.stackFrames.forEach(frame => {
                 output += `    at ${frame.functionName} (${frame.file || 'unknown'}:${frame.line}:${frame.column})\n`;
+                if (frame.snippet) {
+                    const snippet = String(frame.snippet);
+                    output += `      > ${snippet.trim()}\n`;
+                    if (frame.column !== undefined && snippet.trim().length > 0) {
+                        const trimmedOffset = snippet.length - snippet.trimStart().length;
+                        const pointerCol = Math.max(0, frame.column - 1 - trimmedOffset);
+                        output += `        ${' '.repeat(pointerCol)}^\n`;
+                    }
+                }
             });
         }
         return output;

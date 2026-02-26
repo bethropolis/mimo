@@ -32,10 +32,12 @@ export const nodeAdapter = {
   joinPath: (...segments) => path.join(...segments),
 
   basename: (filePath, ext) => path.basename(filePath, ext),
+  extname: (filePath) => path.extname(filePath),
 
   getArguments: () => process.argv.slice(2),
 
   getEnvVariable: (variableName) => process.env[variableName],
+  getEnvAll: () => ({ ...process.env }),
 
   exit: (code) => process.exit(code),
 

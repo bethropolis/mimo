@@ -4,8 +4,9 @@ import { MimoError } from './MimoError.js';
  * Handles and formats errors within the Mimo interpreter.
  */
 export class ErrorHandler {
-    constructor(sourceCodeMap = {}) {
+    constructor(sourceCodeMap = {}, options = {}) {
         this.sourceCodeMap = sourceCodeMap; // Map of filePath -> sourceCodeString
+        this.stackFramesProvider = options.stackFramesProvider || null;
     }
 
     /**
@@ -83,9 +84,19 @@ export class ErrorHandler {
      * @param {Array<Object>} [stackFrames=[]] - The Mimo call stack (from interpreter).
      * @returns {MimoError}
      */
-    createRuntimeError(message, astNode, code = 'RUN000', suggestion = '', stackFrames = []) {
+    createRuntimeError(message, astNode, code = 'RUN000', suggestion = '', stackFrames = null) {
+        const framesFromProvider = (stackFrames === null && typeof this.stackFramesProvider === 'function')
+            ? this.stackFramesProvider()
+            : (stackFrames || []);
 
-        const error = MimoError.runtimeError(code, message, astNode, suggestion, stackFrames);
+        const enrichedFrames = Array.isArray(framesFromProvider)
+            ? framesFromProvider.map((frame) => ({
+                ...frame,
+                snippet: this.getLine(frame.file || 'unknown', frame.line),
+            }))
+            : [];
+
+        const error = MimoError.runtimeError(code, message, astNode, suggestion, enrichedFrames);
         // Ensure file is set for runtime errors too, even if astNode has it.
         // It's crucial for context.
         error.location.file = astNode?.file || 'unknown';
