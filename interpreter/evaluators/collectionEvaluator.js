@@ -132,6 +132,11 @@ export function evaluateSafePropertyAccess(interpreter, node) {
     return null;
   }
 
+  // If property doesn't exist, return null instead of letting evaluatePropertyAccess throw
+  if (!(node.property in object)) {
+    return null;
+  }
+
   return evaluatePropertyAccess(interpreter, { ...node, type: 'PropertyAccess' });
 }
 

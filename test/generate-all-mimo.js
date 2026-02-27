@@ -31,10 +31,21 @@ function generateAllMimo() {
     content += '// Do not edit manually - this file will be overwritten\n\n';
     content += 'show "=== All Test Modules ==="\n';
     
+    const keywords = new Set([
+      'if','then','elif','else','while','for','in','match','case','default','break',
+      'continue','try','catch','throw','return','function','fn','call','end','import',
+      'export','from','as','show','destructure','guard','when','with'
+    ]);
+    const normalize = (moduleName) => {
+      let namespace = moduleName.replace(/[-\s]/g, '_');
+      if (keywords.has(namespace)) namespace = `${namespace}_module`;
+      return namespace;
+    };
+
     // Add imports for each file
     mimoFiles.forEach(file => {
       const moduleName = path.basename(file, '.mimo');
-      const namespace = moduleName.replace(/[-\s]/g, '_');
+      const namespace = normalize(moduleName);
       content += `import ${namespace} from "${moduleName}"\n`;
     });
     
@@ -44,7 +55,7 @@ function generateAllMimo() {
     // Add a list of all available namespaces
     mimoFiles.forEach(file => {
       const moduleName = path.basename(file, '.mimo');
-      const namespace = moduleName.replace(/[-\s]/g, '_');
+      const namespace = normalize(moduleName);
       content += `show "  - ${namespace} (from ${moduleName}.mimo)"\n`;
     });
     
@@ -57,7 +68,7 @@ function generateAllMimo() {
     console.log(`📦 Imported ${mimoFiles.length} modules:`);
     mimoFiles.forEach(file => {
       const moduleName = path.basename(file, '.mimo');
-      const namespace = moduleName.replace(/[-\s]/g, '_');
+      const namespace = normalize(moduleName);
       console.log(`   ${namespace} <- ${file}`);
     });
     

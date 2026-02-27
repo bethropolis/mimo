@@ -5,10 +5,10 @@ function compute(x)
     return * x x
 end
 
-function logged(fn)
+function logged(target)
     return function(...args)
         show + "Calling with " (call len(args))
-        return call fn(...args)
+        return call target(...args)
     end
 end
 
@@ -16,12 +16,12 @@ call compute(4) -> square
 show square
 
 function retry(times)
-    return function(fn)
+    return function(target)
         return function(...args)
             let attempts 0
             while < attempts times
                 try
-                    return call fn(...args)
+                    return call target(...args)
                 catch e
                     set attempts + attempts 1
                     if >= attempts times
@@ -47,15 +47,15 @@ end
 
 show call unstable()
 
-function bold(fn)
+function bold(target)
     return function(...args)
-        return + "**" + call fn(...args) "**"
+        return + "**" + call target(...args) "**"
     end
 end
 
-function italic(fn)
+function italic(target)
     return function(...args)
-        return + "_" + call fn(...args) "_"
+        return + "_" + call target(...args) "_"
     end
 end
 

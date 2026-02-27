@@ -1,77 +1,54 @@
 show "=== Phase 5 — Optional Chaining Tests ==="
-
-const user { name: "Alice", settings: { theme: "dark" } }
-
+const user {
+    profile: { name: "Alice" }
+}
 const nullUser null
-
 show user?.profile?.name
-
 show "Expected: Alice"
-
 show nullUser?.profile?.name
-
 show "Expected: null"
-
-const items ["apple", "banana"]
-
+const items [10, 20, 30]
 const nullItems null
-
 show items?.[0]
-
 show "Expected: 10"
-
 show items?.[5]
-
 show nullItems?.[0]
-
 show "Expected: null"
-
-const greet (function()
-    return "Hello"
+const greet (function(name)
+    return + "Hello " name
 end)
-
 const nullGreet null
-
 show greet?.("Bob")
-
 show "Expected: Hello Bob"
-
 show nullGreet?.("Bob")
-
 show "Expected: null"
-
-const complex { a: { b: { c: (function()
-    return { d: 42 }
-end) } } }
-
+const data {
+    get_list: (function()
+        return [1, 2, 3]
+    end)
+}
 let nullData null
-
 show data?.get_list?.()?.[0]
-
 show "Expected: 1"
-
 show nullData?.get_list?.()?.[0]
-
 show "Expected: null"
-
-let complex { users: [{ name: "Alice", get_id: (function()
-    return 101
-end) }, null] }
-
+let complex {
+    users: [
+        {
+            name: "Alice",
+            get_id: (function()
+                return 101
+            end)
+        },
+        null
+    ]
+}
 show complex?.users?.[0]?.name
-
 show "Expected: Alice"
-
 show complex?.users?.[0]?.get_id?.()
-
 show "Expected: 101"
-
 show complex?.users?.[1]?.name
-
 show "Expected: null"
-
 show complex?.users?.[5]?.name
-
 show "Expected: null"
-
 show "=== Done ==="

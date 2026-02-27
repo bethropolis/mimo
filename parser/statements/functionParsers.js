@@ -58,7 +58,7 @@ export function parseFunctionDeclaration(parser, isExported = false, exportToken
   let hasEncounteredDefault = false;
   let hasEncounteredRest = false;
 
-  if (parser.peek()?.type !== TokenType.RParen) {
+  if (parser.peek()?.type !== TokenType.RParen && parser.peek()?.value !== "->") {
     do {
       if (hasEncounteredRest) {
         parser.error("No parameters allowed after a rest parameter.", parser.peek(), 'SYN060');
@@ -121,8 +121,51 @@ export function parseAnonymousFunction(parser, isFn = false) {
   let hasEncounteredDefault = false;
   let hasEncounteredRest = false;
 
+  if (isFn) {
+    while (parser.peek() && (parser.peek().type !== TokenType.Operator || parser.peek().value !== "->")) {
+      if (hasEncounteredRest) {
+        parser.error("No parameters allowed after a rest parameter.", parser.peek(), 'SYN060');
+      }
+
+      if (parser.match(TokenType.Spread)) {
+        const spreadToken = parser.peek(-1);
+        const paramNameToken = parser.expect(TokenType.Identifier, undefined, 'SYN056', 'Expected an identifier for rest parameter.');
+        restParam = ASTNode.Identifier(paramNameToken.value, spreadToken);
+        hasEncounteredRest = true;
+        break;
+      }
+
+      const paramNode = parseParameterIdentifier(parser);
+      params.push(paramNode);
+
+      if (parser.match(TokenType.Colon)) {
+        defaults[paramNode.name] = parseExpression(parser);
+        hasEncounteredDefault = true;
+      } else if (hasEncounteredDefault && !hasEncounteredRest) {
+        parser.error("Parameter without default value cannot follow parameter with default value.", paramNode, 'SYN_DEFAULT_ORDER');
+      }
+    }
+
+    parser.expect(TokenType.Operator, "->", 'SYN136', 'Expected "->" after fn parameters.');
+    const expression = parseExpression(parser);
+    const body = [ASTNode.ReturnStatement(expression, funcToken)];
+
+    return ASTNode.AnonymousFunction(
+      params,
+      defaults,
+      restParam,
+      body,
+      funcToken,
+      true
+    );
+  }
+
   if (parser.peek()?.type !== TokenType.RParen) {
     do {
+      if (parser.peek()?.type === TokenType.Operator && parser.peek()?.value === "->") {
+        parser.consume();
+        break;
+      }
       if (hasEncounteredRest) {
         parser.error("No parameters allowed after a rest parameter.", parser.peek(), 'SYN060');
       }
@@ -165,29 +208,10 @@ export function parseAnonymousFunction(parser, isFn = false) {
       }
     } while (parser.peek()?.type !== TokenType.RParen && parser.peek()?.value !== "->");
 
-    // In case there were NO params but we still use the -> like `(fn -> body)`
-    if (parser.peek()?.value === "->") {
-      parser.consume(); // Consume the arrow
-    }
   }
 
   if (!isFn) {
     parser.expect(TokenType.RParen, undefined, 'SYN026', 'Expected a closing parenthesis for function parameters.');
-  }
-
-  // fn shorthand is expression-bodied and does not require "end":
-  // (fn x -> * 2 x)
-  if (isFn) {
-    const expression = parseExpression(parser);
-    const body = [ASTNode.ReturnStatement(expression, funcToken)];
-    return ASTNode.AnonymousFunction(
-      params,
-      defaults,
-      restParam,
-      body,
-      funcToken,
-      true
-    );
   }
 
   const body = parseBlock(parser);
