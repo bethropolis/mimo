@@ -84,6 +84,28 @@ set doubled call array.map(numbers, (fn x -> * 2 x))
 show doubled  // [2, 4, 6, 8, 10]
 ```
 
+## `fn` vs `function`
+
+Use `fn` for concise, expression-bodied callbacks and use `function` for full block bodies.
+
+```mimo
+// fn: shorthand, single-expression body, no `end`
+set doubled call array.map([1, 2, 3], (fn x -> * 2 x))
+
+// function: full body, multiple statements, requires `end`
+set classify function(x)
+    if > x 0
+        return "positive"
+    end
+    return "zero-or-negative"
+end
+```
+
+Rules:
+- `fn` uses `->` between params and body.
+- `fn` is expression-bodied (single expression).
+- `function` supports full statement blocks and explicit `return`.
+
 ## Decorators
 
 ```mimo

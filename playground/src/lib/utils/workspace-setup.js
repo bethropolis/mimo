@@ -23,12 +23,12 @@ set in_stock call array.filter(products, (fn p -> > p.stock 0))
 
 for p in in_stock
   call helpers.line_for(p) -> line
-  show line
+show line
 end
 
 show ""
 call helpers.total_value(in_stock) -> total
-show `Inventory value: $${total}`
+show \`Inventory value: $\${total}\`
 
 call string.to_upper("edit src/main.mimo and run again!") -> tip
 show tip`,
@@ -41,7 +41,7 @@ show call helpers.line_for(sample)`,
   if > item.stock 0
     set status "In Stock"
   end
-  return `${item.name} | $${item.price} | ${status}`
+  return \`\${item.name} | $\${item.price} | \${status}\`
 end
 
 export function total_value(items)
