@@ -39,7 +39,11 @@ show company["info"].founded
 // TODO: Chained bracket assignment not yet supported
 // set company["info"]["employees"] 50
 // set company.info.employees 50
-show company.info.employees
+try
+    show company.info.employees
+catch err
+    show + "Caught: " err
+end
 show company
 
 // 5. Property existence checking

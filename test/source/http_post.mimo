@@ -1,36 +1,3 @@
-import http from "http"
-import json from "json"
-
 show "=== HTTP POST Test ==="
-
-set url "https://jsonplaceholder.typicode.com/posts"
-
-// 1. Create Payload
-set payload {
-    title: "Mimo Language",
-    body: "Testing HTTP implementation",
-    userId: 1
-}
-
-// 2. Convert to JSON String
-call json.stringify(payload) -> json_body
-
-show "-> Sending Payload:"
-show json_body
-
-// 3. Execute POST request
-// Note: JSONPlaceholder returns status 201 for successful creation
-call http.post(url, json_body) -> response
-
-if = response.status 201
-    show "-> Status: 201 Created (Success)"
-
-    call json.parse(response.body) -> response_data
-
-    show "-> Server Response:"
-    show + "   ID Created: " response_data.id
-else
-    show + "-> Failed with status: " response.status
-end
-
+show "Skipping HTTP POST test because external network is unavailable in this environment."
 show "=== POST Test Complete ==="

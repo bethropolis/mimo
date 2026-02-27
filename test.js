@@ -4,19 +4,6 @@ import path from 'node:path';
 import { nodeAdapter as adapter } from './adapters/nodeAdapter.js';
 import { Mimo } from './index.js';
 
-function findTestFile(fileName) {
-    const directPath = path.resolve(process.cwd(), fileName);
-    if (fs.existsSync(directPath)) return directPath;
-
-    const withExt = directPath.endsWith('.mimo') ? '' : '.mimo';
-    if (fs.existsSync(`${directPath}${withExt}`)) return `${directPath}${withExt}`;
-
-    const testSourcePath = path.resolve(process.cwd(), 'test/source', fileName);
-    if (fs.existsSync(testSourcePath)) return testSourcePath;
-    if (fs.existsSync(`${testSourcePath}.mimo`)) return `${testSourcePath}.mimo`;
-
-    return null;
-}
 
 async function runTest() {
     const testName = process.argv[2] || 'all';
@@ -42,5 +29,19 @@ async function runTest() {
     }
 }
 
+
+function findTestFile(fileName) {
+    const directPath = path.resolve(process.cwd(), fileName);
+    if (fs.existsSync(directPath)) return directPath;
+
+    const withExt = directPath.endsWith('.mimo') ? '' : '.mimo';
+    if (fs.existsSync(`${directPath}${withExt}`)) return `${directPath}${withExt}`;
+
+    const testSourcePath = path.resolve(process.cwd(), 'test/source', fileName);
+    if (fs.existsSync(testSourcePath)) return testSourcePath;
+    if (fs.existsSync(`${testSourcePath}.mimo`)) return `${testSourcePath}.mimo`;
+
+    return null;
+}
 
 runTest();
