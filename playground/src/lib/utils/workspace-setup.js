@@ -3,39 +3,53 @@
  */
 
 export const DEFAULT_FILE_CONTENTS = {
-  'src/main.mimo': `import math from "../modules/math.mimo"
+  'src/main.mimo': `import helpers from "../modules/helpers.mimo"
+import array from "array"
+import string from "string"
 
-function bootstrap(name)
-    set score call math.double(21)
-    show + "hello, " name
-    show + "score=" score
-    return score
+show "=== Mimo Playground Quick Tour ==="
+show "Prefix math:"
+show + 8 * 2 5
+
+set products [
+  { name: "Notebook", stock: 4, price: 12 },
+  { name: "Marker", stock: 0, price: 3 },
+  { name: "Desk Lamp", stock: 2, price: 28 }
+]
+
+show ""
+show "In-stock report:"
+set in_stock call array.filter(products, (fn p -> > p.stock 0))
+
+for p in in_stock
+  call helpers.line_for(p) -> line
+  show line
 end
 
-call bootstrap("developer") -> result
+show ""
+call helpers.total_value(in_stock) -> total
+show + "Inventory value: $" total
 
-show result`,
-  'src/app.mimo': `function greet(person)
-  return + "Welcome " person
+call string.to_upper("edit src/main.mimo and run again!") -> tip
+show tip`,
+  'src/app.mimo': `import helpers from "../modules/helpers.mimo"
+
+set sample { name: "Keyboard", stock: 6, price: 45 }
+show call helpers.line_for(sample)`,
+  'modules/helpers.mimo': `export function line_for(item)
+  set status if > item.stock 0 then "In Stock" else "Out of Stock"
+  return + + + item.name " | $" item.price " | " status
 end
 
-call greet("Mimo") -> banner
-show banner`,
-  'modules/math.mimo': `export function double(value)
-  return * value 2
-end
-
-export function sum(a, b)
-  return + a b
-end`,
-  'modules/strings.mimo': `export function loud(text)
-  return + text "!"
+export function total_value(items)
+  set totals call array.map(items, (fn p -> * p.stock p.price))
+  return call array.reduce(totals, (fn acc n -> + acc n), 0)
 end`
 };
 
 export const DEFAULT_TABS = [
   { id: 'src/main.mimo', name: 'main.mimo', content: DEFAULT_FILE_CONTENTS['src/main.mimo'] },
-  { id: 'modules/math.mimo', name: 'math.mimo', content: DEFAULT_FILE_CONTENTS['modules/math.mimo'] }
+  { id: 'modules/helpers.mimo', name: 'helpers.mimo', content: DEFAULT_FILE_CONTENTS['modules/helpers.mimo'] }
 ];
 
 export const DEFAULT_ACTIVE_TAB = 'src/main.mimo';

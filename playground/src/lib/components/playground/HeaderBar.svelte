@@ -5,6 +5,7 @@
 	import AlignLeft from '@lucide/svelte/icons/align-left';
 	import Share2 from '@lucide/svelte/icons/share-2';
 	import Settings from '@lucide/svelte/icons/settings';
+	import BookOpen from '@lucide/svelte/icons/book-open';
 
 	let { sidebarOpen = true, fsStatus = 'initializing', onToggleSidebar, onRun, onFormat, onShare, onOpenSettings } = $props();
 
@@ -38,6 +39,16 @@
 	</div>
 
 	<div class="flex items-center gap-2">
+		<a
+			href="https://bethropolis.github.io/mimo/"
+			target="_blank"
+			rel="noreferrer"
+			class={buttonClass}
+			title="Open documentation"
+		>
+			<BookOpen size={16} strokeWidth={2} />
+			<span>Docs</span>
+		</a>
 		<button
 			type="button"
 			onclick={onRun}
