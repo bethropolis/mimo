@@ -37,8 +37,11 @@ show tip`,
 set sample { name: "Keyboard", stock: 6, price: 45 }
 show call helpers.line_for(sample)`,
   'modules/helpers.mimo': `export function line_for(item)
-  set status if > item.stock 0 then "In Stock" else "Out of Stock"
-  return + + + item.name " | $" item.price " | " status
+  set status "Out of Stock"
+  if > item.stock 0
+    set status "In Stock"
+  end
+  return + + + + item.name " | $" item.price " | " status
 end
 
 export function total_value(items)

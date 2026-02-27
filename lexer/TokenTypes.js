@@ -41,6 +41,7 @@ export const KEYWORDS = [
   "when",
   "while",
   "function",
+  "fn",
   "call",
   "show",
   "return",

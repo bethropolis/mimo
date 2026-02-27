@@ -174,6 +174,21 @@ export function parseAnonymousFunction(parser, isFn = false) {
   if (!isFn) {
     parser.expect(TokenType.RParen, undefined, 'SYN026', 'Expected a closing parenthesis for function parameters.');
   }
+
+  // fn shorthand is expression-bodied and does not require "end":
+  // (fn x -> * 2 x)
+  if (isFn) {
+    const expression = parseExpression(parser);
+    const body = [ASTNode.ReturnStatement(expression, funcToken)];
+    return ASTNode.AnonymousFunction(
+      params,
+      defaults,
+      restParam,
+      body,
+      funcToken
+    );
+  }
+
   const body = parseBlock(parser);
   const endToken = parser.expect(TokenType.Keyword, "end", 'SYN027', 'Expected "end" keyword to close function declaration.');
 
