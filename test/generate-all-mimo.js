@@ -34,9 +34,8 @@ function generateAllMimo() {
     // Add imports for each file
     mimoFiles.forEach(file => {
       const moduleName = path.basename(file, '.mimo');
-      // Replace hyphens and other special characters with underscores for valid identifiers
       const namespace = moduleName.replace(/[-\s]/g, '_');
-      content += `import "${moduleName}" as ${namespace}\n`;
+      content += `import ${namespace} from "${moduleName}"\n`;
     });
     
     content += '\nshow "All modules imported successfully!"\n';
