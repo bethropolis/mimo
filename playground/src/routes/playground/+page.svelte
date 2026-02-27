@@ -9,6 +9,9 @@
 	import SettingsModal from '$lib/components/playground/SettingsModal.svelte';
 	import ShareModal from '$lib/components/playground/ShareModal.svelte';
 	import DeleteConfirmationModal from '$lib/components/playground/DeleteConfirmationModal.svelte';
+	import CommandPaletteModal from '$lib/components/playground/CommandPaletteModal.svelte';
+	import ExamplesModal from '$lib/components/playground/ExamplesModal.svelte';
+	import ShortcutsModal from '$lib/components/playground/ShortcutsModal.svelte';
 	import SplitPane from '$lib/components/playground/SplitPane.svelte';
 	import LoadingSkeleton from '$lib/components/playground/LoadingSkeleton.svelte';
 	import {
@@ -27,6 +30,17 @@
 			if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
 				e.preventDefault();
 				store.runActive();
+				return;
+			}
+			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+				e.preventDefault();
+				store.commandPaletteOpen = !store.commandPaletteOpen;
+				return;
+			}
+			if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+				e.preventDefault();
+				store.shortcutsOpen = true;
+				return;
 			}
 		};
 		window.addEventListener('keydown', handleKeydown);
@@ -56,6 +70,9 @@
 				onFormat={store.formatActive}
 				onShare={store.shareWorkspace}
 				onOpenSettings={() => (store.settingsOpen = true)}
+				onOpenExamples={() => (store.examplesOpen = true)}
+				onOpenPalette={() => (store.commandPaletteOpen = true)}
+				onOpenShortcuts={() => (store.shortcutsOpen = true)}
 			/>
 
 			<main class="h-[calc(100vh-4.5rem)] overflow-hidden">
@@ -93,6 +110,8 @@
 												resolvedTheme={store.resolvedTheme}
 												fontSize={store.fontSize}
 												tabSize={store.tabSize}
+												importPaths={store.importPathSuggestions}
+												activePath={store.activeTabId}
 											/>
 										{/snippet}
 										{#snippet second()}
@@ -146,6 +165,8 @@
 										resolvedTheme={store.resolvedTheme}
 										fontSize={store.fontSize}
 										tabSize={store.tabSize}
+										importPaths={store.importPathSuggestions}
+										activePath={store.activeTabId}
 									/>
 								{/snippet}
 								{#snippet second()}
@@ -189,7 +210,23 @@
 				bind:tabSize={store.tabSize}
 				bind:autoSave={store.autoSave}
 				bind:lintEnabled={store.lintEnabled}
+				onResetWorkspace={store.resetWorkspace}
 				onClose={() => (store.settingsOpen = false)}
+			/>
+			<CommandPaletteModal
+				open={store.commandPaletteOpen}
+				actions={store.commandPaletteActions}
+				onClose={() => (store.commandPaletteOpen = false)}
+				onSelect={store.runPaletteAction}
+			/>
+			<ExamplesModal
+				open={store.examplesOpen}
+				onClose={() => (store.examplesOpen = false)}
+				onLoadExample={store.loadExampleWorkspace}
+			/>
+			<ShortcutsModal
+				open={store.shortcutsOpen}
+				onClose={() => (store.shortcutsOpen = false)}
 			/>
 					<ShareModal
 						open={store.shareOpen}

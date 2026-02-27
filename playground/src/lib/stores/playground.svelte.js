@@ -52,10 +52,17 @@ import { formatCommand, formatOutput, formatError, formatSystem, createEntry } f
  * 	rightRatio: number;
  * }} PersistedLayout
  */
+/**
+ * @typedef {{
+ * 	tabIds: string[];
+ * 	activeTabId: string;
+ * }} PersistedSession
+ */
 
 const PLAYGROUND_CONTEXT = Symbol('playground');
 const SETTINGS_STORAGE_KEY = 'mimo.playground.settings.v1';
 const LAYOUT_STORAGE_KEY = 'mimo.playground.layout.v1';
+const SESSION_STORAGE_KEY = 'mimo.playground.session.v1';
 /** @type {PersistedSettings} */
 const DEFAULT_SETTINGS = {
 	theme: 'system',
@@ -71,6 +78,81 @@ const DEFAULT_LAYOUT = {
 	workspaceRatio: 64,
 	centerRatio: 66,
 	rightRatio: 52
+};
+
+const EXAMPLE_WORKSPACES = {
+	inventory: {
+		label: 'Inventory',
+		files: {
+			'src/main.mimo': `import catalog from "../modules/catalog.mimo"
+import pricing from "../modules/pricing.mimo"
+
+show "=== Inventory Report ==="
+for p in catalog.PRODUCTS
+    call pricing.final_price(p.price, "VIP") -> vip
+    show \`${'${p.name}'} | stock=${'${p.stock}'} | vip=$${'${vip}'}\`
+end`,
+			'modules/catalog.mimo': `export const PRODUCTS [
+    { name: "Notebook", stock: 12, price: 9 },
+    { name: "Mouse", stock: 3, price: 25 },
+    { name: "Lamp", stock: 0, price: 30 }
+]`,
+			'modules/pricing.mimo': `export function final_price(base, tier)
+    if = tier "VIP"
+        return * base 0.9
+    end
+    return base
+end`
+		}
+	},
+	regex: {
+		label: 'Regex',
+		files: {
+			'src/main.mimo': `import regex from "regex"
+
+set text "Order #A-104, email: hello@mimo.dev"
+set id call regex.extract("#([A-Z]-[0-9]+)", text)
+set emails call regex.find_matches("[A-Za-z0-9_.-]+@[A-Za-z0-9.-]+", text)
+
+show id
+show emails`
+		}
+	},
+	modules: {
+		label: 'Modules',
+		files: {
+			'src/main.mimo': `import mathx from "../modules/mathx.mimo"
+import text from "../modules/text.mimo"
+
+call mathx.sum3(2, 4, 6) -> total
+show call text.banner(\`sum=${'${total}'}\`)`,
+			'modules/mathx.mimo': `export function sum3(a, b, c)
+    return + + a b c
+end`,
+			'modules/text.mimo': `export function banner(v)
+    return + "[MIMO] " v
+end`
+		}
+	},
+	decorators: {
+		label: 'Decorators',
+		files: {
+			'src/main.mimo': `@logged
+function square(x)
+    return * x x
+end
+
+function logged(wrapped)
+    return function(...args)
+        show \`calling with ${'${args}'}\`
+        return call wrapped(...args)
+    end
+end
+
+call square(9) -> value
+show value`
+		}
+	}
 };
 
 /**
@@ -102,6 +184,13 @@ function normalizeNumber(value, fallback, min, max) {
 function normalizeBoolean(value, fallback) {
 	if (typeof value === 'boolean') return value;
 	return fallback;
+}
+/**
+ * @param {unknown} value
+ * @returns {value is string}
+ */
+function isString(value) {
+	return typeof value === 'string';
 }
 
 /**
@@ -179,6 +268,33 @@ function persistLayout(layout) {
 	}
 }
 
+/**
+ * @returns {PersistedSession | null}
+ */
+function loadPersistedSession() {
+	try {
+		const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw);
+		const tabIds = Array.isArray(parsed?.tabIds) ? parsed.tabIds.filter(isString) : [];
+		const activeTabId = typeof parsed?.activeTabId === 'string' ? parsed.activeTabId : '';
+		return { tabIds, activeTabId };
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * @param {PersistedSession} session
+ */
+function persistSession(session) {
+	try {
+		localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+	} catch {
+		// Ignore persistence failures.
+	}
+}
+
 function localTimestamp() {
 	return new Date().toLocaleTimeString('en-US', { hour12: false });
 }
@@ -186,6 +302,7 @@ function localTimestamp() {
 export function createPlaygroundStore() {
 	const persistedSettings = loadPersistedSettings();
 	const persistedLayout = loadPersistedLayout();
+	const persistedSession = loadPersistedSession();
 
 	// Explorer state
 	let tree = $state(/** @type {import('$lib/utils/workspace.js').ExplorerNode[]} */ ([]));
@@ -243,6 +360,9 @@ export function createPlaygroundStore() {
 	let sidebarOpen = $state(persistedLayout.sidebarOpen);
 	let settingsOpen = $state(false);
 	let shareOpen = $state(false);
+	let examplesOpen = $state(false);
+	let shortcutsOpen = $state(false);
+	let commandPaletteOpen = $state(false);
 	let deleteModalOpen = $state(false);
 	let nodeToDelete = $state('');
 	let isDeletingFolder = $state(false);
@@ -318,6 +438,13 @@ export function createPlaygroundStore() {
 
 	// Derived values
 	let activeCode = $derived(tabs.find((tab) => tab.id === activeTabId)?.content ?? '');
+
+	$effect(() => {
+		persistSession({
+			tabIds: tabs.map((tab) => tab.id),
+			activeTabId
+		});
+	});
 
 	// Effect to lint when code changes
 	$effect(() => {
@@ -799,6 +926,114 @@ export function createPlaygroundStore() {
 		}
 	}
 
+	function resetWorkspace() {
+		try {
+			replaceWorkspaceFiles(DEFAULT_FILE_CONTENTS);
+			tabs = [...DEFAULT_TABS];
+			activeTabId = DEFAULT_ACTIVE_TAB;
+			selectedNodeId = DEFAULT_ACTIVE_TAB;
+			recentFiles = [];
+			commandHistory = [];
+			refreshExplorerFromFs();
+			appendLog('warning', 'Workspace reset to default starter files.');
+			if (activeTabId.endsWith('.mimo')) {
+				refreshAst(readWorkspaceFile(activeTabId) ?? '', `/${activeTabId}`);
+			}
+			return true;
+		} catch (error) {
+			appendLog('error', `Reset failed: ${String(error)}`);
+			return false;
+		}
+	}
+
+	/**
+	 * @param {'inventory'|'regex'|'modules'|'decorators'} exampleId
+	 */
+	function loadExampleWorkspace(exampleId) {
+		const spec = EXAMPLE_WORKSPACES[exampleId];
+		if (!spec) return false;
+		try {
+			replaceWorkspaceFiles(spec.files);
+			refreshExplorerFromFs();
+			const fileIds = Object.keys(spec.files).sort((a, b) =>
+				a === 'src/main.mimo' ? -1 : b === 'src/main.mimo' ? 1 : a.localeCompare(b)
+			);
+			tabs = fileIds.map((id) => ({
+				id,
+				name: id.split('/').pop() ?? id,
+				content: readWorkspaceFile(id) ?? /** @type {Record<string, string>} */(spec.files)[id] ?? ''
+			}));
+			activeTabId = fileIds.includes('src/main.mimo') ? 'src/main.mimo' : (fileIds[0] ?? '');
+			selectedNodeId = activeTabId;
+			examplesOpen = false;
+			appendLog('success', `Loaded example workspace: ${spec.label}`);
+			if (activeTabId.endsWith('.mimo')) {
+				refreshAst(readWorkspaceFile(activeTabId) ?? '', `/${activeTabId}`);
+			}
+			return true;
+		} catch (error) {
+			appendLog('error', `Failed to load example: ${String(error)}`);
+			return false;
+		}
+	}
+
+	function listWorkspaceImportPaths() {
+		const files = snapshotWorkspaceFiles();
+		return Object.keys(files)
+			.filter((p) => p.endsWith('.mimo'))
+			.sort((a, b) => a.localeCompare(b));
+	}
+
+	let importPathSuggestions = $derived(listWorkspaceImportPaths());
+
+	let commandPaletteActions = $derived([
+		{ id: 'run', label: 'Run Active File', shortcut: 'Ctrl/Cmd+Enter' },
+		{ id: 'format', label: 'Format Active File', shortcut: 'Shift+Alt+F' },
+		{ id: 'toggle-sidebar', label: 'Toggle Explorer', shortcut: 'Ctrl/Cmd+B' },
+		{ id: 'open-settings', label: 'Open Settings', shortcut: '' },
+		{ id: 'open-examples', label: 'Open Examples', shortcut: '' },
+		{ id: 'open-shortcuts', label: 'Open Shortcuts', shortcut: '?' },
+		{ id: 'share', label: 'Share Workspace', shortcut: '' },
+		{ id: 'reset-workspace', label: 'Reset Workspace', shortcut: '' },
+		{ id: 'open-docs', label: 'Open Docs', shortcut: '' }
+	]);
+
+	/**
+	 * @param {string} actionId
+	 */
+	function runPaletteAction(actionId) {
+		switch (actionId) {
+			case 'run':
+				runActive();
+				break;
+			case 'format':
+				formatActive();
+				break;
+			case 'toggle-sidebar':
+				sidebarOpen = !sidebarOpen;
+				break;
+			case 'open-settings':
+				settingsOpen = true;
+				break;
+			case 'open-examples':
+				examplesOpen = true;
+				break;
+			case 'open-shortcuts':
+				shortcutsOpen = true;
+				break;
+			case 'share':
+				shareWorkspace();
+				break;
+			case 'reset-workspace':
+				resetWorkspace();
+				break;
+			case 'open-docs':
+				window.open('https://bethropolis.github.io/mimo/', '_blank', 'noopener,noreferrer');
+				break;
+		}
+		commandPaletteOpen = false;
+	}
+
 	async function initialize() {
 		await initZenFS();
 		
@@ -832,9 +1067,26 @@ export function createPlaygroundStore() {
 
 		refreshExplorerFromFs();
 
+		// Restore open tabs / active tab from previous session (unless share link is explicitly loaded).
+			if (!codeParam && persistedSession?.tabIds?.length) {
+				const restoredTabs = persistedSession.tabIds
+					.filter((id) => workspaceExists(id))
+					.map((id) => ({
+						id,
+						name: id.split('/').pop() ?? id,
+						content: readWorkspaceFile(id) ?? ''
+					}));
+			if (restoredTabs.length > 0) {
+				tabs = restoredTabs;
+				activeTabId = restoredTabs.some((t) => t.id === persistedSession.activeTabId)
+					? persistedSession.activeTabId
+					: restoredTabs[0].id;
+				selectedNodeId = activeTabId;
+			}
+		}
+
 		// Update tabs with actual file contents from storage
 		if (tabs.length === 0) {
-			// If no tabs yet, open the first available file
 			const fallback = firstAvailableFileId(tree);
 			if (fallback) {
 				tabs = [{ id: fallback, name: fallback.split('/').pop() ?? fallback, content: readWorkspaceFile(fallback) ?? '' }];
@@ -907,6 +1159,12 @@ export function createPlaygroundStore() {
 		set settingsOpen(v) { settingsOpen = v; },
 		get shareOpen() { return shareOpen; },
 		set shareOpen(v) { shareOpen = v; },
+		get examplesOpen() { return examplesOpen; },
+		set examplesOpen(v) { examplesOpen = v; },
+		get shortcutsOpen() { return shortcutsOpen; },
+		set shortcutsOpen(v) { shortcutsOpen = v; },
+		get commandPaletteOpen() { return commandPaletteOpen; },
+		set commandPaletteOpen(v) { commandPaletteOpen = v; },
 		get deleteModalOpen() { return deleteModalOpen; },
 		set deleteModalOpen(v) { deleteModalOpen = v; },
 		get nodeToDelete() { return nodeToDelete; },
@@ -931,6 +1189,8 @@ export function createPlaygroundStore() {
 		get astData() { return astData; },
 		get astError() { return astError; },
 		get astLoading() { return astLoading; },
+		get importPathSuggestions() { return importPathSuggestions; },
+		get commandPaletteActions() { return commandPaletteActions; },
 		get lintEnabled() { return lintEnabled; },
 		set lintEnabled(v) { lintEnabled = v; },
 		get lintMessages() { return lintMessages; },
@@ -961,6 +1221,9 @@ export function createPlaygroundStore() {
 		uploadWorkspaceZip,
 		generateShareLink,
 		copyShareLink,
+		resetWorkspace,
+		loadExampleWorkspace,
+		runPaletteAction,
 		appendLog,
 		jumpToLocation
 	};

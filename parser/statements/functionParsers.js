@@ -185,7 +185,8 @@ export function parseAnonymousFunction(parser, isFn = false) {
       defaults,
       restParam,
       body,
-      funcToken
+      funcToken,
+      true
     );
   }
 
@@ -198,7 +199,7 @@ export function parseAnonymousFunction(parser, isFn = false) {
     restParam,
     body,
     funcToken,
-    endToken
+    false
   );
 }
 

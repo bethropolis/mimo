@@ -44,6 +44,7 @@
       --surface-strong: #e2e8f0;
       --text: #0f172a;
       --text-muted: #475569;
+      --heading: #0b1224;
       --code-bg: #f1f5f9;
       --code-text: #0f172a;
       --inline-code-bg: #e2e8f0;
@@ -59,10 +60,11 @@
       --surface: #0f172a;
       --surface-strong: #1e293b;
       --text: #e2e8f0;
-      --text-muted: #94a3b8;
+      --text-muted: #cbd5f5;
+      --heading: #f8fafc;
       --code-bg: #020617;
       --code-text: #cbd5e1;
-      --inline-code-bg: #0b1220;
+      --inline-code-bg: #1c2434;
       --inline-code-text: #dbeafe;
       --border: #334155;
       --row-stripe: #111c30;
@@ -112,6 +114,13 @@
       max-width: 920px;
       color: var(--text);
       line-height: 1.7;
+    }
+    .markdown-section h1,
+    .markdown-section h2,
+    .markdown-section h3,
+    .markdown-section h4 {
+      color: var(--heading);
+      font-weight: 700;
     }
 
     .markdown-section p,

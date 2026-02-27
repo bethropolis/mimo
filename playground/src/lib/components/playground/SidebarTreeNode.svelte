@@ -36,6 +36,18 @@
 		onSubmitEdit,
 		onCancelEdit
 	} = $props();
+
+	let editInputEl = $state(/** @type {HTMLInputElement | null} */(null));
+
+	$effect(() => {
+		if (editNodeId !== node.id || !editInputEl) return;
+		editInputEl.focus();
+		if (editInputEl.value.includes('.')) {
+			editInputEl.setSelectionRange(0, editInputEl.value.lastIndexOf('.'));
+		} else {
+			editInputEl.select();
+		}
+	});
 </script>
 
 <div>
@@ -65,16 +77,9 @@
 					<FileCode2 size={13} />
 				{/if}
 				<input
+					bind:this={editInputEl}
 					type="text"
 					value={draftName}
-					use={(node) => {
-						node.focus();
-						if (node.value.includes('.')) {
-							node.setSelectionRange(0, node.value.lastIndexOf('.'));
-						} else {
-							node.select();
-						}
-					}}
 					oninput={(event) => onDraftNameChange(event.currentTarget.value)}
 					onkeydown={(event) => {
 						if (event.key === 'Enter') onSubmitEdit();

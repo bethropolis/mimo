@@ -8,7 +8,7 @@
 	import Folder from '@lucide/svelte/icons/folder';
 	import AlertCircle from '@lucide/svelte/icons/alert-circle';
 	import AlertTriangle from '@lucide/svelte/icons/alert-triangle';
-	import { mimoEditorExtensions, mimoLanguage } from '$lib/editor/mimo-language.js';
+	import { createMimoEditorExtensions, mimoLanguage } from '$lib/editor/mimo-language.js';
 	import { getMimoTheme } from '$lib/editor/mimo-theme.js';
 	import { mimoFormatKeymap } from '$lib/editor/mimo-formatter.js';
 
@@ -24,7 +24,9 @@
 		onFormat,
 		fontSize = 14,
 		tabSize = 2,
-		resolvedTheme = 'light'
+		resolvedTheme = 'light',
+		importPaths = [],
+		activePath = 'src/main.mimo'
 	} = $props();
 
 	let cursorPos = $state({ line: 1, ch: 1 });
@@ -110,7 +112,7 @@
 	let formatExtension = $derived(mimoFormatKeymap(onFormat));
 	
 	let editorExtensions = $derived([
-		...mimoEditorExtensions,
+		...createMimoEditorExtensions(importPaths, activePath),
 		selectionExtension,
 		mimoLinter,
 		formatExtension,

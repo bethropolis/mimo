@@ -14,12 +14,22 @@
 		tabSize = $bindable(2),
 		autoSave = $bindable(true),
 		lintEnabled = $bindable(true),
+		onResetWorkspace,
 		onClose
 	} = $props();
 
 	const optionClass =
 		'rounded-xl border border-border bg-surface px-3 py-2 text-sm focus:ring-2 focus:ring-accent outline-none transition-all';
 	const labelClass = 'flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-text-soft';
+	let resetState = $state(/** @type {'idle'|'ok'|'error'} */('idle'));
+
+	function triggerResetWorkspace() {
+		const ok = onResetWorkspace?.();
+		resetState = ok ? 'ok' : 'error';
+		setTimeout(() => {
+			resetState = 'idle';
+		}, 1600);
+	}
 </script>
 
 {#if open}
@@ -104,20 +114,35 @@
 			</div>
 
 			<div class="flex items-center justify-between border-t border-border/50 bg-surface/50 px-6 py-4">
-				<button
-					type="button"
-					onclick={() => {
-						theme = 'system';
-						fontSize = 14;
-						tabSize = 2;
-						autoSave = true;
-						lintEnabled = true;
-					}}
-					class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-text-soft hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
-				>
-					<RotateCcw size={14} />
-					Reset Defaults
-				</button>
+				<div class="flex items-center gap-2">
+					<button
+						type="button"
+						onclick={() => {
+							theme = 'system';
+							fontSize = 14;
+							tabSize = 2;
+							autoSave = true;
+							lintEnabled = true;
+						}}
+						class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-text-soft hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+					>
+						<RotateCcw size={14} />
+						Reset Defaults
+					</button>
+					<button
+						type="button"
+						onclick={triggerResetWorkspace}
+						class={`rounded-xl border px-3 py-2 text-xs font-bold transition-colors ${
+							resetState === 'ok'
+								? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+								: resetState === 'error'
+									? 'border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-300'
+									: 'border-border text-text-soft hover:bg-surface-elevated hover:text-app-fg'
+						}`}
+					>
+						{resetState === 'ok' ? 'Workspace Reset' : resetState === 'error' ? 'Reset Failed' : 'Reset Workspace'}
+					</button>
+				</div>
 				<button
 					type="button"
 					onclick={onClose}

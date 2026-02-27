@@ -160,12 +160,13 @@ export const ASTNode = {
     length: token.length,
     file: token.file,
   }),
-  AnonymousFunction: (params, defaults, restParam, body, token) => ({
+  AnonymousFunction: (params, defaults, restParam, body, token, isFn = false) => ({
     type: "AnonymousFunction",
     params,
     defaults,
     restParam,
     body,
+    isFn,
     line: token.line,
     column: token.column,
     start: token.start,

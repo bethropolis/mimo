@@ -280,8 +280,86 @@ function mimoCompletionSource(context) {
 	};
 }
 
-export const mimoEditorExtensions = [
-	autocompletion({ override: [mimoCompletionSource], activateOnTyping: true }),
-	search({ top: true }),
-	keymap.of(searchKeymap)
-];
+/**
+ * @param {string} filePath
+ * @returns {string}
+ */
+function fileDir(filePath) {
+	const idx = filePath.lastIndexOf('/');
+	return idx === -1 ? '' : filePath.slice(0, idx);
+}
+
+/**
+ * @param {string} fromDir
+ * @param {string} toFile
+ * @returns {string}
+ */
+function toRelativeImportPath(fromDir, toFile) {
+	const fromParts = fromDir ? fromDir.split('/').filter(Boolean) : [];
+	const toParts = toFile.split('/').filter(Boolean);
+	let i = 0;
+	while (i < fromParts.length && i < toParts.length && fromParts[i] === toParts[i]) i += 1;
+	const up = fromParts.slice(i).map(() => '..');
+	const down = toParts.slice(i);
+	const joined = [...up, ...down].join('/');
+	return joined.startsWith('.') ? joined : `./${joined}`;
+}
+
+/**
+ * @param {string[]} importPaths
+ * @param {string} activePath
+ * @returns {string[]}
+ */
+function buildImportOptions(importPaths, activePath) {
+	const fromDir = fileDir(activePath);
+	const unique = new Set();
+	for (const file of importPaths) {
+		if (!file.endsWith('.mimo') || file === activePath) continue;
+		const rel = toRelativeImportPath(fromDir, file);
+		unique.add(rel);
+		unique.add(rel.replace(/\.mimo$/, ''));
+	}
+	return Array.from(unique).sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * @param {string[]} importPaths
+ * @param {string} activePath
+ */
+function createImportPathCompletionSource(importPaths, activePath) {
+	const importOptions = buildImportOptions(importPaths, activePath);
+	/** @param {import('@codemirror/autocomplete').CompletionContext} context */
+	return (context) => {
+		const start = Math.max(0, context.pos - 300);
+		const slice = context.state.sliceDoc(start, context.pos);
+		const match = slice.match(/(?:import\s+[A-Za-z_][A-Za-z0-9_]*\s+from\s+|from\s+|import\s+)"([^"]*)$/);
+		if (!match) return null;
+		const typed = match[1] ?? '';
+		const from = context.pos - typed.length;
+		const options = importOptions
+			.filter((label) => label.startsWith(typed))
+			.map((label) => ({ label, type: 'text', detail: 'workspace path' }));
+		return {
+			from,
+			options,
+			validFor: /^[^"]*$/
+		};
+	};
+}
+
+/**
+ * @param {string[]} [importPaths]
+ * @param {string} [activePath]
+ */
+export function createMimoEditorExtensions(importPaths = [], activePath = 'src/main.mimo') {
+	return [
+		autocompletion({
+			override: [createImportPathCompletionSource(importPaths, activePath), mimoCompletionSource],
+			activateOnTyping: true
+		}),
+		search({ top: true }),
+		keymap.of(searchKeymap)
+	];
+}
+
+export const mimoEditorExtensions = createMimoEditorExtensions();

@@ -5,6 +5,8 @@ export class PrettyPrinter {
         this.indentation = '    '; // 4 spaces for indentation
         this.currentIndent = '';
         this.output = '';
+        this.maxInlineArrayLength = options.maxInlineArrayLength ?? 100;
+        this.maxInlineObjectLength = options.maxInlineObjectLength ?? 80;
     }
 
     format(ast) {
@@ -52,11 +54,98 @@ export class PrettyPrinter {
     // --- Statement Visitors ---
     visitProgram(node) {
         for (let i = 0; i < node.body.length; i++) {
-            this.visitNode(node.body[i]);
-            if (i < node.body.length - 1) {
-                // Add a blank line between top-level statements/blocks
-                this.write('\n');
-            }
+            const current = node.body[i];
+            const next = node.body[i + 1];
+            this.visitNode(current);
+            if (next && this.shouldInsertBlankLine(current, next)) this.write('\n');
+        }
+    }
+
+    shouldInsertBlankLine(current, next) {
+        if (!current || !next) return false;
+
+        // Keep import blocks tight, with a single separation before the next non-import.
+        if (current.type === 'ImportStatement' && next.type === 'ImportStatement') return false;
+        if (current.type === 'ImportStatement' && next.type !== 'ImportStatement') return true;
+        if (current.type !== 'ImportStatement' && next.type === 'ImportStatement') return true;
+
+        // Group related one-line statements without extra spacing.
+        if (this.isSimpleStatement(current) && this.isSimpleStatement(next)) return false;
+
+        // Respect explicit visual separators in source intent.
+        if (this.isEmptyShowSeparator(current)) return true;
+
+        // Separate blocks and control-flow sections for readability.
+        if (this.isBlockLike(current) || this.isBlockLike(next)) return true;
+        return false;
+    }
+
+    isSimpleStatement(node) {
+        return [
+            'VariableDeclaration',
+            'DestructuringAssignment',
+            'PropertyAssignment',
+            'BracketAssignment',
+            'CallStatement',
+            'ShowStatement',
+            'ReturnStatement',
+            'ThrowStatement',
+            'BreakStatement',
+            'ContinueStatement'
+        ].includes(node?.type);
+    }
+
+    isBlockLike(node) {
+        return [
+            'FunctionDeclaration',
+            'IfStatement',
+            'GuardStatement',
+            'WhileStatement',
+            'ForStatement',
+            'LoopStatement',
+            'TryStatement',
+            'MatchStatement',
+            'LabeledStatement'
+        ].includes(node?.type);
+    }
+
+    isEmptyShowSeparator(node) {
+        return node?.type === 'ShowStatement' && node.expression?.type === 'Literal' && node.expression.value === '';
+    }
+
+    estimateNodeLength(node) {
+        if (!node) return 0;
+        switch (node.type) {
+            case 'Identifier':
+                return node.name.length;
+            case 'Literal':
+                return typeof node.value === 'string' ? node.value.length + 2 : String(node.value).length;
+            case 'PropertyAccess':
+            case 'SafePropertyAccess':
+                return this.estimateNodeLength(node.object) + 1 + String(node.property ?? '').length;
+            case 'ArrayAccess':
+            case 'SafeArrayAccess':
+                return this.estimateNodeLength(node.object) + this.estimateNodeLength(node.index) + 2;
+            case 'ModuleAccess':
+                return String(node.module ?? '').length + 1 + String(node.property ?? '').length;
+            case 'CallExpression':
+                return 7 + this.estimateNodeLength(node.callee) + node.arguments.reduce((n, arg) => n + this.estimateNodeLength(arg) + 2, 0);
+            case 'BinaryExpression':
+                return String(node.operator ?? '').length + 2 + this.estimateNodeLength(node.left) + this.estimateNodeLength(node.right);
+            case 'UnaryExpression':
+                return String(node.operator ?? '').length + 1 + this.estimateNodeLength(node.argument);
+            case 'ArrayLiteral':
+                return 2 + node.elements.reduce((n, el) => n + this.estimateNodeLength(el) + 2, 0);
+            case 'ObjectLiteral':
+                return 4 + node.properties.reduce((n, prop) => {
+                    if (!prop) return n;
+                    if (prop.type === 'SpreadElement') return n + 3 + this.estimateNodeLength(prop.argument);
+                    return n + String(prop.key ?? '').length + 2 + this.estimateNodeLength(prop.value) + 2;
+                }, 0);
+            case 'AnonymousFunction':
+                return 20 + (node.params?.length ?? 0) * 4;
+            default:
+                return 24;
         }
     }
 
@@ -205,6 +294,36 @@ export class PrettyPrinter {
     }
 
     visitAnonymousFunction(node) {
+        const canUseFnShorthand =
+            node.isFn === true &&
+            node.body.length === 1 &&
+            node.body[0]?.type === 'ReturnStatement' &&
+            node.body[0]?.argument;
+
+        if (canUseFnShorthand) {
+            this.write('(fn');
+            if (node.params.length > 0) {
+                this.write(' ');
+                const params = node.params.map((p) => {
+                    const name = typeof p === 'string' ? p : p.name;
+                    const defaultNode = node.defaults[name];
+                    if (!defaultNode) return name;
+                    const tempPrinter = new PrettyPrinter();
+                    tempPrinter.visitNode(defaultNode);
+                    return `${name}: ${tempPrinter.output}`;
+                });
+                this.write(params.join(' '));
+            }
+            if (node.restParam) {
+                const restName = typeof node.restParam === 'string' ? node.restParam : node.restParam.name;
+                this.write(`${node.params.length > 0 ? ' ' : ' '}...${restName}`);
+            }
+            this.write(' -> ');
+            this.visitNode(node.body[0].argument);
+            this.write(')');
+            return;
+        }
+
         this.write(`(function(`);
         const params = node.params.map((p) => {
             const name = typeof p === 'string' ? p : p.name;
@@ -406,16 +525,44 @@ export class PrettyPrinter {
 
     visitArrayLiteral(node) {
         this.write('[');
+        const hasComplexElements = node.elements.some((el) =>
+            ['ObjectLiteral', 'ArrayLiteral', 'AnonymousFunction', 'CallExpression'].includes(el?.type) ||
+            (el?.type === 'SpreadElement' && ['ObjectLiteral', 'ArrayLiteral'].includes(el.argument?.type))
+        );
+        const shouldMultiline =
+            node.elements.length > 4 ||
+            (hasComplexElements && node.elements.length > 1) ||
+            this.estimateNodeLength(node) > this.maxInlineArrayLength;
+
+        if (!shouldMultiline || node.elements.length === 0) {
+            node.elements.forEach((el, i) => {
+                if (el.type === 'SpreadElement') {
+                    this.write('...');
+                    this.visitNode(el.argument);
+                } else {
+                    this.visitNode(el);
+                }
+                if (i < node.elements.length - 1) this.write(', ');
+            });
+            this.write(']');
+            return;
+        }
+
+        this.write('\n');
+        this.indent();
         node.elements.forEach((el, i) => {
+            this.write(this.currentIndent);
             if (el.type === 'SpreadElement') {
                 this.write('...');
                 this.visitNode(el.argument);
             } else {
                 this.visitNode(el);
             }
-            if (i < node.elements.length - 1) this.write(', ');
+            if (i < node.elements.length - 1) this.write(',');
+            this.write('\n');
         });
-        this.write(']');
+        this.dedent();
+        this.write(this.currentIndent + ']');
     }
 
     visitObjectLiteral(node) {
@@ -423,8 +570,35 @@ export class PrettyPrinter {
             this.write('{}');
             return;
         }
-        this.write('{ ');
+        const hasComplexValues = node.properties.some((prop) =>
+            prop?.type === 'SpreadElement' ||
+            ['ObjectLiteral', 'ArrayLiteral', 'AnonymousFunction', 'CallExpression'].includes(prop?.value?.type)
+        );
+        const shouldMultiline =
+            node.properties.length > 4 ||
+            hasComplexValues ||
+            this.estimateNodeLength(node) > this.maxInlineObjectLength;
+
+        if (!shouldMultiline) {
+            this.write('{ ');
+            node.properties.forEach((prop, i) => {
+                if (prop && prop.type === 'SpreadElement') {
+                    this.write('...');
+                    this.visitNode(prop.argument);
+                } else {
+                    this.write(`${prop.key}: `);
+                    this.visitNode(prop.value);
+                }
+                if (i < node.properties.length - 1) this.write(', ');
+            });
+            this.write(' }');
+            return;
+        }
+
+        this.write('{\n');
+        this.indent();
         node.properties.forEach((prop, i) => {
+            this.write(this.currentIndent);
             if (prop && prop.type === 'SpreadElement') {
                 this.write('...');
                 this.visitNode(prop.argument);
@@ -432,9 +606,11 @@ export class PrettyPrinter {
                 this.write(`${prop.key}: `);
                 this.visitNode(prop.value);
             }
-            if (i < node.properties.length - 1) this.write(', ');
+            if (i < node.properties.length - 1) this.write(',');
+            this.write('\n');
         });
-        this.write(' }');
+        this.dedent();
+        this.write(this.currentIndent + '}');
     }
 
     visitArrayPattern(node) {
