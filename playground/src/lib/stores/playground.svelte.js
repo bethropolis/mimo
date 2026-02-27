@@ -29,13 +29,164 @@ import { DEFAULT_FILE_CONTENTS, DEFAULT_TABS, DEFAULT_ACTIVE_TAB } from '$lib/ut
 import { executeCommand, getCommandSuggestions } from '$lib/terminal/commands.js';
 import { formatCommand, formatOutput, formatError, formatSystem, createEntry } from '$lib/terminal/formatter.js';
 
+/**
+ * @typedef {'system'|'dark'|'light'} PlaygroundTheme
+ */
+
+/**
+ * @typedef {{
+ * 	theme: PlaygroundTheme;
+ * 	fontSize: number;
+ * 	tabSize: number;
+ * 	autoSave: boolean;
+ * 	lintEnabled: boolean;
+ * }} PersistedSettings
+ */
+
+/**
+ * @typedef {{
+ * 	sidebarOpen: boolean;
+ * 	sidebarRatio: number;
+ * 	workspaceRatio: number;
+ * 	centerRatio: number;
+ * 	rightRatio: number;
+ * }} PersistedLayout
+ */
+
 const PLAYGROUND_CONTEXT = Symbol('playground');
+const SETTINGS_STORAGE_KEY = 'mimo.playground.settings.v1';
+const LAYOUT_STORAGE_KEY = 'mimo.playground.layout.v1';
+/** @type {PersistedSettings} */
+const DEFAULT_SETTINGS = {
+	theme: 'system',
+	fontSize: 14,
+	tabSize: 2,
+	autoSave: true,
+	lintEnabled: true
+};
+/** @type {PersistedLayout} */
+const DEFAULT_LAYOUT = {
+	sidebarOpen: true,
+	sidebarRatio: 23,
+	workspaceRatio: 64,
+	centerRatio: 66,
+	rightRatio: 52
+};
+
+/**
+ * @param {unknown} value
+ * @returns {PlaygroundTheme}
+ */
+function normalizeTheme(value) {
+	return value === 'dark' || value === 'light' || value === 'system' ? value : 'system';
+}
+
+/**
+ * @param {unknown} value
+ * @param {number} fallback
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
+function normalizeNumber(value, fallback, min, max) {
+	const parsed = Number(value);
+	if (!Number.isFinite(parsed)) return fallback;
+	return Math.min(max, Math.max(min, Math.round(parsed)));
+}
+
+/**
+ * @param {unknown} value
+ * @param {boolean} fallback
+ * @returns {boolean}
+ */
+function normalizeBoolean(value, fallback) {
+	if (typeof value === 'boolean') return value;
+	return fallback;
+}
+
+/**
+ * @param {unknown} value
+ * @param {number} fallback
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
+function normalizeRatio(value, fallback, min, max) {
+	const parsed = Number(value);
+	if (!Number.isFinite(parsed)) return fallback;
+	return Math.min(max, Math.max(min, parsed));
+}
+
+/**
+ * @returns {PersistedSettings}
+ */
+function loadPersistedSettings() {
+	try {
+		const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+		if (!raw) return { ...DEFAULT_SETTINGS };
+		const parsed = JSON.parse(raw);
+		return {
+			theme: normalizeTheme(parsed?.theme),
+			fontSize: normalizeNumber(parsed?.fontSize, DEFAULT_SETTINGS.fontSize, 12, 20),
+			tabSize: normalizeNumber(parsed?.tabSize, DEFAULT_SETTINGS.tabSize, 1, 8),
+			autoSave: normalizeBoolean(parsed?.autoSave, DEFAULT_SETTINGS.autoSave),
+			lintEnabled: normalizeBoolean(parsed?.lintEnabled, DEFAULT_SETTINGS.lintEnabled)
+		};
+	} catch {
+		return { ...DEFAULT_SETTINGS };
+	}
+}
+
+/**
+ * @returns {PersistedLayout}
+ */
+function loadPersistedLayout() {
+	try {
+		const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
+		if (!raw) return { ...DEFAULT_LAYOUT };
+		const parsed = JSON.parse(raw);
+		return {
+			sidebarOpen: normalizeBoolean(parsed?.sidebarOpen, DEFAULT_LAYOUT.sidebarOpen),
+			sidebarRatio: normalizeRatio(parsed?.sidebarRatio, DEFAULT_LAYOUT.sidebarRatio, 14, 35),
+			workspaceRatio: normalizeRatio(parsed?.workspaceRatio, DEFAULT_LAYOUT.workspaceRatio, 45, 80),
+			centerRatio: normalizeRatio(parsed?.centerRatio, DEFAULT_LAYOUT.centerRatio, 45, 80),
+			rightRatio: normalizeRatio(parsed?.rightRatio, DEFAULT_LAYOUT.rightRatio, 30, 70)
+		};
+	} catch {
+		return { ...DEFAULT_LAYOUT };
+	}
+}
+
+/**
+ * @param {PersistedSettings} settings
+ */
+function persistSettings(settings) {
+	try {
+		localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+	} catch {
+		// Ignore persistence failures (private mode/quota/etc).
+	}
+}
+
+/**
+ * @param {PersistedLayout} layout
+ */
+function persistLayout(layout) {
+	try {
+		localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layout));
+	} catch {
+		// Ignore persistence failures.
+	}
+}
 
 function localTimestamp() {
 	return new Date().toLocaleTimeString('en-US', { hour12: false });
 }
 
 export function createPlaygroundStore() {
+	const persistedSettings = loadPersistedSettings();
+	const persistedLayout = loadPersistedLayout();
+
 	// Explorer state
 	let tree = $state(/** @type {import('$lib/utils/workspace.js').ExplorerNode[]} */ ([]));
 	let selectedNodeId = $state(DEFAULT_ACTIVE_TAB);
@@ -47,14 +198,34 @@ export function createPlaygroundStore() {
 	let recentFiles = $state(/** @type {string[]} */ ([]));
 
 	// Theme settings
-	let theme = $state('system');
-	let fontSize = $state(14);
-	let tabSize = $state(2);
-	let autoSave = $state(true);
+	let theme = $state(persistedSettings.theme);
+	let fontSize = $state(persistedSettings.fontSize);
+	let tabSize = $state(persistedSettings.tabSize);
+	let autoSave = $state(persistedSettings.autoSave);
 
 	// Lint settings
-	let lintEnabled = $state(true);
+	let lintEnabled = $state(persistedSettings.lintEnabled);
 	let lintMessages = $state(/** @type {Array<{ line: number; column: number; endColumn: number; message: string; ruleId: string; severity: string }>} */ ([]));
+
+	$effect(() => {
+		persistSettings({
+			theme: normalizeTheme(theme),
+			fontSize: normalizeNumber(fontSize, DEFAULT_SETTINGS.fontSize, 12, 20),
+			tabSize: normalizeNumber(tabSize, DEFAULT_SETTINGS.tabSize, 1, 8),
+			autoSave: normalizeBoolean(autoSave, DEFAULT_SETTINGS.autoSave),
+			lintEnabled: normalizeBoolean(lintEnabled, DEFAULT_SETTINGS.lintEnabled)
+		});
+	});
+
+	$effect(() => {
+		persistLayout({
+			sidebarOpen: normalizeBoolean(sidebarOpen, DEFAULT_LAYOUT.sidebarOpen),
+			sidebarRatio: normalizeRatio(sidebarRatio, DEFAULT_LAYOUT.sidebarRatio, 14, 35),
+			workspaceRatio: normalizeRatio(workspaceRatio, DEFAULT_LAYOUT.workspaceRatio, 45, 80),
+			centerRatio: normalizeRatio(centerRatio, DEFAULT_LAYOUT.centerRatio, 45, 80),
+			rightRatio: normalizeRatio(rightRatio, DEFAULT_LAYOUT.rightRatio, 30, 70)
+		});
+	});
 
 	// System theme detection
 	let prefersDark = $state(false);
@@ -69,7 +240,7 @@ export function createPlaygroundStore() {
 	let resolvedTheme = $derived(theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme);
 
 	// UI state
-	let sidebarOpen = $state(true);
+	let sidebarOpen = $state(persistedLayout.sidebarOpen);
 	let settingsOpen = $state(false);
 	let shareOpen = $state(false);
 	let deleteModalOpen = $state(false);
@@ -80,10 +251,10 @@ export function createPlaygroundStore() {
 	let shareLinkError = $state('');
 
 	// Split ratios
-	let sidebarRatio = $state(23);
-	let workspaceRatio = $state(64);
-	let centerRatio = $state(66);
-	let rightRatio = $state(52);
+	let sidebarRatio = $state(persistedLayout.sidebarRatio);
+	let workspaceRatio = $state(persistedLayout.workspaceRatio);
+	let centerRatio = $state(persistedLayout.centerRatio);
+	let rightRatio = $state(persistedLayout.rightRatio);
 
 	// Output state
 	let outputLines = $state(['Mimo playground ready.']);
