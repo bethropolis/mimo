@@ -85,7 +85,13 @@
 
     .sidebar {
       border-right: 1px solid var(--border);
-      background: var(--bg);
+      background: var(--surface);
+      box-shadow: inset -10px 0 25px rgba(15, 23, 42, 0.05);
+    }
+
+    body[data-theme='dark'] .sidebar {
+      background: var(--surface);
+      box-shadow: inset -10px 0 30px rgba(0, 0, 0, 0.6);
     }
 
     .sidebar ul li.active > a {
@@ -94,16 +100,32 @@
     }
 
     .search {
-      margin-bottom: 0.5rem;
-      border-bottom: 1px solid color-mix(in oklab, var(--border) 78%, transparent) !important;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.45rem;
+      border-bottom: 1px solid var(--border);
     }
 
     .search input {
+      width: 100%;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 0.75rem;
       background: var(--surface);
       color: var(--text);
-      padding: 0.5rem 0.75rem;
+      padding: 0.55rem 0.9rem;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .search input:focus-visible {
+      outline: none;
+      border-color: rgba(14, 165, 233, 0.65);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
+    }
+
+    body[data-theme='dark'] .search input {
+      background: var(--surface-strong);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
     }
 
     .content {
@@ -121,6 +143,14 @@
     .markdown-section h4 {
       color: var(--heading);
       font-weight: 700;
+    }
+
+    body[data-theme='dark'] .markdown-section h1,
+    body[data-theme='dark'] .markdown-section h2,
+    body[data-theme='dark'] .markdown-section h3,
+    body[data-theme='dark'] .markdown-section h4 {
+      color: var(--heading);
+      text-shadow: 0 2px 8px rgba(2, 6, 23, 0.9);
     }
 
     .markdown-section p,
@@ -153,6 +183,10 @@
       background: var(--row-stripe);
     }
 
+    body[data-theme='dark'] .markdown-section tr:nth-child(2n) {
+      background: rgba(15, 23, 42, 0.5);
+    }
+
     .markdown-section p.tip {
       border-left: 4px solid var(--tip-border);
       background: var(--tip-bg);
@@ -161,19 +195,31 @@
     .markdown-section pre {
       background: var(--code-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.9rem;
+      border-radius: 14px;
+      padding: 1rem;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+      overflow-x: auto;
     }
 
     .markdown-section :not(pre) > code {
       background: var(--inline-code-bg);
       color: var(--inline-code-text);
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      font-size: 0.95em;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    }
+
+    body[data-theme='dark'] .markdown-section :not(pre) > code {
+      border-color: rgba(255, 255, 255, 0.08);
     }
 
     .markdown-section pre code {
       background: transparent;
       color: inherit;
       text-shadow: none;
+      font-size: 0.95em;
     }
 
     .token.comment { color: #64748b; }
@@ -232,18 +278,32 @@
 
     .pagination-item {
       border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--surface);
+      border-radius: 14px;
+      background: transparent;
+      padding: 0;
+      transition: border-color 0.2s ease;
     }
 
     .docsify-pagination-container {
-      gap: 0.75rem;
+      gap: 1rem;
     }
 
     .docsify-pagination-container .pagination-item a {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 0.95rem 1rem;
+      border-radius: 14px;
       background: var(--surface);
-      border-radius: 10px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
       color: var(--text);
+      min-height: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .docsify-pagination-container .pagination-item a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
     }
 
     .docsify-pagination-container .pagination-item-label,
@@ -256,27 +316,35 @@
       stroke: var(--text-muted);
     }
 
-    body[data-theme='dark'] .docsify-pagination-container .pagination-item {
-      border-color: var(--border);
-      background: color-mix(in oklab, var(--surface) 85%, black 15%);
+    body[data-theme='dark'] .docsify-pagination-container .pagination-item a {
+      background: rgba(15, 23, 42, 0.85);
+      box-shadow: 0 25px 65px rgba(0, 0, 0, 0.65);
     }
 
-    body[data-theme='dark'] .docsify-pagination-container .pagination-item a {
-      background: transparent;
+    body[data-theme='dark'] .docsify-pagination-container .pagination-item-label svg polyline {
+      stroke: var(--text);
     }
 
     .sidebar-toggle {
-      background: color-mix(in oklab, var(--surface) 88%, transparent);
+      background: rgba(59, 130, 246, 0.05);
       border-top: 1px solid var(--border);
       color: var(--text);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 0.85rem 0;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(59, 130, 246, 0.12);
     }
 
     body[data-theme='dark'] .sidebar-toggle {
-      background: color-mix(in oklab, var(--surface) 78%, transparent);
+      background: rgba(15, 23, 42, 0.9);
       border-top-color: var(--border);
       color: var(--text);
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.65);
     }
 
     .theme-toggle {
