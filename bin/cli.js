@@ -7,6 +7,7 @@ import { Mimo } from "../index.js";
 import { runRepl } from "../repl.js";
 import { formatFile, formatSource } from "../tools/formatter.js";
 import { lintFile, lintFileJson, parseRuleFlags } from "../tools/linter.js";
+import { runConverter } from "../tools/convert.js";
 
 // --- Helper Functions ---
 function getVersion() {
@@ -34,6 +35,8 @@ Commands:
                     Flags: --fail-on-warning, --quiet, --json
                     Rules: --rule:<name>=true|false
   test [path]       Run test files. Defaults to current directory.
+  convert <options> Convert Mimo code to other languages.
+                    Flags: --in, --out, --to
   doctor            Validate runtime/tooling environment and stdlib availability.
 
 Options:
@@ -421,6 +424,10 @@ async function main() {
     case "test": {
       const target = commandArgs[0] || "."; // Default to current dir
       await runTests(target);
+      break;
+    }
+    case "convert": {
+      await runConverter(commandArgs);
       break;
     }
 

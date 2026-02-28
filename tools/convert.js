@@ -271,8 +271,8 @@ async function readStdin() {
     });
 }
 
-async function main() {
-    const args = process.argv.slice(2);
+async function main(providedArgs) {
+    const args = providedArgs || process.argv.slice(2);
     const options = parseArgs(args);
 
     // Initialize the registry by discovering plugins
@@ -370,4 +370,10 @@ async function main() {
     console.log(`✅ Conversion to ${language.toUpperCase()} successful!`);
 }
 
-main();
+// Export for use in CLI
+export { main as runConverter };
+
+// Only run if this file is the main module
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    main();
+}
