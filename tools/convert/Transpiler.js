@@ -52,7 +52,7 @@ export class Transpiler {
         ast.body.forEach(stmt => {
             if (stmt.type === 'ImportStatement') {
                 const modulePath = stmt.path;
-                if (!['fs', 'math', 'string', 'array', 'json', 'datetime'].includes(modulePath)) {
+                if (!['fs', 'math', 'string', 'array', 'json', 'datetime', 'path', 'env', 'regex', 'http', 'object', 'assert'].includes(modulePath)) {
                     let nextFilePath = path.resolve(path.dirname(filePath), modulePath);
                     if (!nextFilePath.endsWith('.mimo')) {
                         nextFilePath += '.mimo';

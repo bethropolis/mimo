@@ -1,527 +1,329 @@
 /**
- * The Mimo to Python transpiler.
+ * Mimo → Python transpiler.
+ *
+ * Converts a Mimo AST to Python 3 source code.
+ * Extends BaseConverter for shared infrastructure; visitor methods are
+ * mixed in from focused sub-modules.
  */
+import { BaseConverter } from '../base_converter.js';
+import { statementVisitors } from './visitors/statements.js';
+import { expressionVisitors } from './visitors/expressions.js';
+import { patternVisitors } from './visitors/patterns.js';
 
-const CORE_BUILTINS = new Set([
-    "len",
-    "get",
-    "update",
-    "type",
-    "push",
-    "pop",
-    "slice",
-    "range",
-    "join",
-    "has_property",
-    "keys",
-    "values",
-    "entries",
-    "get_arguments",
-    "get_env",
-    "exit_code",
-    "coalesce",
-    "get_property_safe",
-    "if_else",
-]);
-
-export class MimoToPyConverter {
+export class MimoToPyConverter extends BaseConverter {
     constructor() {
-        this.output = "";
-        this.indentation = "    ";
-        this.currentIndent = "";
-        this.declaredVariables = new Set();
+        super();
         this.moduleAliases = new Map();
-        this.imports = new Set();
+        this._matchCounter = 0;
+        this._lambdaCounter = 0;
+        this._pendingImports = [];       // stdlib imports gathered in first pass
+        this._hoistedFunctions = [];     // hoisted inner defs for multi-stmt anon functions
+        this._deferredDecorators = [];   // decorator applications emitted after all function defs
+        this._moduleVars = new Set();    // top-level variable names (for `global` declarations)
+        this._emittingHoistedFunctions = false; // true during program-level function hoisting pass
+        this._enclosingFunctionVars = []; // stack of variable sets for enclosing function scopes
     }
 
+    // -------------------------------------------------------------------------
+    // Entry point
+    // -------------------------------------------------------------------------
+
     convert(ast) {
-        // First pass to collect imports
-        this.collectImports(ast);
-        
-        // Generate import statements
+        // First pass: gather stdlib module imports so we can emit them at the top.
+        this._collectStdlibImports(ast);
+
+        // Second pass: collect all module-level variable names for `global` declarations.
+        this._collectModuleVars(ast);
+
+        // Build header
         this.output = `from mimo_runtime import mimo\n`;
-        if (this.imports.size > 0) {
-            this.imports.forEach(imp => {
-                this.output += `${imp}\n`;
-            });
+        for (const imp of this._pendingImports) {
+            this.output += `${imp}\n`;
         }
-        this.output += `\n`;
-        
+        this.output += '\n';
+
         this.visitNode(ast);
-        
-        // Add main execution guard
-        this.output += `\nif __name__ == "__main__":\n    pass\n`;
-        
+
+        // Python idiom: guard the top-level execution
+        this.output += '\nif __name__ == "__main__":\n    pass\n';
+
         return this.output;
     }
 
-    collectImports(node) {
-        if (!node) return;
-        
-        if (node.type === 'ImportStatement') {
-            if (!['fs', 'math', 'string', 'array', 'json', 'datetime'].includes(node.path)) {
-                const moduleName = node.path.endsWith('.mimo') ? node.path.replace('.mimo', '') : node.path;
-                this.imports.add(`import ${moduleName} as ${node.alias}`);
+    // -------------------------------------------------------------------------
+    // AST analysis helpers (pre-passes)
+    // -------------------------------------------------------------------------
+
+    /** Collect external (non-stdlib) module imports for top-level import stmts. */
+    _collectStdlibImports(node) {
+        if (!node || typeof node !== 'object') return;
+        if (node.type === 'ImportStatement' && !this.isStdlibModule(node.path)) {
+            const modName = node.path.endsWith('.mimo')
+                ? node.path.slice(0, -5)
+                : node.path;
+            const imp = `import ${modName} as ${node.alias}`;
+            if (!this._pendingImports.includes(imp)) {
+                this._pendingImports.push(imp);
             }
         }
-        
-        // Recursively check all properties
-        for (const key in node) {
-            const value = node[key];
-            if (Array.isArray(value)) {
-                value.forEach(item => this.collectImports(item));
-            } else if (value && typeof value === 'object') {
-                this.collectImports(value);
+        for (const key of Object.keys(node)) {
+            const child = node[key];
+            if (Array.isArray(child)) {
+                child.forEach((c) => this._collectStdlibImports(c));
+            } else if (child && typeof child === 'object' && child.type) {
+                this._collectStdlibImports(child);
             }
         }
     }
 
-    indent() {
-        this.currentIndent += this.indentation;
-    }
-    
-    dedent() {
-        this.currentIndent = this.currentIndent.slice(0, -this.indentation.length);
-    }
-    
-    write(text) {
-        this.output += text;
-    }
-    
-    writeLine(line = "") {
-        if (line === "") {
-            this.output += "\n";
-        } else {
-            this.output += this.currentIndent + line + "\n";
+    /**
+     * Collect module-level variable names from the top-level program body.
+     * These are used to emit `global` declarations inside functions that
+     * assign to them (Mimo uses dynamic scoping for `set`).
+     */
+    _collectModuleVars(ast) {
+        if (!ast || ast.type !== 'Program') return;
+        for (const stmt of ast.body) {
+            if (stmt.type === 'VariableDeclaration') {
+                this._moduleVars.add(stmt.identifier);
+            } else if (stmt.type === 'AssignmentStatement' && stmt.target?.type === 'Identifier') {
+                this._moduleVars.add(stmt.target.name);
+            } else if (stmt.type === 'FunctionDeclaration') {
+                this._moduleVars.add(stmt.name);
+            }
         }
     }
 
-    visitNode(node) {
-        if (!node || !node.type) return;
-        const visitor = this[`visit${node.type}`];
-        if (visitor) visitor.call(this, node);
-        else
-            console.warn(`[Python Converter] No visitor for AST node type: ${node.type}`);
+    /**
+     * Collect all variable names that are assigned (set) within a block of statements.
+     * Does not recurse into nested function declarations.
+     */
+    _collectAssignedVars(stmts, result = new Set()) {
+        for (const stmt of stmts || []) {
+            if (!stmt) continue;
+            if (stmt.type === 'AssignmentStatement' && stmt.target?.type === 'Identifier') {
+                result.add(stmt.target.name);
+            } else if (stmt.type === 'VariableDeclaration') {
+                result.add(stmt.identifier);
+            } else if (stmt.type === 'IfStatement') {
+                this._collectAssignedVars(stmt.consequent, result);
+                if (Array.isArray(stmt.alternate)) this._collectAssignedVars(stmt.alternate, result);
+                else if (stmt.alternate) this._collectAssignedVars([stmt.alternate], result);
+            } else if (stmt.type === 'WhileStatement' || stmt.type === 'ForStatement' || stmt.type === 'LoopStatement') {
+                this._collectAssignedVars(stmt.body, result);
+            } else if (stmt.type === 'TryStatement') {
+                this._collectAssignedVars(stmt.tryBlock, result);
+                this._collectAssignedVars(stmt.catchBlock, result);
+            } else if (stmt.type === 'GuardStatement') {
+                this._collectAssignedVars(stmt.alternate || stmt.elseBlock, result);
+            }
+            // Do NOT recurse into nested FunctionDeclaration — they have their own scope
+        }
+        return result;
     }
 
+    // -------------------------------------------------------------------------
+    // Overrides
+    // -------------------------------------------------------------------------
+
+    onUndefinedVisitor(node) {
+        console.warn(`[Python Converter] No visitor for AST node type: ${node.type}`);
+    }
+
+    /** Python blocks must not be empty — emit `pass` if empty. */
     visitBlock(statements) {
-        if (statements.length === 0) {
-            this.writeLine("pass");
+        if (!statements || statements.length === 0) {
+            this.indent();
+            this.writeLine('pass');
+            this.dedent();
             return;
         }
         this.indent();
-        statements.forEach((stmt) => this.visitNode(stmt));
+        let prev = null;
+        statements.forEach((stmt) => {
+            this.emitLineGap(stmt, prev);
+            // Snapshot output length before visiting the statement.
+            // Any multi-statement anonymous functions encountered during visitNode(stmt)
+            // push into _hoistedFunctions. After the visit we splice their definitions
+            // BEFORE the statement that referenced them.
+            const outputBefore = this.output.length;
+            const hoistedBefore = this._hoistedFunctions.length;
+
+            this.visitNode(stmt);
+
+            const newlyHoisted = this._hoistedFunctions.splice(hoistedBefore);
+            if (newlyHoisted.length > 0) {
+                const stmtCode = this.output.slice(outputBefore);
+                this.output = this.output.slice(0, outputBefore);
+                for (const hfn of newlyHoisted) {
+                    this._emitHoistedFunction(hfn);
+                }
+                this.output += stmtCode;
+            }
+            prev = stmt;
+        });
         this.dedent();
     }
 
-    // --- Statement Visitors ---
-    visitProgram(node) {
-        node.body.forEach((stmt) => this.visitNode(stmt));
+    emitSpread(node) {
+        this.write('*');
+        this.visitNode(node.argument);
     }
 
-    visitShowStatement(node) {
-        this.write(`${this.currentIndent}mimo.show(`);
-        this.visitNode(node.expression);
-        this.write(")\n");
-    }
+    // -------------------------------------------------------------------------
+    // Hoisting infrastructure
+    // -------------------------------------------------------------------------
 
-    visitVariableDeclaration(node) {
-        const globalPrefix = node.isExported ? 'global ' : '';
-        if (node.isExported) {
-            this.writeLine(`${globalPrefix}${node.identifier}`);
+    /**
+     * Emit a hoisted anonymous function as a named `def`.
+     * Handles nonlocal declarations for closure variables and recursively
+     * emits any pre-hoisted sub-functions inside the body.
+     */
+    _emitHoistedFunction(hfn) {
+        this.writeLine(`def ${hfn.name}(${hfn.params}):`);
+
+        // Determine which vars are local to this hoisted function
+        const paramNames = new Set(
+            (hfn.params ? hfn.params.split(',').map(p => p.trim().replace(/=.*$/, '').replace(/^\*/, '')) : [])
+                .filter(Boolean)
+        );
+        const assignedInBody = this._collectAssignedVars(hfn.body);
+        const funcVars = new Set([...paramNames, ...assignedInBody]);
+
+        // Nonlocal: vars assigned in this body that live in an enclosing function scope
+        const nonlocalVars = [...assignedInBody].filter(
+            v => !paramNames.has(v) &&
+                 !this._moduleVars.has(v) &&
+                 this._enclosingFunctionVars.some(scope => scope.has(v))
+        );
+
+        // Push our vars so inner functions can detect their own nonlocals
+        this._enclosingFunctionVars.push(funcVars);
+
+        this.indent();
+        if (nonlocalVars.length > 0) {
+            this.writeLine(`nonlocal ${nonlocalVars.join(', ')}`);
         }
-        
-        this.write(`${this.currentIndent}${node.identifier} = `);
-        this.visitNode(node.value);
-        this.write('\n');
-        this.declaredVariables.add(node.identifier);
-    }
-
-    visitFunctionDeclaration(node) {
-        const params = node.params.map(p => p.name).join(', ');
-        
-        this.writeLine(`def ${node.name}(${params}):`);
-        this.visitBlock(node.body);
-        this.writeLine();
-        this.declaredVariables.add(node.name);
-    }
-
-    visitCallStatement(node) {
-        if (node.destination) {
-            const destName = node.destination.name;
-            this.write(`${this.currentIndent}${destName} = `);
-            this.declaredVariables.add(destName);
+        // Emit any pre-hoisted sub-functions inside this def's body first
+        if (hfn.preHoisted && hfn.preHoisted.length > 0) {
+            for (const sub of hfn.preHoisted) {
+                this._emitHoistedFunction(sub);
+            }
+        }
+        // Emit body statements with hoisting support for inner anonymous functions
+        if (!hfn.body || hfn.body.length === 0) {
+            this.writeLine('pass');
         } else {
-            this.write(this.currentIndent);
+            for (const stmt of hfn.body) {
+                const outputBefore = this.output.length;
+                const hoistedBefore = this._hoistedFunctions.length;
+
+                this.visitNode(stmt);
+
+                const newlyHoisted = this._hoistedFunctions.splice(hoistedBefore);
+                if (newlyHoisted.length > 0) {
+                    const stmtCode = this.output.slice(outputBefore);
+                    this.output = this.output.slice(0, outputBefore);
+                    for (const innerHfn of newlyHoisted) {
+                        this._emitHoistedFunction(innerHfn);
+                    }
+                    this.output += stmtCode;
+                }
+            }
         }
+        this.dedent();
 
-        this.visitCallee(node.callee);
-
-        this.write(`(`);
-        node.arguments.forEach((arg, i) => {
-            this.visitNode(arg);
-            if (i < node.arguments.length - 1) this.write(", ");
-        });
-        this.write(")\n");
+        this._enclosingFunctionVars.pop();
+        this.writeLine();
     }
+
+    // -------------------------------------------------------------------------
+    // Callee helper — routes built-ins through mimo.xxx
+    // -------------------------------------------------------------------------
 
     visitCallee(calleeNode) {
         switch (calleeNode.type) {
-            case "Identifier":
-                if (CORE_BUILTINS.has(calleeNode.name)) {
+            case 'Identifier':
+                if (this.isCoreBuiltin(calleeNode.name)) {
                     this.write(`mimo.${calleeNode.name}`);
                 } else {
                     this.visitNode(calleeNode);
                 }
                 break;
-
-            case "ModuleAccess":
-                this.visitNode(calleeNode);
-                break;
-
-            case "AnonymousFunction":
-                this.visitNode(calleeNode);
-                break;
-
             default:
                 this.visitNode(calleeNode);
                 break;
         }
     }
 
-    visitReturnStatement(node) {
-        this.write(`${this.currentIndent}return`);
-        if (node.argument) {
-            this.write(" ");
-            this.visitNode(node.argument);
-        }
-        this.write("\n");
-    }
+    // -------------------------------------------------------------------------
+    // Program
+    // -------------------------------------------------------------------------
 
-    visitIfStatement(node) {
-        this.write(`${this.currentIndent}if `);
-        this.visitNode(node.condition);
-        this.write(":\n");
-        this.visitBlock(node.consequent);
-        
-        if (node.alternate) {
-            if (node.alternate.type === "IfStatement") {
-                this.write(`${this.currentIndent}el`);
-                this.visitNode(node.alternate); // `elif` chain
-            } else {
-                this.writeLine("else:");
-                this.visitBlock(node.alternate);
+    visitProgram(node) {
+        // Mimo hoists all FunctionDeclarations before executing other statements.
+        // To match this, emit all function definitions first (without decorators),
+        // then apply all decorators, then run the rest of the statements.
+        const functions = node.body.filter(s => s.type === 'FunctionDeclaration');
+        const others = node.body.filter(s => s.type !== 'FunctionDeclaration');
+
+        // Pass 1: emit all function defs (decorator wrappers collected into _deferredDecorators)
+        this._emittingHoistedFunctions = true;
+        functions.forEach((stmt) => this.visitNode(stmt));
+        this._emittingHoistedFunctions = false;
+
+        // Pass 2: apply collected decorator wrappers
+        if (this._deferredDecorators.length > 0) {
+            for (const line of this._deferredDecorators) {
+                this.writeLine(line);
             }
+            this._deferredDecorators = [];
+            this.writeLine();
         }
-    }
 
-    visitWhileStatement(node) {
-        this.write(`${this.currentIndent}while `);
-        this.visitNode(node.condition);
-        this.write(":\n");
-        this.visitBlock(node.body);
-    }
+        // Pass 3: emit non-function statements (with hoisting support for inline anonymous functions)
+        let prev = null;
+        others.forEach((stmt) => {
+            this.emitLineGap(stmt, prev);
+            const outputBefore = this.output.length;
+            const hoistedBefore = this._hoistedFunctions.length;
 
-    visitForStatement(node) {
-        this.write(`${this.currentIndent}for ${node.variable.name} in `);
-        this.visitNode(node.iterable);
-        this.write(":\n");
-        this.visitBlock(node.body);
-    }
+            this.visitNode(stmt);
 
-    visitTryStatement(node) {
-        this.writeLine("try:");
-        this.visitBlock(node.tryBlock);
-        if (node.catchBlock) {
-            this.writeLine(`except Exception as ${node.catchVar?.name || "_err"}:`);
-            this.visitBlock(node.catchBlock);
-        }
-    }
-
-    visitThrowStatement(node) {
-        this.write(`${this.currentIndent}raise `);
-        this.visitNode(node.argument);
-        this.write("\n");
-    }
-
-    visitImportStatement(node) {
-        this.moduleAliases.set(node.alias, node.path);
-        
-        if (['fs', 'math', 'string', 'array', 'json', 'datetime'].includes(node.path)) {
-            this.writeLine(`${node.alias} = mimo.${node.path}`);
-        } else {
-            // Import was already handled in collectImports
-            this.writeLine(`${node.alias} = ${node.alias}`);
-        }
-    }
-
-    visitDestructuringAssignment(node) {
-        this.write(`${this.currentIndent}`);
-        this.visitNode(node.pattern);
-        this.write(" = ");
-        this.visitNode(node.expression);
-        this.write("\n");
-    }
-
-    visitPropertyAssignment(node) {
-        this.write(this.currentIndent);
-        this.visitNode(node.object);
-        this.write(`.${node.property} = `);
-        this.visitNode(node.value);
-        this.write("\n");
-    }
-
-    visitBracketAssignment(node) {
-        this.write(this.currentIndent);
-        this.visitNode(node.object);
-        this.write("[");
-        this.visitNode(node.index);
-        this.write("] = ");
-        this.visitNode(node.value);
-        this.write("\n");
-    }
-
-    visitMatchStatement(node) {
-        // Python doesn't have switch until 3.10, so we use if/elif chain
-        const tempVar = `__match_val_${Math.floor(Math.random() * 1e6)}`;
-        this.writeLine(`${tempVar} = `, false);
-        this.visitNode(node.discriminant);
-        this.write("\n");
-        
-        let first = true;
-        node.cases.forEach((caseNode) => {
-            this.visitCaseClause(caseNode, tempVar, first);
-            first = false;
-        });
-    }
-
-    visitCaseClause(node, matchVar, isFirst) {
-        if (!node.pattern) {
-            // default case
-            this.writeLine("else:");
-        } else {
-            const prefix = isFirst ? "if " : "elif ";
-            this.write(`${this.currentIndent}${prefix}`);
-            this.generateMatchCondition(node.pattern, matchVar);
-            this.write(":\n");
-            this.indent();
-            this.generateMatchBindings(node.pattern, matchVar);
-            this.dedent();
-        }
-        this.visitBlock(node.consequent);
-    }
-
-    generateMatchCondition(pattern, matchVar) {
-        if (pattern.type === "Literal") {
-            this.write(`mimo.eq(${matchVar}, `);
-            this.visitNode(pattern);
-            this.write(")");
-        } else if (pattern.type === "Identifier") {
-            this.write("True");
-        } else if (pattern.type === "ArrayPattern") {
-            this.write(
-                `isinstance(${matchVar}, list) and len(${matchVar}) == ${pattern.elements.length}`
-            );
-            pattern.elements.forEach((el, i) => {
-                this.write(" and ");
-                this.generateMatchCondition(el, `${matchVar}[${i}]`);
-            });
-        }
-    }
-
-    generateMatchBindings(pattern, matchVar) {
-        if (pattern.type === "Identifier") {
-            this.writeLine(`${pattern.name} = ${matchVar}`);
-        } else if (pattern.type === "ArrayPattern") {
-            pattern.elements.forEach((el, i) =>
-                this.generateMatchBindings(el, `${matchVar}[${i}]`)
-            );
-        }
-    }
-
-    // --- Expression Visitors ---
-    visitBinaryExpression(node) {
-        const opMap = { 
-            "=": "==", 
-            "!=": "!=", 
-            "and": "and", 
-            "or": "or",
-            "===": "==",
-            "!==": "!="
-        };
-        const pyOp = opMap[node.operator] || node.operator;
-        
-        this.write("(");
-        this.visitNode(node.left);
-        this.write(` ${pyOp} `);
-        this.visitNode(node.right);
-        this.write(")");
-    }
-
-    visitUnaryExpression(node) {
-        const opMap = { "!": "not ", "not": "not " };
-        const pyOp = opMap[node.operator] || node.operator;
-        this.write(`(${pyOp}`);
-        this.visitNode(node.argument);
-        this.write(")");
-    }
-
-    visitIdentifier(node) {
-        this.write(node.name);
-    }
-
-    visitLiteral(node) {
-        if (node.value === null) {
-            this.write("None");
-        } else if (node.value === true) {
-            this.write("True");
-        } else if (node.value === false) {
-            this.write("False");
-        } else if (typeof node.value === 'string') {
-            // Use repr to properly escape strings
-            this.write(JSON.stringify(node.value));
-        } else {
-            this.write(String(node.value));
-        }
-    }
-
-    visitArrayLiteral(node) {
-        this.write("[");
-        node.elements.forEach((el, i) => {
-            if (el.type === "SpreadElement") {
-                this.write("*");
-                this.visitNode(el.argument);
-            } else {
-                this.visitNode(el);
+            const newlyHoisted = this._hoistedFunctions.splice(hoistedBefore);
+            if (newlyHoisted.length > 0) {
+                const stmtCode = this.output.slice(outputBefore);
+                this.output = this.output.slice(0, outputBefore);
+                for (const hfn of newlyHoisted) {
+                    this._emitHoistedFunction(hfn);
+                }
+                this.output += stmtCode;
             }
-            if (i < node.elements.length - 1) this.write(", ");
+            prev = stmt;
         });
-        this.write("]");
     }
 
-    visitObjectLiteral(node) {
-        this.write("{");
-        node.properties.forEach((prop, i) => {
-            this.write(`"${prop.key}": `);
-            this.visitNode(prop.value);
-            if (i < node.properties.length - 1) this.write(", ");
-        });
-        this.write("}");
-    }
+    // -------------------------------------------------------------------------
+    // Private helpers
+    // -------------------------------------------------------------------------
 
-    visitAnonymousFunction(node) {
-        const params = node.params.map((p) => p.name).join(", ");
-        
-        // Python lambda for simple expressions, or define a nested function
-        if (node.body.length === 1 && node.body[0].type === 'ReturnStatement') {
-            this.write(`lambda ${params}: `);
-            if (node.body[0].argument) {
-                this.visitNode(node.body[0].argument);
-            } else {
-                this.write("None");
-            }
-        } else {
-            // For complex functions, we need to create a nested function
-            const funcName = `__lambda_${Math.floor(Math.random() * 1e6)}`;
-            this.write(`(lambda: (\n`);
-            this.writeLine(`def ${funcName}(${params}):`);
-            this.visitBlock(node.body);
-            this.writeLine(`return ${funcName}`);
-            this.write(`${this.currentIndent})())`);
-        }
-    }
-
-    visitModuleAccess(node) {
-        this.write(`${node.module}.${node.property}`);
-    }
-
-    visitPropertyAccess(node) {
-        this.visitNode(node.object);
-        this.write(`.${node.property}`);
-    }
-
-    visitSafePropertyAccess(node) {
-        this.write(`getattr(`);
-        this.visitNode(node.object);
-        this.write(`, "${node.property}", None)`);
-    }
-
-    visitArrayAccess(node) {
-        this.visitNode(node.object);
-        this.write(`[`);
-        this.visitNode(node.index);
-        this.write(`]`);
-    }
-
-    visitCallExpression(node) {
-        this.visitCallee(node.callee);
-
-        this.write("(");
-        node.arguments.forEach((arg, i) => {
-            this.visitNode(arg);
-            if (i < node.arguments.length - 1) this.write(", ");
-        });
-        this.write(")");
-    }
-
-    visitTemplateLiteral(node) {
-        this.write("f\"");
-        node.parts.forEach((part) => {
-            if (part.type === "Literal") {
-                // Escape quotes and braces in literal parts
-                const escaped = part.value
-                    .replace(/\\/g, "\\\\")
-                    .replace(/"/g, '\\"')
-                    .replace(/{/g, "{{")
-                    .replace(/}/g, "}}");
-                this.write(escaped);
-            } else {
-                this.write("{");
-                this.visitNode(part);
-                this.write("}");
-            }
-        });
-        this.write("\"");
-    }
-
-    visitArrayPattern(node) {
-        this.write(`[${node.elements.map((e) => e.name).join(", ")}]`);
-        node.elements.forEach((e) => this.declaredVariables.add(e.name));
-    }
-
-    visitObjectPattern(node) {
-        // Python doesn't have object destructuring like JS, so we simulate it
-        const names = node.properties.map((p) => p.name);
-        this.write(`[${names.join(", ")}]`);
-        node.properties.forEach((p) => this.declaredVariables.add(p.name));
-    }
-
-    visitBreakStatement(node) {
-        this.writeLine("break");
-    }
-
-    visitContinueStatement(node) {
-        this.writeLine("continue");
-    }
-
-    visitLoopStatement(node) {
-        if (node.label) {
-            this.writeLine(`# Label: ${node.label}`);
-        }
-        this.writeLine("while True:");
-        this.visitBlock(node.body);
-    }
-
-    visitLabeledStatement(node) {
-        this.writeLine(`# Label: ${node.label}`);
-        this.visitNode(node.statement);
-    }
-
-    visitRangeLiteral(node) {
-        this.write("mimo.range(");
-        this.visitNode(node.start);
-        this.write(", ");
-        this.visitNode(node.end);
-        this.write(")");
+    /**
+     * Render an expression node to a string without writing to output.
+     * Used for default parameter values and decorator args.
+     */
+    _exprToString(node) {
+        if (!node) return 'None';
+        const savedOutput = this.output;
+        const savedIndent = this.currentIndent;
+        this.output = '';
+        this.currentIndent = '';
+        this.visitNode(node);
+        const result = this.output;
+        this.output = savedOutput;
+        this.currentIndent = savedIndent;
+        return result;
     }
 }
+
+// Mix in visitor methods from sub-modules
+Object.assign(MimoToPyConverter.prototype, statementVisitors, expressionVisitors, patternVisitors);
