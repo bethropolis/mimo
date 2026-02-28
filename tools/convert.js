@@ -34,14 +34,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Parser } from '../parser/Parser.js';
 import { Lexer } from '../lexer/Lexer.js';
-import { MimoToJsConverter } from './converters/javascript/to_js.js';
-import { MimoToPyConverter } from './converters/python/to_py.js';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Converter registry system
 class ConverterRegistry {
     constructor() {
         this.converters = new Map();
-        this.setupDefaultConverters();
     }
 
     /**
@@ -91,23 +89,49 @@ class ConverterRegistry {
         return null;
     }
 
-    setupDefaultConverters() {
-        // Register JavaScript converter
-        this.register('js', '.js', MimoToJsConverter, 'javascript/mimo_runtime.js');
-        this.register('javascript', '.js', MimoToJsConverter, 'javascript/mimo_runtime.js');
-        
-        // Register Python converter
-        this.register('py', '.py', MimoToPyConverter, 'python/mimo_runtime.py');
-        this.register('python', '.py', MimoToPyConverter, 'python/mimo_runtime.py');
-        
-        // Future converters can be registered here:
-        // Example: Adding Go support
-        // import { MimoToGoConverter } from './converters/go/to_go.js';
-        // this.register('go', '.go', MimoToGoConverter, 'go/mimo_runtime.go');
-        
-        // Example: Adding Rust support  
-        // import { MimoToRustConverter } from './converters/rust/to_rust.js';
-        // this.register('rust', '.rs', MimoToRustConverter, 'rust/mimo_runtime.rs');
+    /**
+     * Dynamically scan the converters directory and load all plugins
+     */
+    async discoverConverters() {
+        const convertersDir = path.join(__dirname, 'converters');
+        if (!fs.existsSync(convertersDir)) return;
+
+        const entries = fs.readdirSync(convertersDir, { withFileTypes: true });
+
+        for (const entry of entries) {
+            if (entry.isDirectory()) {
+                const langDir = path.join(convertersDir, entry.name);
+                const indexPath = path.join(langDir, 'index.js');
+
+                if (fs.existsSync(indexPath)) {
+                    try {
+                        // Use dynamic import with file URL for Windows compatibility
+                        const modulePath = `file://${indexPath}`;
+                        const { config, Converter } = await import(modulePath);
+
+                        if (config && Converter) {
+                            const { name, aliases, extension, runtimeFile } = config;
+
+                            // Register main name and all aliases
+                            const regName = name || entry.name;
+                            const runtimePath = runtimeFile ? path.join(entry.name, runtimeFile) : null;
+
+                            this.register(regName, extension, Converter, runtimePath);
+
+                            if (aliases && Array.isArray(aliases)) {
+                                for (const alias of aliases) {
+                                    if (alias !== regName) {
+                                        this.register(alias, extension, Converter, runtimePath);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`Warning: Failed to load converter in ${entry.name}: ${error.message}`);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -139,23 +163,23 @@ function parseArgs(args) {
  */
 function determineTarget(options) {
     let targetLanguage = options.to;
-    
+
     // If no target specified, try to detect from output file extension
     if (!targetLanguage && options.out) {
         targetLanguage = converterRegistry.detectLanguageFromExtension(options.out);
     }
-    
+
     // Default to JavaScript if still not determined
     if (!targetLanguage) {
         targetLanguage = 'js';
     }
-    
+
     const converterInfo = converterRegistry.get(targetLanguage);
     if (!converterInfo) {
         const availableLanguages = converterRegistry.getLanguages().join(', ');
         throw new Error(`Unsupported target language: ${targetLanguage}. Available: ${availableLanguages}`);
     }
-    
+
     return {
         language: targetLanguage,
         converterInfo,
@@ -251,6 +275,9 @@ async function main() {
     const args = process.argv.slice(2);
     const options = parseArgs(args);
 
+    // Initialize the registry by discovering plugins
+    await converterRegistry.discoverConverters();
+
     if ((!options.in && process.stdin.isTTY) || !options.out) {
         const availableLanguages = converterRegistry.getLanguages().join(', ');
         console.error('Usage: node tools/convert.js --in <infile> --out <outfile|outdir> [--to <language>]');
@@ -268,7 +295,7 @@ async function main() {
     }
 
     const { language, converterInfo, targetExtension } = targetConfig;
-    
+
     let outDir;
     let isFileOutput = false;
 
@@ -325,7 +352,7 @@ async function main() {
             console.error('Error: Directory output requires an input file to resolve dependencies.');
             process.exit(1);
         }
-        
+
         // Copy the runtime file if specified for directory output
         if (converterInfo.runtimeFile) {
             const __dirname = path.dirname(fileURLToPath(import.meta.url));
