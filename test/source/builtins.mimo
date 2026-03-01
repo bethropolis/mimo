@@ -1,7 +1,13 @@
 show "=== Built-in Functions Demo ==="
 
 show "1. Testing len() function:"
-set numbers [1, 2, 3, 4, 5]
+set numbers [
+    1,
+    2,
+    3,
+    4,
+    5
+]
 call len(numbers) -> nums_length
 show nums_length
 

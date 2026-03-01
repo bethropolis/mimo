@@ -361,25 +361,40 @@ export class PrettyPrinter {
 
     visitIfStatement(node) {
         this.write(this.currentIndent + 'if ');
+        this._visitIfBody(node);
+    }
+
+    /**
+     * Emit the condition, consequent, and optional alternate for an if statement.
+     * Called after the caller has already written the leading `if `.
+     * currentIndent must be at the correct outer level throughout — never zeroed.
+     *
+     * NOTE: We never emit `else if` as a single construct. The parser always
+     * requires two `end`s for a chained else-if (the inner if consumes its own
+     * `end`, then the outer if expects another). So we always emit the fully
+     * explicit nested form:
+     *
+     *   else
+     *       if <condition>
+     *           ...
+     *       end
+     *   end
+     */
+    _visitIfBody(node) {
         this.visitNode(node.condition);
         this.write('\n');
         this.visitBlock(node.consequent);
         if (node.alternate) {
             if (node.alternate.type === 'IfStatement') {
-                this.write(this.currentIndent + 'else ');
-                // inline the else-if (strips currentIndent prefix that visitIfStatement adds)
-                const savedIndent = this.currentIndent;
-                this.currentIndent = '';
-                this.visitIfStatement(node.alternate);
-                this.currentIndent = savedIndent;
+                // Nested else-if: emit as explicit else + indented if block.
+                this.writeLine('else');
+                this.visitBlock([node.alternate]);
             } else {
                 this.writeLine('else');
                 this.visitBlock(node.alternate);
-                this.writeLine('end');
             }
-        } else {
-            this.writeLine('end');
         }
+        this.writeLine('end');
     }
 
     visitGuardStatement(node) {

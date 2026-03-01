@@ -1,6 +1,5 @@
 // Simple test for conditional expressions - precedence and edge cases
 // Now using `if_else`, `coalesce`, `get_property_safe` builtins
-
 // Basic ternary operator
 set x 5
 set result call if_else(> x 3, "big", "small")
@@ -56,7 +55,11 @@ set chained call coalesce(first, call coalesce(second, third))
 show chained
 
 // Chained safe navigation
-set deep { level1: { level2: { value: "deep" } } }
+set deep {
+    level1: {
+        level2: { value: "deep" }
+    }
+}
 set deep_val call get_property_safe(call get_property_safe(call get_property_safe(deep, "level1"), "level2"), "value")
 show deep_val
 

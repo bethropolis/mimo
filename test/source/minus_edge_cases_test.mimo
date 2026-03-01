@@ -1,22 +1,21 @@
 // Test edge cases for minus operations to ensure robust parsing
-
 // Test 1: Binary minus in nested expressions
-set result1 - (+ 5 3) (- 10 6)
+set result1 - + 5 3 - 10 6
 show "Test 1 - Binary minus with nested expressions: (5+3) - (10-6) ="
 show result1
 
 // Test 2: Unary minus with complex expressions
-set result2 (- (+ 2 3))
+set result2 - + 2 3
 show "Test 2 - Unary minus with complex expression: -(2+3) ="
 show result2
 
 // Test 3: Multiple unary minus operations
-set result3 (- (- 5))
+set result3 - - 5
 show "Test 3 - Double unary minus: -(-5) ="
 show result3
 
 // Test 4: Binary minus at statement boundaries
-if (< (- 8 3) 10)
+if < - 8 3 10
     show "Test 4 - Binary minus in condition: 8-3 < 10 is true"
 end
 
@@ -25,17 +24,17 @@ function test_unary_param(x)
     return * x 2
 end
 
-call test_unary_param((- 4)) -> result5
+call test_unary_param(- 4) -> result5
 show "Test 5 - Unary minus as function parameter: -4 * 2 ="
 show result5
 
 // Test 6: Binary minus with unary minus operands
-set result6 - (- 10) (- 3)
+set result6 - - 10 - 3
 show "Test 6 - Binary minus with unary operands: (-10) - (-3) ="
 show result6
 
 // Test 7: Mixed operations preserving precedence
-set result7 + (* 2 3) (- 8 2)
+set result7 + * 2 3 - 8 2
 show "Test 7 - Mixed operations: (2*3) + (8-2) ="
 show result7
 
@@ -45,27 +44,25 @@ show "Test 8 - Binary minus in array: [10-3, 5-2, 8-1] ="
 show arr
 
 // Test 9: Unary minus in array context
-set arr2 [(- 5), (- 10), (- 15)]
+set arr2 [- 5, - 10, - 15]
 show "Test 9 - Unary minus in array: [-5, -10, -15] ="
 show arr2
 
 // Test 10: Binary minus in object literal
-set obj {
-    difference: - 20 5,
-    negative: (- 7)
-}
+set obj { difference: - 20 5, negative: - 7 }
+
 show "Test 10 - Minus operations in object:"
 show obj.difference
 show obj.negative
 
 // Test 11: Chain of binary minus operations
-set result11 - (- 20 5) (- 10 3)
+set result11 - - 20 5 - 10 3
 show "Test 11 - Chain of binary minus: (20-5) - (10-3) ="
 show result11
 
 // Test 12: Return statement with minus operations
 function complex_minus()
-    return - (* 6 2) (+ 4 1)
+    return - * 6 2 + 4 1
 end
 
 call complex_minus() -> result12
