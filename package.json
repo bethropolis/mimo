@@ -13,6 +13,10 @@
   "main": "index.js",
   "module": "index.js",
   "type": "module",
+  "workspaces": [
+    "playground",
+    "extensions/*"
+  ],
   "bin": {
     "mimo": "./bin/cli.js"
   },
@@ -36,7 +40,8 @@
     "ext:package": "bun run --cwd extensions/mimo-vscode package",
     "web:dev": "bun run --cwd playground dev --open",
     "web:build": "bun run --cwd playground build",
-    "web:preview": "bun run --cwd playground preview"
+    "web:preview": "bun run --cwd playground preview",
+    "web:check": "bun run --cwd playground check"
   },
   "devDependencies": {
     "@types/bun": "latest",
