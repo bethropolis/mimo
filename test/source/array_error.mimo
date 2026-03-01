@@ -8,10 +8,11 @@ show "Valid access:"
 show numbers[1]
 
 show "Invalid access - this will cause an error:"
+
 try
-    show numbers[10] 
-catch err 
-    show + "Caught expected error: " err 
+    show numbers[10]
+catch err
+    show + "Caught expected error: " err
 end
 
 show "This line should not be reached"

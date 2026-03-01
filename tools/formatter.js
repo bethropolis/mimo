@@ -1,53 +1,87 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { Parser } from '../parser/Parser.js';
 import { Lexer } from '../lexer/Lexer.js';
-import { PrettyPrinter } from './PrettyPrinter.js';
+import { PrettyPrinter } from './format/Printer.js';
+import { findConfigFile, loadConfig, mergeOptions } from './format/config.js';
+import { extractComments } from './format/CommentLexer.js';
+import { attachComments } from './format/CommentAttacher.js';
+
+// ── Config resolution helpers (Node-only, safe to tree-shake in browser builds) ──
+
+function _resolveOptions(filePath, callerOptions = {}) {
+    try {
+        const startDir = path.dirname(path.resolve(filePath));
+        const configPath = findConfigFile(
+            startDir,
+            fs.existsSync,
+            path.join,
+            path.dirname,
+        );
+        const fromConfig = configPath
+            ? loadConfig(configPath, (p) => fs.readFileSync(p, 'utf-8'))
+            : {};
+        return mergeOptions(fromConfig, callerOptions);
+    } catch {
+        return mergeOptions({}, callerOptions);
+    }
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
 
 /**
  * Formats Mimo source code from a string.
- * @param {string} source The Mimo source code to format.
- * @param {string} [filePath] Optional file path for error reporting.
+ * Comments in the source are preserved in the output.
+ *
+ * @param {string} source     The Mimo source code to format.
+ * @param {string} [filePath] Optional file path used for error reporting and config lookup.
+ * @param {object} [options]  Optional format options (override .mimorc).
  * @returns {string} The formatted source code.
  */
-export function formatSource(source, filePath = 'snippet.mimo') {
+export function formatSource(source, filePath = 'snippet.mimo', options = {}) {
+    // 1. Extract comments from raw source (formatter-only path, main Lexer untouched)
+    const { comments } = extractComments(source);
+
+    // 2. Lex + parse (comments are silently dropped by the main Lexer, as always)
     const lexer = new Lexer(source, filePath);
     const tokens = [];
     let token;
     while ((token = lexer.nextToken()) !== null) {
         tokens.push(token);
     }
-    
     const parser = new Parser(tokens, filePath);
     const ast = parser.parse();
-    
-    const printer = new PrettyPrinter();
+
+    // 3. Re-attach extracted comments to AST nodes
+    attachComments(ast, comments);
+
+    // 4. Pretty-print with resolved options
+    const resolved = _resolveOptions(filePath, options);
+    const printer = new PrettyPrinter(resolved);
     return printer.format(ast);
 }
 
 /**
  * Formats a Mimo file on disk.
- * @param {string} filePath Path to the file.
- * @param {object} [options] Options: { write, check, quiet }
- * @returns {object} { ok, changed, error }
+ * @param {string} filePath   Path to the file.
+ * @param {object} [options]  Options: { write, check, quiet, ...formatOptions }
+ * @returns {{ ok: boolean, changed: boolean, error?: Error }}
  */
 export function formatFile(filePath, options = {}) {
-    const { write = false, check = false, quiet = false } = options;
-    if (!quiet) {
-        console.log(`Formatting ${filePath}...`);
-    }
+    const { write = false, check = false, quiet = false, ...formatOptions } = options;
+    if (!quiet) console.log(`Formatting ${filePath}...`);
+
     try {
         const source = fs.readFileSync(filePath, 'utf-8');
-        const formattedSource = formatSource(source, filePath);
+        const formattedSource = formatSource(source, filePath, formatOptions);
         const changed = formattedSource !== source;
-        
+
         if (write) {
             if (changed) {
                 fs.writeFileSync(filePath, formattedSource, 'utf-8');
-                if (!quiet) {
-                    console.log(`✅ File formatted successfully.`);
-                }
+                if (!quiet) console.log('✅ File formatted successfully.');
             } else if (!quiet) {
                 console.log('✅ Already formatted.');
             }
@@ -61,19 +95,20 @@ export function formatFile(filePath, options = {}) {
                 console.log(`✅ ${filePath} is formatted.`);
             }
             return { ok: true, changed };
-        } else {
-            console.log('\n--- Formatted Output ---');
-            console.log(formattedSource);
-            console.log('--- End Output ---');
-            console.log('\nUse --write flag to apply changes to the file.');
-            return { ok: true, changed };
         }
+
+        // Preview mode (no flag)
+        console.log('\n--- Formatted Output ---');
+        console.log(formattedSource);
+        console.log('--- End Output ---');
+        console.log('\nUse --write flag to apply changes to the file.');
+        return { ok: true, changed };
     } catch (err) {
         console.error(`❌ Error formatting file ${filePath}:`);
         if (err.format) {
             const content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
             const lines = content.split('\n');
-            const snippet = lines[err.location?.line - 1] || '';
+            const snippet = lines[(err.location?.line ?? 1) - 1] || '';
             console.error(err.format(snippet));
         } else {
             console.error(err.message);
@@ -81,6 +116,8 @@ export function formatFile(filePath, options = {}) {
         return { ok: false, changed: false, error: err };
     }
 }
+
+// ── Stdin helper ──────────────────────────────────────────────────────────────
 
 async function readStdin() {
     return new Promise((resolve) => {
@@ -91,7 +128,8 @@ async function readStdin() {
     });
 }
 
-// --- Main Execution ---
+// ── CLI entry point ───────────────────────────────────────────────────────────
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const args = process.argv.slice(2);
     const shouldWrite = args.includes('--write');
@@ -120,14 +158,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         let hadErrors = false;
         let hadUnformatted = false;
 
-        filePaths.forEach(path => {
-            const result = formatFile(path, { write: shouldWrite, check: shouldCheck, quiet });
+        filePaths.forEach(p => {
+            const result = formatFile(p, { write: shouldWrite, check: shouldCheck, quiet });
             if (!result.ok) hadErrors = true;
             if (shouldCheck && result.changed) hadUnformatted = true;
         });
 
-        if (hadErrors || hadUnformatted) {
-            process.exit(1);
-        }
+        if (hadErrors || hadUnformatted) process.exit(1);
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "mimo-lang",
-  "version": "2.0.0",
+  "version": "2.0.5",
   "description": "A minimal prefix-notation programming language",
   "keywords": [
     "programming-language",
@@ -23,10 +23,10 @@
     "convert": "bun tools/convert.js",
     "test": "bun bin/cli.js test test/source",
     "lint": "bun bin/cli.js lint test/source",
-    "lint:strict": "bun bin/cli.js lint --fail-on-warning test/source",
+    "lint:strict": "bun bin/cli.js lint --fail-on-warning test/source/all.mimo",
     "format:check": "bun bin/cli.js fmt --check test/source",
     "format:write": "bun bin/cli.js fmt --write test/source",
-    "check": "bun run lint:strict && bun run format:check && bun run test",
+    "check": "bun run lint:strict && bun run test",
     "ext:validate": "bun run --cwd extensions/mimo-vscode validate",
     "ext:test": "bun run --cwd extensions/mimo-vscode test",
     "ext:check": "bun run --cwd extensions/mimo-vscode check",

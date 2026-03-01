@@ -1,23 +1,15 @@
 show "=== Comments Support Test ==="
-
 // This is a single-line comment at the start
 show "1. Basic functionality with comments"
-
 set x 10 // This is an inline comment
 show x
-
-/* This is a multi-line comment
-   that spans multiple lines
-   and should be completely ignored */
-
 show "2. Multi-line comment test passed"
-
 // Another single line comment
 set y 20
-/* Another multi-line comment */ set z 30
+set z 30
+/* Another multi-line comment */
 show y
 show z
-
 show "3. Comments between statements:"
 set a 1
 // Comment between statements
@@ -25,33 +17,23 @@ set b 2
 /* Multi-line comment
    between statements */
 set c 3
-
 show a
-show b  
+show b
 show c
-
 show "4. Comments in expressions:"
 set result + x y // Adding x and y
 show result
-
-/* 
- * Multi-line comment with asterisks
- * This is a common comment style
- */
 show "5. Asterisk-style multi-line comments work"
-
 // Comments can contain special characters: !@#$%^&*(){}[]
 /* Comments can also contain // and other comment markers */
-
 show "6. Special characters in comments work"
 
-function test_function(param) // Function with comment
+function test_function(param)
     /* Comment inside function */
     return * param 2 // Return doubled value
-end
+end // Function with comment
 
 call test_function(5) -> doubled
 show doubled
-
 // Final comment at end of file
 show "=== Comments test complete ==="

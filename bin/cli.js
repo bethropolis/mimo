@@ -392,28 +392,34 @@ async function main() {
           lintFileJson(file, { rules })
         );
         console.log(JSON.stringify(results.length === 1 ? results[0] : results));
-        const hasErrors = results.some((r) => !r.ok);
-        const warningCount = results.reduce(
-          (sum, r) => sum + r.messages.length,
+        const hasParseErrors = results.some((r) => !r.ok);
+        const errorCount = results.reduce(
+          (sum, r) => sum + r.messages.filter((m) => m.severity === "error").length,
           0
         );
-        if (hasErrors || (failOnWarning && warningCount > 0)) {
+        const warningCount = results.reduce(
+          (sum, r) => sum + r.messages.filter((m) => m.severity !== "error").length,
+          0
+        );
+        if (hasParseErrors || errorCount > 0 || (failOnWarning && warningCount > 0)) {
           process.exit(1);
         }
       } else {
-        let hadErrors = false;
-        let warnings = 0;
+        let hasParseErrors = false;
+        let errorCount = 0;
+        let warningCount = 0;
 
         for (const file of filesToLint) {
           const result = lintFile(file, { quiet, rules });
           if (!result.ok) {
-            hadErrors = true;
+            hasParseErrors = true;
             continue;
           }
-          warnings += result.messages.length;
+          errorCount   += result.errorCount;
+          warningCount += result.warningCount;
         }
 
-        if (hadErrors || (failOnWarning && warnings > 0)) {
+        if (hasParseErrors || errorCount > 0 || (failOnWarning && warningCount > 0)) {
           process.exit(1);
         }
       }

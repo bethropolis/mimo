@@ -22,15 +22,14 @@ show "Directory exists? "
 
 call fs.exists(test_dir)
 
-show + "
-Writing to file: " test_file
+show + "Writing to file: " test_file
 
 call fs.write_file(test_file, test_content)
 
-show + "File exists? " call fs.exists(test_file)
+call fs.exists(test_file) -> file_exists1
+show + "File exists? " file_exists1
 
-show "
-2. Reading and Verification:"
+show "2. Reading and Verification:"
 
 call fs.read_file(test_file) -> read_content
 
@@ -38,31 +37,29 @@ show + "Read content: " read_content
 
 show + "Content matches? " = read_content test_content
 
-show "
-3. Listing Directory Contents:"
+show "3. Listing Directory Contents:"
 
 call fs.list_dir(test_dir) -> dir_contents
 
 show + "Directory contents: " dir_contents
 
-show "
-4. Cleanup:"
+show "4. Cleanup:"
 
 show + "Removing file: " test_file
 
 call fs.remove_file(test_file)
 
-show + "File exists? " call fs.exists(test_file)
+call fs.exists(test_file) -> file_exists2
+show + "File exists? " file_exists2
 
-show + "
-Removing directory: " test_dir
+show + "Removing directory: " test_dir
 
 call fs.remove_dir(test_dir)
 
-show + "Directory exists? " call fs.exists(test_dir)
+call fs.exists(test_dir) -> dir_exists
+show + "Directory exists? " dir_exists
 
-show "
-5. Error Handling (reading non-existent file):"
+show "5. Error Handling (reading non-existent file):"
 
 // UNKNOWN NODE: {"type":"TryStatement","tryBlock":[{"type":"CallStatement","callee":{"type":"ModuleAccess","module":"fs","property":"read_file","line":43,"column":10,"start":1359,"length":2,"file":"test/source/fs.mimo"},"arguments":[{"type":"Literal","value":"non_existent_file.txt","line":43,"column":23,"start":1372,"length":23,"file":"test/source/fs.mimo"}],"destination":null,"line":43,"column":5,"start":1354,"length":4,"file":"test/source/fs.mimo"}],"catchVar":{"type":"Identifier","name":"err","line":44,"column":7,"start":1403,"length":3,"file":"test/source/fs.mimo"},"catchBlock":[{"type":"ShowStatement","expression":{"type":"Literal","value":"Caught error reading non-existent file as expected.","line":45,"column":10,"start":1416,"length":53,"file":"test/source/fs.mimo"},"line":45,"column":5,"start":1411,"length":4,"file":"test/source/fs.mimo"}],"line":42,"column":1,"start":1346,"length":3,"file":"test/source/fs.mimo"}
 

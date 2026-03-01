@@ -9,6 +9,8 @@ import { Parser } from './parser/Parser.js';
 import { MimoError } from './interpreter/MimoError.js';
 import { Linter } from './tools/lint/Linter.js';
 import { PrettyPrinter } from './tools/PrettyPrinter.js';
+import { extractComments } from './tools/format/CommentLexer.js';
+import { attachComments } from './tools/format/CommentAttacher.js';
 
 /**
  * Tokenizer module - handles lexical analysis
@@ -329,27 +331,34 @@ export function lintSource(source, filePath = '/playground.mimo', rules = {}) {
 
 export function formatSource(source) {
     try {
+        // Extract comments from raw source (formatter-only path)
+        const { comments } = extractComments(source);
+
         const lexer = new Lexer(source, '/format.mimo');
         const tokens = [];
         let token;
         while ((token = lexer.nextToken()) !== null) {
             tokens.push(token);
         }
-        
+
         const parser = new Parser(tokens, '/format.mimo');
         const ast = parser.parse();
-        
+
+        // Attach extracted comments to AST nodes
+        attachComments(ast, comments);
+
         const printer = new PrettyPrinter();
+        // A8: format() already normalises the trailing newline
         const formatted = printer.format(ast);
-        
+
         return {
             ok: true,
-            formatted: formatted.trimEnd()
+            formatted,
         };
     } catch (err) {
         return {
             ok: false,
-            error: err.message
+            error: err.message,
         };
     }
 }
