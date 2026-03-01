@@ -1,6 +1,6 @@
 {
   "name": "mimo-lang",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "A minimal prefix-notation programming language",
   "keywords": [
     "programming-language",
@@ -20,6 +20,9 @@
     "mimo": "bun bin/cli.js",
     "dev": "bun test.js",
     "build": "bun build.js",
+    "prebuild:mimo": "bun tools/stamp-version.js",
+    "build:mimo": "bun build ./bin/cli.js --compile --outfile mimo",
+    "build:all": "bun build.js && bun run ext:package && bun run web:build",
     "convert": "bun tools/convert.js",
     "test": "bun bin/cli.js test test/source",
     "lint": "bun bin/cli.js lint test/source",
