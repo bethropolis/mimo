@@ -23,17 +23,9 @@ end
 
 ## Indentation
 
-Use consistent indentation (2 or 4 spaces):
+Use 4 spaces per level. This is what `mimo fmt` produces and enforces:
 
 ```mimo
-// 2-space indentation
-if > x 0
-  if < x 100
-    show "in range"
-  end
-end
-
-// 4-space indentation
 if > x 0
     if < x 100
         show "in range"
@@ -114,3 +106,25 @@ end
 call process(10) -> result
 show result
 ```
+
+## Formatter
+
+Mimo ships with a built-in formatter (`mimo fmt`) that enforces the conventions in this guide automatically. The canonical style is:
+
+- **4 spaces** per indent level
+- Blank lines around block-level constructs (`if`, `while`, `for`, `function`, `try`, `match`)
+- Long arrays and objects (> 4 elements or > 80–100 chars) expanded to multiline
+- Double-quoted strings
+
+```bash
+# Preview formatted output (does not modify files)
+mimo fmt src/
+
+# Format in place
+mimo fmt --write src/
+
+# CI check — exit 1 if any file needs formatting
+mimo fmt --check src/
+```
+
+Running `mimo fmt --write` on your codebase is the easiest way to bring it into conformance with this guide. See the [CLI Reference](../cli.md) for full flag documentation.

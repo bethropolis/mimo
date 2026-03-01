@@ -1,6 +1,7 @@
 * Getting Started
   * [Overview](README.md)
   * [Syntax Guide](syntax-guide.md)
+  * [CLI Reference](cli.md)
   * [Testing](testing.md)
 * Language Reference
   * [Variables](syntax/variables.md)

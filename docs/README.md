@@ -14,6 +14,7 @@ A minimal prefix-notation programming language.
 ## Quick Links
 
 - [Syntax Guide](syntax-guide.md) - Complete language reference
+- [CLI Reference](cli.md) - All commands, flags, and examples
 - [Testing Guide](testing.md) - How to test Mimo programs
 
 ## Language Reference

@@ -11,20 +11,22 @@ bun -e "
   console.log(lexer.nextToken());
 "
 
-# Test parser
+# Test parser / evaluator
 bun bin/cli.js -e "your code here"
-
-# Test evaluation
-bun bin/cli.js -e "set x 10 \n show x"
+bun bin/cli.js -e "set x 10 show x"
 ```
 
 ### 2. Running Test Suite
 ```bash
-# All tests
-bun test.js
+# All tests + strict lint (the full CI gate)
+bun run check
 
-# Specific test file
-bun bin/cli.js test/source/all.mimo
+# Tests only
+mimo test test/source/
+bun bin/cli.js test test/source/
+
+# Single test file
+mimo test test/source/all.mimo
 
 # REPL tests
 bun test/run_repl_tests.js
@@ -33,17 +35,18 @@ bun test/run_repl_tests.js
 ### 3. Manual REPL Testing
 ```bash
 # Start REPL
-bun repl.js
+mimo repl
+# or: bun repl.js
 
 # In REPL:
 > set x 10
 > show x
 10
 > function double(n) return * 2 n end
-> show call double 5
+> show call double(5)
 10
 
-# New REPL utilities
+# REPL special commands
 > :load test/source/stdlib_path_env.mimo
 > :ast call path.join("a", "b")
 > :time call path.join("a", "b")
@@ -65,7 +68,20 @@ bun bin/cli.js -e "/ 10 0"
 ### 5. Environment Diagnostics
 ```bash
 # Validate runtime/tooling setup
-bun bin/cli.js doctor
+mimo doctor
+# or: bun bin/cli.js doctor
+```
+
+### 6. Formatting and Linting
+```bash
+# Check formatting without modifying files
+mimo fmt --check test/source/
+
+# Format all test sources in place
+mimo fmt --write test/source/
+
+# Lint with strict mode (fail on warnings)
+mimo lint --fail-on-warning test/source/all.mimo
 ```
 
 ---
@@ -81,10 +97,10 @@ console.log('Environment:', this.env.vars);
 
 ### 2. Use Pretty Printer
 ```javascript
-import { PrettyPrinter } from './tools/PrettyPrinter.js';
+import { PrettyPrinter } from './tools/format/Printer.js';
 
 const printer = new PrettyPrinter();
-console.log(printer.print(ast));
+console.log(printer.format(ast));
 ```
 
 ### 3. Trace Execution Path
