@@ -16,14 +16,6 @@ Mimo source files (`.mimo`) that test core language functionality:
 - **`minus_edge_cases_test.mimo`** - Edge cases for minus operator parsing
 - **Pattern matching, control flow, modules** - Various feature-specific tests
 
-### REPL Tests
-
-JavaScript test files for the interactive REPL:
-
-- **`test_repl.js`** - Basic REPL functionality (expressions, variables, commands)
-- **`test_repl_advanced.js`** - Advanced features (objects, arrays, complex expressions)
-- **`test_multiline.js`** - Multi-line input support (functions, control structures)
-- **`run_repl_tests.js`** - Test runner for all REPL tests
 
 ## Running Tests
 
@@ -43,18 +35,6 @@ bun index.js test/source/minus_operations_test.mimo
 bun index.js test/source/pattern_matching.mimo
 ```
 
-### REPL Tests
-
-```bash
-# Run all REPL tests
-bun test/run_repl_tests.js
-
-# Run individual REPL tests
-bun test/test_repl.js
-bun test/test_repl_advanced.js
-bun test/test_multiline.js
-```
-
 ## Test Structure
 
 ### Language Test Files
@@ -71,18 +51,6 @@ show "Actual result:", result
 // Assertions are implicit through successful execution
 ```
 
-### REPL Test Files
-
-REPL tests use bun.js child processes to interact with the REPL programmatically:
-
-```javascript
-const testCommands = [
-    'set x 42',
-    'x',           // Should output: 42
-    'exit'
-];
-// Automated command sending and output validation
-```
 
 ## Test Coverage
 
@@ -124,12 +92,6 @@ const testCommands = [
 3. Test both success and error cases
 4. Include show statements for visual validation
 
-### For REPL Features
-
-1. Add test commands to existing REPL test files
-2. Or create new specialized test file
-3. Update `run_repl_tests.js` if adding new test file
-4. Ensure proper cleanup and exit handling
 
 ## Test Output
 
@@ -153,7 +115,4 @@ echo 'show "Basic test"' | bun repl.js
 
 # Full language test
 bun index.js test/source/all.mimo
-
-# Complete REPL validation
-bun test/run_repl_tests.js
 ```
