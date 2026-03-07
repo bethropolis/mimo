@@ -1,41 +1,50 @@
-# Development
+# ── Compiled binaries ─────────────────────────────────────────────────────────
+# The standalone compiled binary produced by `bun build --compile`
+mimo
+alya_vm/
+
+# ── Development & CI ──────────────────────────────────────────────────────────
 .github/
 .vscode/
 .idea/
+.gitattributes
+AGENTS.md
 
-# Documentation
-docs/
-*.md
-!README.md
-!LICENSE
+# ── Lockfiles & internal build scripts ───────────────────────────────────────
+bun.lock
+package-lock.json
+build.js
+test.js
+tools/stamp-version.js
 
-# Playground and extensions
+# ── Playground & VS Code extension (not part of the npm package) ─────────────
 playground/
 extensions/
 
-# Tests
+# ── Tests ─────────────────────────────────────────────────────────────────────
 test/
 *.test.js
 *.spec.js
 
-# Build artifacts
-*.bundle.js
-*.min.js
+# ── Docs (README.md and LICENSE are kept via the !-exceptions below) ──────────
+docs/
+*.md
+!README.md
 
-# Config files
-.eslintrc*
-.prettierrc*
-jsconfig.json
-tsconfig.json
-vite.config.*
-tailwind.config.*
-postcss.config.*
-svelte.config.*
+# ── Pre-built web dist (consumers use index.web.js + browserAdapter directly) ─
+dist/
 
-# Misc
-.DS_Store
-Thumbs.db
+# ── Web entry (only needed for playground build, not library consumers) ───────
+web/
+
+# ── Runtime artifacts ─────────────────────────────────────────────────────────
+.mimo_history
 *.log
 .env
 .env.*
 !.env.example
+
+# ── OS & editor noise ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+node_modules/
