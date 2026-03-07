@@ -9,9 +9,23 @@ import { stringify, highlightMimoCode } from "./interpreter/Utils.js";
 import { formatValue } from "./tools/replFormatter.js";
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import { getMimoType } from "./interpreter/suggestions.js";
 
-const HISTORY_FILE = path.join(process.cwd(), ".mimo_history");
+function getHistoryFile() {
+    // XDG_STATE_HOME on Linux; %APPDATA% on Windows; ~/.local/state elsewhere
+    let stateDir;
+    if (process.platform === "win32") {
+        stateDir = process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming");
+    } else {
+        stateDir = process.env.XDG_STATE_HOME || path.join(os.homedir(), ".local", "state");
+    }
+    const mimoStateDir = path.join(stateDir, "mimo");
+    fs.mkdirSync(mimoStateDir, { recursive: true });
+    return path.join(mimoStateDir, "history");
+}
+
+const HISTORY_FILE = getHistoryFile();
 
 /**
  * Tracking nesting levels for dynamic multiline input.
