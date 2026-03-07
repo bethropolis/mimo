@@ -26,7 +26,7 @@
 ## Installation
 
 ```bash
-bun install -g mimo-lang
+npm install -g mimo-lang
 ```
 
 ## Usage
@@ -90,7 +90,7 @@ contributions are welcome.
 ## Links
 
 - [Documentation](https://bethropolis.github.io/mimo/)
-- [Playground](https://bethropolis.github.io/mimo/playground)
+- [Playground](https://mimo-lang.vercel.app/playground/)
 - [GitHub](https://github.com/bethropolis/mimo)
 
 ## License
